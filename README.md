@@ -4,6 +4,8 @@ Aplicação responsiva da campanha **Leu, Palpitou, Vendeu**.
 
 ## Escopo do piloto
 
+Esta primeira publicação roda como piloto controlado somente com a loja **Imperatriz**.
+
 Participam somente:
 
 - vendedores gerais e vendedores especialistas, tratados igualmente como **Vendedor**;
@@ -12,9 +14,9 @@ Participam somente:
 
 Os demais cargos ficam cadastrados como `future_phase` e não conseguem acessar o piloto.
 
-## Lojas fixas
+## Loja ativa na primeira versão
 
-Centro, Cohama, Forquilha, Cohafuma, Africanos, Olho Dagua, Maiobão, Santa Inês, Bacabal e Imperatriz.
+Imperatriz.
 
 ## Acessos da demonstração
 

@@ -7,6 +7,8 @@ Este roteiro publica a aplicação em uma VPS Ubuntu usando Docker Compose com:
 - código-fonte vindo do GitHub;
 - porta HTTP exposta pela VPS.
 
+Esta primeira versão está configurada como piloto controlado somente para a loja **Imperatriz**.
+
 > Importante: troque a senha do usuário da VPS e nunca salve senhas reais no GitHub. Use senha forte no `.env`.
 
 ## 1. Acesso à VPS

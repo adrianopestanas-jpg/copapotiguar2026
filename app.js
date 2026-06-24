@@ -130,6 +130,7 @@ const Icon = ({
     "aria-hidden": "true"
   }, paths[name]);
 };
+const PILOT_STORE = "Imperatriz";
 const onlyDigits = value => String(value ?? "").replace(/\D/g, "");
 const formatCpfValue = value => {
   const digits = onlyDigits(value).slice(0, 11);
@@ -137,7 +138,7 @@ const formatCpfValue = value => {
 };
 const toTitleCase = value => String(value ?? "").toLowerCase().replace(/(^|\s)(\S)/g, (_, space, char) => `${space}${char.toUpperCase()}`).replace(/\bDe\b/g, "de").replace(/\bDa\b/g, "da").replace(/\bDas\b/g, "das").replace(/\bDo\b/g, "do").replace(/\bDos\b/g, "dos");
 const textKey = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f']/g, "").trim().toUpperCase();
-const fixedStores = ["Centro", "Cohama", "Forquilha", "Cohafuma", "Africanos", "Olho Dagua", "Maiobão", "Santa Inês", "Bacabal", "Imperatriz"];
+const fixedStores = ["Imperatriz"];
 const normalizeStore = store => ({
   CENTRO: "Centro",
   COHAMA: "Cohama",
@@ -173,14 +174,14 @@ const registeredUsers = participantRows.map(([name, cpf, job, store, explicitPro
     store: normalizeStore(store),
     status: "Ativo"
   };
-});
+}).filter(user => user.store === PILOT_STORE || user.profile === "Administrador");
 const rankedSellers = registeredUsers.filter(user => user.profile === "Vendedor");
 const ranking = rankedSellers.slice(0, 10).map((user, index) => ({
   name: user.name,
   store: user.store,
   role: user.job,
-  points: 102 - index * 4 + index % 3,
-  trend: index < 3 ? "+1" : "—"
+  points: 0,
+  trend: "—"
 }));
 const demoUsers = registeredUsers.reduce((acc, participant, index) => {
   const document = onlyDigits(participant.cpf);
@@ -191,8 +192,8 @@ const demoUsers = registeredUsers.reduce((acc, participant, index) => {
     originalRole: participant.originalJob || participant.job,
     accessRole: participant.profile === "Administrador" ? "admin" : participant.profile === "Liderança" ? "leadership" : "seller",
     store: participant.store,
-    points: participant.profile === "Administrador" ? 0 : Math.max(18, 96 - index % 70),
-    position: participant.profile === "Administrador" ? null : index + 1,
+    points: 0,
+    position: null,
     initials: makeInitials(participant.name)
   };
   return acc;
@@ -250,128 +251,19 @@ const siteProductDemo = {
   siteUrl: "https://www.apotiguar.com.br/produto/manta-liquida-impermeabilizante-branca-18kg-quartzolit-89313"
 };
 const initialProductAssignments = [{
-  store: "Cohama",
-  productId: "qualiz-18",
-  goal: 50
-}, {
-  store: "Cohama",
-  productId: "argamassa-ac3",
-  goal: 35
-}, {
-  store: "Forquilha",
-  productId: "coral-18",
-  goal: 48
-}, {
-  store: "Cohafuma",
-  productId: "qualiz-18",
-  goal: 46
-}, {
   store: "Imperatriz",
   productId: "piso-house-color-formigres",
   goal: 200
-}, {
-  store: "Centro",
-  productId: "argamassa-ac3",
-  goal: 40
-}, {
-  store: "Africanos",
-  productId: "qualiz-18",
-  goal: 40
-}, {
-  store: "Olho Dagua",
-  productId: "coral-18",
-  goal: 42
-}, {
-  store: "Maiobão",
-  productId: "argamassa-ac3",
-  goal: 38
-}, {
-  store: "Santa Inês",
-  productId: "suvinil-18",
-  goal: 36
-}, {
-  store: "Bacabal",
-  productId: "qualiz-18",
-  goal: 35
 }];
-const initialSalesEntries = [{
-  id: 1,
-  seller: "Francisco de Assis Vieira de Moura",
-  store: "Cohama",
-  productId: "qualiz-18",
-  quantity: 7
-}, {
-  id: 2,
-  seller: "Jose de Arimatea Santos de Azevedo",
-  store: "Forquilha",
-  productId: "coral-18",
-  quantity: 9
-}, {
-  id: 3,
-  seller: "Jose Ribamar Nunes Junior",
-  store: "Cohafuma",
-  productId: "qualiz-18",
-  quantity: 5
-}, {
-  id: 4,
-  seller: "Elaine Cristina Mascena Mota",
-  store: "Imperatriz",
-  productId: "piso-house-color-formigres",
-  quantity: 4
-}];
+const initialSalesEntries = [];
 const stores = [{
-  name: "Cohafuma",
-  score: 286,
-  sold: 51,
-  goal: 46
-}, {
-  name: "Cohama",
-  score: 273,
-  sold: 42,
-  goal: 50
-}, {
-  name: "Forquilha",
-  score: 266,
-  sold: 45,
-  goal: 48
-}, {
   name: "Imperatriz",
-  score: 254,
-  sold: 38,
-  goal: 45
-}, {
-  name: "Centro",
-  score: 241,
-  sold: 32,
-  goal: 40
-}, {
-  name: "Africanos",
-  score: 232,
-  sold: 30,
-  goal: 40
-}, {
-  name: "Olho Dagua",
-  score: 226,
-  sold: 29,
-  goal: 42
-}, {
-  name: "Maiobão",
-  score: 218,
-  sold: 27,
-  goal: 38
-}, {
-  name: "Santa Inês",
-  score: 211,
-  sold: 26,
-  goal: 36
-}, {
-  name: "Bacabal",
-  score: 204,
-  sold: 24,
-  goal: 35
+  score: 0,
+  sold: 0,
+  goal: 200
 }];
 const getStoreStats = storeName => {
-  const stats = stores.find(store => store.name === storeName) || stores.find(store => store.name === "Centro") || stores[0];
+  const stats = stores.find(store => store.name === storeName) || stores.find(store => store.name === PILOT_STORE) || stores[0];
   const sorted = [...stores].sort((a, b) => b.sold / b.goal - a.sold / a.goal);
   return {
     ...stats,
@@ -395,7 +287,7 @@ const getStoreFocus = storeName => {
     percent: Math.round(sold / goal * 100)
   };
 };
-const sellerPoints = (seller, index) => Math.max(18, 96 - index % 70);
+const sellerPoints = () => 0;
 const getStoreRanking = (storeName, limit = 10) => rankedSellers.filter(user => user.store === storeName).map(user => {
   const globalIndex = rankedSellers.findIndex(seller => seller.cpf === user.cpf);
   return {
@@ -415,6 +307,8 @@ const games = [{
   awayFlag: "🇧🇷",
   venue: "Miami Stadium"
 }];
+const predictionClosesAt = new Date("2026-06-24T18:59:59-03:00");
+const getPredictionClosed = () => new Date() > predictionClosesAt;
 function Brand({
   compact = false
 }) {
@@ -880,6 +774,7 @@ function Home({
   user
 }) {
   const leadership = user.accessRole === "leadership";
+  const predictionsClosed = getPredictionClosed();
   const storeStats = getStoreStats(user.store);
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
@@ -890,13 +785,13 @@ function Home({
     className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-semibold text-slate-400"
-  }, "Quarta-feira, 24 de junho • 20:00"), /*#__PURE__*/React.createElement("h2", {
+  }, "Quarta-feira, 24 de junho • palpites até 18:59"), /*#__PURE__*/React.createElement("h2", {
     className: "mt-1 font-display text-3xl font-extrabold text-potiguar-950"
   }, "Boa noite, ", user.firstName, "! ", /*#__PURE__*/React.createElement("span", {
     className: "inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]"
   }, "👋")), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-sm text-slate-500"
-  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : "A janela de palpites está aberta. Bora subir nesse ranking?")), /*#__PURE__*/React.createElement("div", {
+  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "A janela de palpites está aberta até 18:59.")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm"
   }, /*#__PURE__*/React.createElement(Avatar, {
     initials: user.initials,
@@ -911,8 +806,8 @@ function Home({
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "bolt",
     label: leadership ? "Pontos da liderança" : "Seus pontos",
-    value: leadership ? 32 : acknowledged ? 88 : 87,
-    detail: leadership ? "Gerados pelo resultado da loja" : "+13 nesta semana",
+    value: "0",
+    detail: leadership ? "Aguardando fechamento da rodada" : "Aguardando apuração da rodada",
     accent: "green"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "ranking",
@@ -923,14 +818,14 @@ function Home({
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "target",
     label: leadership ? "Vendedores ativos" : "Palpites certos",
-    value: leadership ? `${storeSellers.length}/${storeSellers.length}` : "12",
-    detail: leadership ? "Equipe elegível no piloto" : "67% de aproveitamento",
+    value: leadership ? `${storeSellers.length}/${storeSellers.length}` : "0",
+    detail: leadership ? "Equipe elegível no piloto" : "Aguardando resultado do jogo",
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "fire",
-    label: leadership ? "Meta da loja" : "Sequência",
-    value: leadership ? `${storeFocus.percent}%` : "5 dias",
-    detail: leadership ? `${storeFocus.sold} de ${storeFocus.goal} ${storeFocusUnit}` : "Seu recorde: 8 dias",
+    label: leadership ? "Meta da loja" : "Meta da loja",
+    value: `${storeFocus.percent}%`,
+    detail: `${storeFocus.sold} de ${storeFocus.goal} ${storeFocusUnit}`,
     accent: "white"
   })), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
@@ -943,20 +838,20 @@ function Home({
     setAcknowledged: setAcknowledged,
     setToast: setToast
   }), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setPage("guesses"),
+    onClick: () => setPage(predictionsClosed ? "store" : "guesses"),
     className: "group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex h-full items-center justify-between gap-5"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-2 text-xs font-bold text-potiguar-lime"
   }, /*#__PURE__*/React.createElement(Icon, {
-    name: acknowledged ? "ball" : "lock",
+    name: predictionsClosed ? "lock" : acknowledged ? "ball" : "lock",
     size: 16
-  }), " ", acknowledged ? "Área liberada" : "Ação necessária"), /*#__PURE__*/React.createElement("h3", {
+  }), " ", predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-2 font-display text-xl font-extrabold"
-  }, acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
+  }, predictionsClosed ? "Acompanhar produto foco" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-white/55"
-  }, "Aberto agora • encerra às 23h59")), /*#__PURE__*/React.createElement("span", {
+  }, predictionsClosed ? "Agora a operação segue pelas vendas" : "Aberto agora • encerra às 18h59")), /*#__PURE__*/React.createElement("span", {
     className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "chevron"
@@ -973,7 +868,13 @@ function Guesses({
     1: ["", ""]
   });
   const [saved, setSaved] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+  const predictionsClosed = now > predictionClosesAt;
   const complete = Object.values(scores).every(pair => pair[0] !== "" && pair[1] !== "");
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(timer);
+  }, []);
   const updateScore = (id, side, value) => {
     if (value === "" || /^\d$/.test(value) && Number(value) <= 9) {
       setScores({
@@ -983,7 +884,7 @@ function Guesses({
       setSaved(false);
     }
   };
-  if (!acknowledged) return /*#__PURE__*/React.createElement("div", {
+  if (!acknowledged && !predictionsClosed) return /*#__PURE__*/React.createElement("div", {
     className: "mx-auto max-w-2xl py-8 sm:py-16"
   }, /*#__PURE__*/React.createElement("div", {
     className: "soft-card overflow-hidden rounded-[28px] text-center"
@@ -1004,10 +905,35 @@ function Guesses({
     className: "rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block"
-  }, "Regra da rodada"), "A janela está aberta nesta simulação: 24 de junho, das 20h às 23h59."), /*#__PURE__*/React.createElement("button", {
+  }, "Regra da rodada"), "A janela fica aberta hoje, 24 de junho, somente até 18h59."), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage("home"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
   }, "Voltar e ler o comunicado"))));
+  if (predictionsClosed) return /*#__PURE__*/React.createElement("div", {
+    className: "mx-auto max-w-2xl py-8 sm:py-16"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "soft-card overflow-hidden rounded-[28px] text-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "hero-pattern pitch-lines px-6 py-12 text-white"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "lock",
+    size: 38
+  })), /*#__PURE__*/React.createElement("h2", {
+    className: "mt-6 font-display text-3xl font-extrabold"
+  }, "Palpites encerrados"), /*#__PURE__*/React.createElement("p", {
+    className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60"
+  }, "A janela de palpites fechou às 18h59 de hoje, antes do jogo Escócia x Brasil.")), /*#__PURE__*/React.createElement("div", {
+    className: "p-6 sm:p-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900"
+  }, /*#__PURE__*/React.createElement("strong", {
+    className: "block"
+  }, "Próxima etapa"), "A partir de agora, acompanhe somente as vendas do produto foco de Imperatriz."), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setPage("store"),
+    className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
+  }, "Ver produto foco e loja"))));
   return /*#__PURE__*/React.createElement("div", {
     className: "mx-auto max-w-4xl space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -1018,7 +944,7 @@ function Guesses({
     className: "flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"
   }, /*#__PURE__*/React.createElement("span", {
     className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
-  }), " Teste aberto • 20:00 simulado"), /*#__PURE__*/React.createElement("h2", {
+  }), " Aberto até 18:59"), /*#__PURE__*/React.createElement("h2", {
     className: "mt-3 font-display text-3xl font-extrabold"
   }, "Palpite teste: Brasil hoje"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
@@ -1029,9 +955,9 @@ function Guesses({
     className: "text-potiguar-lime"
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
-  }, "Tempo restante"), /*#__PURE__*/React.createElement("p", {
+  }, "Fechamento"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-lg font-extrabold"
-  }, "03h 59min"))))), /*#__PURE__*/React.createElement("div", {
+  }, "18h59"))))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, games.map(game => /*#__PURE__*/React.createElement("article", {
     key: game.id,
@@ -1175,6 +1101,8 @@ function StorePage({
   user
 }) {
   const storeStats = getStoreStats(user.store);
+  const storeFocus = getStoreFocus(user.store);
+  const storeUnit = storeFocus.product.unit || "unidades";
   const localRanking = getStoreRanking(user.store);
   const networkRanking = [...stores].sort((a, b) => b.sold / b.goal - a.sold / a.goal);
   const dayChampion = networkRanking[0];
@@ -1203,7 +1131,7 @@ function StorePage({
     className: "mt-7"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-2 flex justify-between text-xs font-bold"
-  }, /*#__PURE__*/React.createElement("span", null, storeStats.sold, " unidades vendidas"), /*#__PURE__*/React.createElement("span", null, "Meta: ", storeStats.goal)), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, storeStats.sold, " ", storeUnit, " vendidos"), /*#__PURE__*/React.createElement("span", null, "Meta: ", storeStats.goal, " ", storeUnit)), /*#__PURE__*/React.createElement("div", {
     className: "h-3 overflow-hidden rounded-full bg-black/20"
   }, /*#__PURE__*/React.createElement("div", {
     className: "h-full rounded-full bg-potiguar-lime",
@@ -1255,7 +1183,7 @@ function StorePage({
     className: "font-display text-xl font-extrabold text-potiguar-950"
   }, dayChampion.name), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400"
-  }, Math.round(dayChampion.sold / dayChampion.goal * 100), "% da meta • ", dayChampion.sold, " unidades")))), /*#__PURE__*/React.createElement("section", {
+  }, Math.round(dayChampion.sold / dayChampion.goal * 100), "% da meta • ", dayChampion.sold, " ", storeUnit)))), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between"
@@ -1296,7 +1224,7 @@ function AdminPage({
     cpf: "",
     job: "Vendedor",
     profile: "Vendedor",
-    store: "Centro"
+    store: PILOT_STORE
   });
   const [assignments, setAssignments] = useState(initialProductAssignments);
   const [productCatalog, setProductCatalog] = useState(focusProducts);
@@ -1310,17 +1238,18 @@ function AdminPage({
     siteUrl: ""
   });
   const [newAssignment, setNewAssignment] = useState({
-    store: "Centro",
-    productId: "qualiz-18",
-    goal: "40"
+    store: PILOT_STORE,
+    productId: "piso-house-color-formigres",
+    goal: "200"
   });
   const [salesEntries, setSalesEntries] = useState(initialSalesEntries);
   const [newSale, setNewSale] = useState(() => {
     const firstSeller = registeredUsers.find(user => user.profile === "Vendedor") || {};
+    const firstAssignment = initialProductAssignments.find(item => item.store === (firstSeller.store || PILOT_STORE)) || initialProductAssignments[0];
     return {
-      store: firstSeller.store || "Centro",
+      store: firstSeller.store || PILOT_STORE,
       seller: firstSeller.name || "",
-      productId: "qualiz-18",
+      productId: firstAssignment?.productId || "",
       quantity: "1"
     };
   });
@@ -1396,7 +1325,7 @@ function AdminPage({
       cpf: "",
       job: "Vendedor",
       profile: "Vendedor",
-      store: "Centro"
+      store: PILOT_STORE
     });
     setShowUserForm(false);
     setToast("Colaborador cadastrado na demonstração.");
@@ -1491,20 +1420,20 @@ function AdminPage({
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "megaphone",
     label: "Leituras",
-    value: "46",
-    detail: "88% confirmaram",
+    value: "0",
+    detail: "Aguardando confirmações",
     accent: "lime"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "ball",
     label: "Palpites",
-    value: "41",
-    detail: "79% dos elegíveis",
+    value: "0",
+    detail: "Aguardando envio",
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "store",
-    label: "Lojas na meta",
-    value: "4/10",
-    detail: "Cohafuma lidera",
+    label: "Loja na meta",
+    value: "0/1",
+    detail: "Imperatriz em apuração",
     accent: "white"
   })), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
@@ -1595,7 +1524,7 @@ function AdminPage({
     className: "text-[10px] text-slate-400"
   }, person.store)), /*#__PURE__*/React.createElement("span", {
     className: "rounded-xl bg-potiguar-lime/20 px-3 py-2 font-display text-lg font-extrabold text-potiguar-800"
-  }, person.quantity, " un.")))))), /*#__PURE__*/React.createElement("section", {
+  }, person.quantity, " ", productCatalog.find(product => assignments.some(item => item.productId === product.id))?.unit || "un.")))))), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
@@ -1635,12 +1564,12 @@ function AdminPage({
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
   }, "Evolução do piloto"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Participação nos últimos 7 dias")), /*#__PURE__*/React.createElement(Icon, {
+  }, "Participação em apuração")), /*#__PURE__*/React.createElement(Icon, {
     name: "chart",
     className: "text-potiguar-700"
   })), /*#__PURE__*/React.createElement("div", {
     className: "mt-8 flex h-48 items-end justify-between gap-3 border-b border-slate-100 px-2"
-  }, [62, 70, 68, 76, 81, 84, 88].map((value, index) => /*#__PURE__*/React.createElement("div", {
+  }, [0, 0, 0, 0, 0, 0, 0].map((value, index) => /*#__PURE__*/React.createElement("div", {
     key: index,
     className: "flex h-full flex-1 flex-col justify-end gap-2 text-center"
   }, /*#__PURE__*/React.createElement("span", {
@@ -1648,7 +1577,7 @@ function AdminPage({
   }, value, "%"), /*#__PURE__*/React.createElement("div", {
     className: "mx-auto w-full max-w-10 rounded-t-lg bg-gradient-to-t from-potiguar-900 to-potiguar-lime",
     style: {
-      height: `${value}%`
+      height: `${Math.max(value, 4)}%`
     }
   }), /*#__PURE__*/React.createElement("span", {
     className: "text-[9px] font-bold text-slate-400"
@@ -1670,7 +1599,7 @@ function AdminPage({
     className: "rounded-xl bg-white/10 p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-white/45"
-  }, "Unidades lançadas"), /*#__PURE__*/React.createElement("p", {
+  }, "Quantidade lançada"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 font-display text-3xl font-extrabold"
   }, salesEntries.reduce((sum, item) => sum + Number(item.quantity), 0))), /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl bg-white/10 p-4"
@@ -1678,7 +1607,7 @@ function AdminPage({
     className: "text-[10px] text-white/45"
   }, "Lojas com produto configurado"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 font-display text-3xl font-extrabold"
-  }, new Set(assignments.map(item => item.store)).size, "/10")))))), module === "products" && /*#__PURE__*/React.createElement("section", {
+  }, new Set(assignments.map(item => item.store)).size, "/", fixedStores.length)))))), module === "products" && /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"

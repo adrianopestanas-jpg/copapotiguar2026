@@ -16,15 +16,6 @@ create table stores (
 );
 
 insert into stores (name) values
-('Centro'),
-('Cohama'),
-('Forquilha'),
-('Cohafuma'),
-('Africanos'),
-('Olho Dagua'),
-('Maiobão'),
-('Santa Inês'),
-('Bacabal'),
 ('Imperatriz')
 on conflict (name) do nothing;
 
