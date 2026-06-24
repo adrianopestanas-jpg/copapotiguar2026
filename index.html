@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#063f2c" />
+    <meta
+      name="description"
+      content="Copa Potiguar 2026 — Leu, Palpitou, Vendeu"
+    />
+    <title>Copa Potiguar 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./vendor/tailwindcss.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              potiguar: {
+                950: "#032b1e",
+                900: "#063f2c",
+                800: "#07543a",
+                700: "#08734d",
+                500: "#15a865",
+                lime: "#c8f135",
+                yellow: "#ffd43b",
+              },
+            },
+            fontFamily: {
+              sans: ["Manrope", "sans-serif"],
+              display: ["Outfit", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="./vendor/react.production.min.js"></script>
+    <script src="./vendor/react-dom.production.min.js"></script>
+    <script src="./participants-data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
