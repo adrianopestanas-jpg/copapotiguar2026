@@ -88,3 +88,4 @@ O PostgreSQL e o frontend estão preparados, mas ainda é necessário implementa
 - serviço de consulta ao catálogo do site por código interno/SKU;
 - auditoria das ações;
 - proteção contra abuso e limitação de requisições.
+# copapotiguar2026
