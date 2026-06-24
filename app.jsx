@@ -449,20 +449,20 @@ function Announcement({ acknowledged, setAcknowledged, setToast }) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600">Comunicado obrigatório</p>
-              <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Novo processo de frete no Visual Store</h3>
+              <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Copa Potiguar 2026: começou o jogo</h3>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500">19 JUN • 19:56</span>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-500">A partir de hoje, toda cotação de frete deve ser realizada pelo simulador disponível dentro do Visual Store. Antes de concluir a venda, informe corretamente o CEP, confira as opções de entrega, o prazo e o valor apresentado. Não utilize cálculos ou valores de frete feitos fora do sistema.</p>
+          <p className="mt-3 text-sm leading-6 text-slate-500">Hoje começa o piloto da Copa Potiguar 2026 em Imperatriz. Leia o comunicado, assista ao vídeo e participe da rodada: o jogo vale palpite, o produto foco vale venda e o desempenho da loja vale reconhecimento para o time.</p>
           <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
-            <strong className="block font-extrabold">Novo fluxo obrigatório</strong>
-            Visual Store → Simulador de Frete → Informar CEP → Selecionar entrega → Confirmar na venda.
+            <strong className="block font-extrabold">Como participar hoje</strong>
+            Assista ao vídeo → confirme a leitura → envie seu palpite antes das 18h59 → acompanhe as vendas do produto foco.
           </div>
           <div className="mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-potiguar-950 p-3">
             <div className="mb-3 flex items-center justify-between gap-3 px-1">
               <div>
-                <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime">Vídeo do processo</p>
-                <p className="mt-0.5 text-xs font-semibold text-white/65">Assista ao passo a passo no Visual Store</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime">Vídeo da campanha</p>
+                <p className="mt-0.5 text-xs font-semibold text-white/65">Assista antes de liberar seu palpite</p>
               </div>
               <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white/70">
                 <Icon name="play" size={11} /> Tutorial
@@ -471,14 +471,14 @@ function Announcement({ acknowledged, setAcknowledged, setToast }) {
             <div className="mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl">
               <iframe
                 className="h-full w-full"
-                src="https://www.youtube-nocookie.com/embed/KbxxW4y0ZjA?rel=0"
-                title="Tutorial do novo processo de frete no Visual Store"
+                src="https://www.youtube-nocookie.com/embed/7EzZjpmw6FQ?rel=0"
+                title="Vídeo da Copa Potiguar 2026"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               ></iframe>
             </div>
             <a
-              href="https://www.youtube.com/shorts/KbxxW4y0ZjA"
+              href="https://youtu.be/7EzZjpmw6FQ"
               target="_blank"
               rel="noreferrer"
               className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-[11px] font-extrabold text-white transition hover:bg-white/15"

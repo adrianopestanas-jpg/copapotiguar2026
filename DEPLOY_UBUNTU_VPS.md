@@ -231,3 +231,56 @@ Após subir:
 - conferir ranking por loja;
 - verificar `docker compose ps`;
 - verificar `docker compose logs`.
+
+## 13. Ativar HTTPS com Let's Encrypt
+
+Pré-requisitos:
+
+- DNS `copa2026.apotiguar.com.br` apontando para a VPS;
+- porta 80 liberada;
+- aplicação respondendo em `http://copa2026.apotiguar.com.br`.
+
+Na VPS, instale o Certbot:
+
+```bash
+sudo apt update
+sudo apt install -y certbot
+```
+
+Pare temporariamente o container web para liberar a porta 80:
+
+```bash
+cd ~/apps/copapotiguar2026
+docker compose stop web
+```
+
+Emita o certificado:
+
+```bash
+sudo certbot certonly --standalone -d copa2026.apotiguar.com.br
+```
+
+Suba a aplicação com HTTPS:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.https.yml up -d --build --force-recreate
+```
+
+Acesse:
+
+```text
+https://copa2026.apotiguar.com.br
+```
+
+Renovação do certificado:
+
+```bash
+sudo certbot renew --dry-run
+```
+
+Quando o certificado renovar, recarregue o container web:
+
+```bash
+cd ~/apps/copapotiguar2026
+docker compose -f docker-compose.yml -f docker-compose.https.yml restart web
+```

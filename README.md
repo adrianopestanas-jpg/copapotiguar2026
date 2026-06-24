@@ -59,7 +59,9 @@ A aplicação ficará em `http://IP-DA-VPS` ou `http://copa2026.apotiguar.com.br
 
 - `Dockerfile`: imagem Nginx para o frontend.
 - `docker-compose.yml`: frontend e PostgreSQL 16.
+- `docker-compose.https.yml`: override para publicar HTTPS com certificado Let’s Encrypt.
 - `nginx.conf`: SPA, cache, cabeçalhos e health check.
+- `nginx.https.conf`: Nginx com redirecionamento HTTP → HTTPS.
 - `supabase-schema.sql`: usuários, sessões, acessos, comunicados, vídeos, produtos, metas, vendas, jogos, palpites, premiações, pontos, rodadas e auditoria.
 - `.env.example`: variáveis necessárias para implantação.
 
