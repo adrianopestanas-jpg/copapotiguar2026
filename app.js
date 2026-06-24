@@ -198,7 +198,6 @@ const demoUsers = registeredUsers.reduce((acc, participant, index) => {
   };
   return acc;
 }, {});
-const demoAccessCards = [registeredUsers.find(user => user.profile === "Vendedor"), registeredUsers.find(user => user.profile === "Liderança"), ...registeredUsers.filter(user => user.profile === "Administrador")].filter(Boolean);
 const focusProducts = [{
   id: "qualiz-18",
   sku: "10001",
@@ -328,8 +327,8 @@ function Brand({
 function LoginScreen({
   onLogin
 }) {
-  const [cpf, setCpf] = useState(demoAccessCards[0]?.cpf || "");
-  const [password, setPassword] = useState("potiguar2026");
+  const [cpf, setCpf] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const formatCpf = value => {
     const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -337,9 +336,11 @@ function LoginScreen({
   };
   const submit = event => {
     event.preventDefault();
-    const user = demoUsers[cpf.replace(/\D/g, "")];
-    if (!user || password !== "potiguar2026") {
-      setError("CPF ou senha inválidos para a demonstração.");
+    const cpfDigits = cpf.replace(/\D/g, "");
+    const passwordDigits = password.replace(/\D/g, "");
+    const user = demoUsers[cpfDigits];
+    if (!user || passwordDigits !== cpfDigits) {
+      setError("CPF ou senha inválidos.");
       return;
     }
     onLogin(user);
@@ -362,7 +363,7 @@ function LoginScreen({
     className: "mt-5 text-sm leading-6 text-white/60"
   }, "Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja.")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-white/35"
-  }, "Acesso controlado • Ambiente de demonstração")), /*#__PURE__*/React.createElement("section", {
+  }, "Acesso controlado • Piloto Imperatriz")), /*#__PURE__*/React.createElement("section", {
     className: "flex flex-col justify-center p-6 sm:p-10 lg:p-14"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-9 lg:hidden"
@@ -374,7 +375,7 @@ function LoginScreen({
     className: "mt-2 font-display text-3xl font-extrabold text-potiguar-950"
   }, "Entre na Copa Potiguar"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-slate-400"
-  }, "Use seu CPF e senha de acesso."), /*#__PURE__*/React.createElement("form", {
+  }, "Use seu CPF. Nesta largada do piloto, a senha é o próprio CPF."), /*#__PURE__*/React.createElement("form", {
     onSubmit: submit,
     className: "mt-8 space-y-4"
   }, /*#__PURE__*/React.createElement("label", {
@@ -406,26 +407,7 @@ function LoginScreen({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
     size: 17
-  }), " Entrar")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-7 rounded-2xl bg-slate-50 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-slate-400"
-  }, "Acessos para demonstração"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 grid gap-2 text-[11px]"
-  }, demoAccessCards.map(user => /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    key: user.cpf,
-    onClick: () => {
-      setCpf(user.cpf);
-      setPassword("potiguar2026");
-      setError("");
-    },
-    className: "flex justify-between rounded-lg bg-white px-3 py-2 text-left font-bold text-potiguar-800"
-  }, /*#__PURE__*/React.createElement("span", null, user.cpf), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, user.profile)))), /*#__PURE__*/React.createElement("p", {
-    className: "mt-3 text-[10px] text-slate-400"
-  }, "Senha para todos: ", /*#__PURE__*/React.createElement("strong", null, "potiguar2026"))))));
+  }), " Entrar")))));
 }
 function Sidebar({
   page,
@@ -1328,7 +1310,7 @@ function AdminPage({
       store: PILOT_STORE
     });
     setShowUserForm(false);
-    setToast("Colaborador cadastrado na demonstração.");
+    setToast("Colaborador cadastrado no piloto.");
   };
   const assignProduct = event => {
     event.preventDefault();
@@ -1380,7 +1362,7 @@ function AdminPage({
       imageUrl: "",
       siteUrl: ""
     });
-    setToast("Produto cadastrado na demonstração.");
+    setToast("Produto cadastrado no piloto.");
   };
   const addSale = event => {
     event.preventDefault();
@@ -2055,7 +2037,7 @@ function AdminPage({
     onClick: () => setModule("dashboard"),
     className: "rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400"
   }, "Cancelar"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setToast(`${formModule.button}: demonstração registrada. A persistência será feita no PostgreSQL.`),
+    onClick: () => setToast(`${formModule.button}: registro preparado. A persistência será feita no PostgreSQL.`),
     className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
   }, formModule.button))), module === "dashboard" && /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.25fr_.75fr]"

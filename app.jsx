@@ -137,12 +137,6 @@ const demoUsers = registeredUsers.reduce((acc, participant, index) => {
   return acc;
 }, {});
 
-const demoAccessCards = [
-  registeredUsers.find(user => user.profile === "Vendedor"),
-  registeredUsers.find(user => user.profile === "Liderança"),
-  ...registeredUsers.filter(user => user.profile === "Administrador"),
-].filter(Boolean);
-
 const focusProducts = [
   { id: "qualiz-18", sku: "10001", name: "Tinta Qualiz Fosco Completo 18L", brand: "Qualiz", price: "R$ 289,90", description: "Tinta acrílica fosca para ambientes internos e externos.", imageUrl: "" },
   { id: "coral-18", sku: "10002", name: "Tinta Coral Rende Muito 18L", brand: "Coral", price: "R$ 359,90", description: "Tinta acrílica de alto rendimento e cobertura.", imageUrl: "" },
@@ -236,8 +230,8 @@ function Brand({ compact = false }) {
 }
 
 function LoginScreen({ onLogin }) {
-  const [cpf, setCpf] = useState(demoAccessCards[0]?.cpf || "");
-  const [password, setPassword] = useState("potiguar2026");
+  const [cpf, setCpf] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const formatCpf = (value) => {
@@ -250,9 +244,11 @@ function LoginScreen({ onLogin }) {
 
   const submit = (event) => {
     event.preventDefault();
-    const user = demoUsers[cpf.replace(/\D/g, "")];
-    if (!user || password !== "potiguar2026") {
-      setError("CPF ou senha inválidos para a demonstração.");
+    const cpfDigits = cpf.replace(/\D/g, "");
+    const passwordDigits = password.replace(/\D/g, "");
+    const user = demoUsers[cpfDigits];
+    if (!user || passwordDigits !== cpfDigits) {
+      setError("CPF ou senha inválidos.");
       return;
     }
     onLogin(user);
@@ -268,13 +264,13 @@ function LoginScreen({ onLogin }) {
             <h1 className="mt-6 font-display text-5xl font-extrabold leading-[1.02]">Leu.<br/>Palpitou.<br/><span className="text-potiguar-lime">Vendeu.</span></h1>
             <p className="mt-5 text-sm leading-6 text-white/60">Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja.</p>
           </div>
-          <p className="text-xs text-white/35">Acesso controlado • Ambiente de demonstração</p>
+          <p className="text-xs text-white/35">Acesso controlado • Piloto Imperatriz</p>
         </section>
         <section className="flex flex-col justify-center p-6 sm:p-10 lg:p-14">
           <div className="mb-9 lg:hidden"><Brand compact /></div>
           <p className="text-xs font-extrabold uppercase tracking-[.16em] text-potiguar-700">Bem-vindo</p>
           <h2 className="mt-2 font-display text-3xl font-extrabold text-potiguar-950">Entre na Copa Potiguar</h2>
-          <p className="mt-2 text-sm text-slate-400">Use seu CPF e senha de acesso.</p>
+          <p className="mt-2 text-sm text-slate-400">Use seu CPF. Nesta largada do piloto, a senha é o próprio CPF.</p>
           <form onSubmit={submit} className="mt-8 space-y-4">
             <label className="block">
               <span className="mb-2 block text-xs font-extrabold text-potiguar-950">CPF</span>
@@ -287,17 +283,6 @@ function LoginScreen({ onLogin }) {
             {error && <p className="rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600">{error}</p>}
             <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15"><Icon name="lock" size={17}/> Entrar</button>
           </form>
-          <div className="mt-7 rounded-2xl bg-slate-50 p-4">
-            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Acessos para demonstração</p>
-            <div className="mt-3 grid gap-2 text-[11px]">
-              {demoAccessCards.map(user => (
-                <button type="button" key={user.cpf} onClick={() => { setCpf(user.cpf); setPassword("potiguar2026"); setError(""); }} className="flex justify-between rounded-lg bg-white px-3 py-2 text-left font-bold text-potiguar-800">
-                  <span>{user.cpf}</span><span className="text-slate-400">{user.profile}</span>
-                </button>
-              ))}
-            </div>
-            <p className="mt-3 text-[10px] text-slate-400">Senha para todos: <strong>potiguar2026</strong></p>
-          </div>
         </section>
       </div>
     </div>
@@ -938,7 +923,7 @@ function AdminPage({ setToast }) {
     setUsers([...users, { ...newUser, email: "", status: "Ativo" }]);
     setNewUser({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
     setShowUserForm(false);
-    setToast("Colaborador cadastrado na demonstração.");
+    setToast("Colaborador cadastrado no piloto.");
   };
 
   const assignProduct = event => {
@@ -979,7 +964,7 @@ function AdminPage({ setToast }) {
     const id = `${newProduct.sku}-${Date.now()}`;
     setProductCatalog([...productCatalog, { ...newProduct, id }]);
     setNewProduct({ sku: "", name: "", brand: "", price: "", description: "", imageUrl: "", siteUrl: "" });
-    setToast("Produto cadastrado na demonstração.");
+    setToast("Produto cadastrado no piloto.");
   };
 
   const addSale = event => {
@@ -1228,7 +1213,7 @@ function AdminPage({ setToast }) {
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
             <button onClick={() => setModule("dashboard")} className="rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400">Cancelar</button>
-            <button onClick={() => setToast(`${formModule.button}: demonstração registrada. A persistência será feita no PostgreSQL.`)} className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">{formModule.button}</button>
+            <button onClick={() => setToast(`${formModule.button}: registro preparado. A persistência será feita no PostgreSQL.`)} className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">{formModule.button}</button>
           </div>
         </section>
       )}

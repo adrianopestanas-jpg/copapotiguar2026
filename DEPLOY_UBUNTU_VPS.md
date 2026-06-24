@@ -197,7 +197,7 @@ docker compose down -v
 
 ## 11. Observações para produção
 
-A versão atual já publica a interface via Nginx e sobe o PostgreSQL, mas a aplicação ainda está em modo demonstrativo no frontend.
+A versão atual já publica a interface via Nginx e sobe o PostgreSQL, mas a aplicação ainda está em modo piloto no frontend.
 
 Para produção real, o TI deve implementar a API/backend para:
 

@@ -18,15 +18,16 @@ Os demais cargos ficam cadastrados como `future_phase` e não conseguem acessar 
 
 Imperatriz.
 
-## Acessos da demonstração
+## Acesso do piloto
 
-| Perfil | CPF fictício | Senha |
-|---|---|---|
-| Vendedor | 111.111.111-11 | potiguar2026 |
-| Gerente | 222.222.222-22 | potiguar2026 |
-| Administrador | 999.999.999-99 | potiguar2026 |
+O login usa os CPFs cadastrados dos participantes de Imperatriz e dos administradores.
 
-Os CPFs acima são exclusivamente fictícios. O login atual é demonstrativo e executado no frontend. Em produção, autenticação, validação de CPF, hash de senha, JWT, sessões e bloqueio de tentativas devem ser realizados por uma API.
+Nesta primeira largada do piloto:
+
+- usuário: CPF cadastrado;
+- senha: o próprio CPF.
+
+Em produção, autenticação, validação de CPF, hash de senha, JWT, sessões e bloqueio de tentativas devem ser realizados por uma API.
 
 ## Executar localmente
 
