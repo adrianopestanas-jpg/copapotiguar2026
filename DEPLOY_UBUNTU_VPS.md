@@ -145,6 +145,12 @@ No navegador:
 http://192.168.1.239
 ```
 
+Com o DNS configurado:
+
+```text
+http://copa2026.apotiguar.com.br
+```
+
 Se usar outra porta no `.env`, por exemplo `APP_PORT=8080`, acesse:
 
 ```text

@@ -53,7 +53,7 @@ Altere obrigatoriamente `POSTGRES_PASSWORD` e execute:
 docker compose up -d --build
 ```
 
-A aplicação ficará em `http://IP-DA-VPS:8080`.
+A aplicação ficará em `http://IP-DA-VPS` ou `http://copa2026.apotiguar.com.br`, quando o DNS estiver apontando para a VPS.
 
 ## Estrutura preparada
 
