@@ -326,6 +326,58 @@ const getPredictionPoints = entry => {
   const resultOutcome = Math.sign(result.homeScore - result.awayScore);
   return predictedOutcome === resultOutcome ? 2 : 0;
 };
+const buildPilotRanking = (users, predictionEntries, salesEntries) => {
+  const participants = users.filter(user => user.profile !== "Administrador");
+  const rows = participants.map(user => ({
+    name: user.name,
+    cpf: onlyDigits(user.cpf),
+    store: user.store,
+    role: user.profile,
+    points: 0,
+    predictionPoints: 0,
+    salesPoints: 0,
+    topSellerPoints: 0,
+    storeGoalPoints: 0
+  }));
+  const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
+  predictionEntries.forEach(entry => {
+    const row = byCpf[onlyDigits(entry.cpf)];
+    if (!row) return;
+    const points = getPredictionPoints(entry);
+    row.predictionPoints += points;
+    row.points += points;
+  });
+  const salesByCpf = salesEntries.reduce((acc, entry) => {
+    const cpf = onlyDigits(entry.sellerCpf || "");
+    if (!cpf) return acc;
+    acc[cpf] = (acc[cpf] || 0) + Number(entry.quantity || 0);
+    return acc;
+  }, {});
+  Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
+    const row = byCpf[cpf];
+    if (!row || quantity <= 0) return;
+    row.salesPoints += 5;
+    row.points += 5;
+  });
+  const maxSold = Math.max(0, ...Object.values(salesByCpf));
+  if (maxSold > 0) {
+    Object.entries(salesByCpf).filter(([, quantity]) => quantity === maxSold).slice(0, 1).forEach(([cpf]) => {
+      const row = byCpf[cpf];
+      if (!row) return;
+      row.topSellerPoints += 8;
+      row.points += 8;
+    });
+  }
+  const storeGoal = initialProductAssignments.find(item => item.store === PILOT_STORE)?.goal || 200;
+  const totalSold = Object.values(salesByCpf).reduce((sum, value) => sum + value, 0);
+  if (totalSold >= storeGoal) {
+    rows.forEach(row => {
+      row.storeGoalPoints += row.role === "Liderança" ? 4 : 2;
+      row.points += row.role === "Liderança" ? 4 : 2;
+    });
+  }
+  return rows.sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+};
 function Brand({
   compact = false
 }) {
@@ -442,7 +494,7 @@ function Sidebar({
   }, items.map(([icon, label, value]) => /*#__PURE__*/React.createElement("button", {
     key: value,
     onClick: () => setPage(value),
-    className: `nav-item ${page === value ? "active bg-white/10 text-white" : "text-white/60 hover:bg-white/5 hover:text-white"} flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-left text-sm font-bold`
+    className: `nav-item ${page === value ? "active bg-potiguar-lime text-potiguar-950 shadow-lg shadow-potiguar-lime/10" : "text-white/65 hover:bg-white/8 hover:text-white"} flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-left text-sm font-extrabold`
   }, /*#__PURE__*/React.createElement(Icon, {
     name: icon
   }), label))), /*#__PURE__*/React.createElement("div", {
@@ -1218,7 +1270,8 @@ function StorePage({
 }
 function AdminPage({
   setToast,
-  predictionEntries
+  predictionEntries,
+  onRefreshData
 }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
@@ -1310,6 +1363,9 @@ function AdminPage({
     acc[entry.seller].quantity += Number(entry.quantity);
     return acc;
   }, {})).sort((a, b) => b.quantity - a.quantity);
+  const pilotRanking = buildPilotRanking(users, predictionEntries, salesEntries);
+  const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const storeGoal = assignments.find(item => item.store === PILOT_STORE)?.goal || 200;
   const loadSales = async () => {
     try {
       const response = await fetch("/api/sales", {
@@ -1324,6 +1380,8 @@ function AdminPage({
   };
   useEffect(() => {
     loadSales();
+    const timer = setInterval(loadSales, 15000);
+    return () => clearInterval(timer);
   }, []);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const createUser = event => {
@@ -1444,13 +1502,25 @@ function AdminPage({
     className: "text-sm font-semibold text-slate-400"
   }, "Piloto comercial • acesso administrativo"), /*#__PURE__*/React.createElement("h2", {
     className: "font-display text-3xl font-extrabold text-potiguar-950"
-  }, "Central de administração")), /*#__PURE__*/React.createElement("button", {
+  }, "Central de administração")), /*#__PURE__*/React.createElement("div", {
+    className: "flex gap-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      loadSales();
+      onRefreshData();
+      setToast("Dados atualizados.");
+    },
+    className: "flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "clock",
+    size: 17
+  }), " Atualizar"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setToast("Relatório da rodada preparado para exportação."),
     className: "flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "chart",
     size: 17
-  }), " Exportar relatório")), /*#__PURE__*/React.createElement("div", {
+  }), " Exportar relatório"))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-3 xl:grid-cols-4"
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "users",
@@ -1472,9 +1542,9 @@ function AdminPage({
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "store",
-    label: "Loja na meta",
-    value: "0/1",
-    detail: "Imperatriz em apuração",
+    label: "Meta Imperatriz",
+    value: `${Math.round(totalSold / storeGoal * 100)}%`,
+    detail: `${totalSold} de ${storeGoal} m²`,
     accent: "white"
   })), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
@@ -1527,7 +1597,7 @@ function AdminPage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Ranking de vendedores")), /*#__PURE__*/React.createElement("div", {
     className: "divide-y divide-slate-100"
-  }, ranking.slice(0, 10).map((person, index) => /*#__PURE__*/React.createElement("div", {
+  }, pilotRanking.slice(0, 10).map((person, index) => /*#__PURE__*/React.createElement("div", {
     key: person.name,
     className: "flex items-center gap-3 px-5 py-3"
   }, /*#__PURE__*/React.createElement("span", {
@@ -1540,7 +1610,7 @@ function AdminPage({
     className: "truncate text-xs font-extrabold text-potiguar-950"
   }, person.name), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-slate-400"
-  }, person.store, " • Vendedor")), /*#__PURE__*/React.createElement("strong", {
+  }, person.store, " • ", person.role, " • Palpite ", person.predictionPoints, " pts • Venda ", person.salesPoints + person.topSellerPoints, " pts")), /*#__PURE__*/React.createElement("strong", {
     className: "font-display text-lg text-potiguar-900"
   }, person.points, " pts"))))), /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
@@ -2176,7 +2246,7 @@ function AdminPage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Metas por loja")), /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold text-slate-400"
-  }, "Atualizado 08:40")), /*#__PURE__*/React.createElement("div", {
+  }, "Atualização automática")), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 space-y-5"
   }, stores.map((s, i) => /*#__PURE__*/React.createElement("div", {
     key: s.name,
@@ -2188,11 +2258,11 @@ function AdminPage({
   }, /*#__PURE__*/React.createElement("div", {
     className: "progress-fill h-full rounded-full",
     style: {
-      width: `${Math.min(s.sold / s.goal * 100, 100)}%`
+      width: `${Math.min(totalSold / storeGoal * 100, 100)}%`
     }
   })), /*#__PURE__*/React.createElement("span", {
     className: "text-right text-xs font-extrabold text-potiguar-700"
-  }, Math.round(s.sold / s.goal * 100), "%"))))), /*#__PURE__*/React.createElement("section", {
+  }, Math.round(totalSold / storeGoal * 100), "%"))))), /*#__PURE__*/React.createElement("section", {
     className: "hero-pattern pitch-lines rounded-2xl p-6 text-white"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between"
@@ -2249,6 +2319,8 @@ function App() {
   };
   useEffect(() => {
     loadPredictions();
+    const timer = setInterval(loadPredictions, 15000);
+    return () => clearInterval(timer);
   }, []);
   const savePrediction = async (currentUser, scores) => {
     try {
@@ -2328,7 +2400,8 @@ function App() {
     user: user
   }), page === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     setToast: setToast,
-    predictionEntries: predictionEntries
+    predictionEntries: predictionEntries,
+    onRefreshData: loadPredictions
   }))), /*#__PURE__*/React.createElement(MobileNav, {
     page: page,
     setPage: setPage,

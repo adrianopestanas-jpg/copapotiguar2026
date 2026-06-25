@@ -132,10 +132,22 @@ button {
 
 .desktop-nav .nav-item.active::before {
   top: 50%;
-  left: -12px;
-  width: 4px;
-  height: 28px;
+  left: -24px;
+  width: 6px;
+  height: 56px;
   transform: translateY(-50%);
+  background: var(--lime);
+  box-shadow: 0 0 18px rgba(200, 241, 53, 0.55);
+}
+
+.desktop-nav .nav-item.active {
+  color: var(--green-950);
+  background: linear-gradient(135deg, #d8ff43, var(--lime));
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.16);
+}
+
+.desktop-nav .nav-item.active svg {
+  color: var(--green-950);
 }
 
 .progress-track {
