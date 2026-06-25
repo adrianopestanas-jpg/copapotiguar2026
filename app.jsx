@@ -231,6 +231,14 @@ const getPredictionPoints = entry => {
   return predictedOutcome === resultOutcome ? 2 : 0;
 };
 
+const getPredictionStats = entry => {
+  const points = getPredictionPoints(entry);
+  const result = matchResults[entry.match_id];
+  if (!result) return { points, hit: false, exact: false };
+  const exact = Number(entry.home_score) === result.homeScore && Number(entry.away_score) === result.awayScore;
+  return { points, hit: points > 0, exact };
+};
+
 const buildPilotRanking = (users, predictionEntries, salesEntries) => {
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
@@ -240,17 +248,23 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
     role: user.profile,
     points: 0,
     predictionPoints: 0,
+    predictionHits: 0,
+    exactPredictions: 0,
     salesPoints: 0,
     topSellerPoints: 0,
     storeGoalPoints: 0,
+    soldQuantity: 0,
+    isTopSeller: false,
   }));
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
 
   predictionEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row) return;
-    const points = getPredictionPoints(entry);
+    const { points, hit, exact } = getPredictionStats(entry);
     row.predictionPoints += points;
+    row.predictionHits += hit ? 1 : 0;
+    row.exactPredictions += exact ? 1 : 0;
     row.points += points;
   });
 
@@ -264,6 +278,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
   Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
     const row = byCpf[cpf];
     if (!row || quantity <= 0) return;
+    row.soldQuantity = quantity;
     row.salesPoints += 5;
     row.points += 5;
   });
@@ -276,6 +291,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
       .forEach(([cpf]) => {
         const row = byCpf[cpf];
         if (!row) return;
+        row.isTopSeller = true;
         row.topSellerPoints += 8;
         row.points += 8;
       });
@@ -481,11 +497,16 @@ function StatCard({ icon, label, value, detail, accent = "green" }) {
   );
 }
 
-function ProductCard({ user }) {
+function ProductCard({ user, totalSold, pilotRanking }) {
   const leadership = user.accessRole === "leadership";
   const focus = getStoreFocus(user.store);
-  const width = `${Math.min(focus.percent, 100)}%`;
+  const percent = Math.round((totalSold / focus.goal) * 100);
+  const remaining = Math.max(focus.goal - totalSold, 0);
+  const width = `${Math.min(percent, 100)}%`;
   const unit = focus.product.unit || "un.";
+  const topSeller = pilotRanking
+    .filter(person => person.store === user.store && person.role === "Vendedor" && person.soldQuantity > 0)
+    .sort((a, b) => b.soldQuantity - a.soldQuantity || b.points - a.points)[0];
   return (
     <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8">
       <div className="flex flex-col gap-7 sm:flex-row sm:items-center sm:justify-between">
@@ -494,16 +515,20 @@ function ProductCard({ user }) {
             <Icon name="fire" size={16} /> {leadership ? "Resultado dos vendedores" : "Produto Foco"}
           </div>
           <h2 className="mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl">{focus.product.name}</h2>
-          <p className="mt-2 text-sm text-white/60">{leadership ? `Desempenho consolidado da equipe ${user.store}` : `Todos os vendedores competem em igualdade • Marca ${focus.product.brand}`}</p>
+          <p className="mt-2 text-sm text-white/60">{leadership ? `Desempenho consolidado da equipe ${user.store}` : `Todos os vendedores competem em igualdade • SKU ${focus.product.sku} • Marca ${focus.product.brand}`}</p>
           <div className="mt-6">
             <div className="mb-2 flex items-end justify-between">
               <span className="text-xs font-bold text-white/55">Meta da {user.store}</span>
-              <span className="font-display text-xl font-extrabold">{focus.sold} <small className="text-xs font-semibold text-white/55">/ {focus.goal} {unit}</small></span>
+              <span className="font-display text-xl font-extrabold">{totalSold} <small className="text-xs font-semibold text-white/55">/ {focus.goal} {unit}</small></span>
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-black/20">
               <div className="h-full rounded-full bg-potiguar-lime" style={{ width }}></div>
             </div>
-            <p className="mt-2 text-xs font-bold text-potiguar-lime">{leadership ? "Sua pontuação depende do resultado desta equipe." : focus.remaining > 0 ? `Faltam só ${focus.remaining} ${unit} para bater a meta!` : "Meta batida! Agora é ampliar a vantagem."}</p>
+            <p className="mt-2 text-xs font-bold text-potiguar-lime">{leadership ? `Meta da equipe: ${percent}% atingida.` : remaining > 0 ? `Faltam só ${remaining} ${unit} para bater a meta!` : "Meta batida! Agora é ampliar a vantagem."}</p>
+            <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-extrabold">
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white/75">{percent}% atingido</span>
+              <span className="rounded-full bg-white/10 px-3 py-1.5 text-white/75">{topSeller ? `Destaque: ${topSeller.name.split(" ")[0]} • ${topSeller.soldQuantity} ${unit}` : "Aguardando vendas"}</span>
+            </div>
           </div>
         </div>
         <div className="flex items-center justify-center">
@@ -578,7 +603,7 @@ function Announcement({ acknowledged, setAcknowledged, setToast }) {
   );
 }
 
-function MiniRanking() {
+function MiniRanking({ pilotRanking }) {
   return (
     <section className="soft-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-center justify-between">
@@ -589,7 +614,7 @@ function MiniRanking() {
         <Icon name="trophy" className="text-amber-500" />
       </div>
       <div className="mt-5 space-y-4">
-        {ranking.slice(0, 3).map((person, idx) => (
+        {pilotRanking.slice(0, 3).map((person, idx) => (
           <div key={person.name} className="flex items-center gap-3">
             <span className={`grid h-7 w-7 place-items-center rounded-lg text-xs font-extrabold ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-500" : "bg-orange-100 text-orange-700"}`}>{idx + 1}</span>
             <Avatar initials={person.name.split(" ").map(x => x[0]).slice(0,2).join("")} />
@@ -605,9 +630,10 @@ function MiniRanking() {
   );
 }
 
-function StoreMiniRanking({ user }) {
-  const localRanking = getStoreRanking(user.store, 4);
-  const myPosition = getStoreRanking(user.store, 999).findIndex(person => person.name === user.name) + 1;
+function StoreMiniRanking({ user, pilotRanking }) {
+  const localRanking = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").slice(0, 4);
+  const myPosition = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").findIndex(person => person.name === user.name) + 1;
+  const unit = getStoreFocus(user.store).product.unit || "un.";
   return (
     <section className="soft-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-center justify-between">
@@ -626,7 +652,7 @@ function StoreMiniRanking({ user }) {
               <Avatar initials={person.name.split(" ").map(x => x[0]).slice(0, 2).join("")} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-extrabold text-potiguar-950">{person.name}{isMe && <span className="ml-1 text-[9px] text-potiguar-700">(VOCÊ)</span>}</p>
-                <p className="text-[10px] text-slate-400">Vendedor</p>
+                <p className="text-[10px] text-slate-400">{person.soldQuantity} {unit} • {person.predictionHits} acerto(s){person.isTopSeller ? " • destaque" : ""}</p>
               </div>
               <strong className="font-display text-lg text-potiguar-900">{person.points}</strong>
             </div>
@@ -637,13 +663,18 @@ function StoreMiniRanking({ user }) {
   );
 }
 
-function Home({ acknowledged, setAcknowledged, setPage, setToast, user }) {
+function Home({ acknowledged, setAcknowledged, setPage, setToast, user, pilotRanking, totalSold }) {
   const leadership = user.accessRole === "leadership";
   const predictionsClosed = getPredictionClosed();
-  const storeStats = getStoreStats(user.store);
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
-  const storeSellers = rankedSellers.filter(seller => seller.store === user.store);
+  const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
+  const activeSellers = storeSellers.filter(person => person.soldQuantity > 0).length;
+  const userRanking = pilotRanking.find(row => row.cpf === onlyDigits(user.cpf));
+  const userPosition = pilotRanking.findIndex(row => row.cpf === onlyDigits(user.cpf)) + 1;
+  const storeGoal = storeFocus.goal;
+  const storePercent = Math.round((totalSold / storeGoal) * 100);
+  const totalPredictionHits = pilotRanking.reduce((sum, person) => sum + person.predictionHits, 0);
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -656,21 +687,21 @@ function Home({ acknowledged, setAcknowledged, setPage, setToast, user }) {
           <Avatar initials={user.initials} size="large" rank={user.position} />
           <div>
             <p className="text-xs font-semibold text-slate-400">{user.accessRole === "seller" ? "Vendedor" : user.originalRole}</p>
-            <p className="text-sm font-extrabold text-potiguar-950">{user.store} • {leadership ? `${storeStats.networkPosition}ª loja da rede` : `${user.position || "—"}º geral`}</p>
+            <p className="text-sm font-extrabold text-potiguar-950">{user.store} • {leadership ? "Liderança" : `${userPosition || "—"}º geral`}</p>
           </div>
         </div>
       </section>
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard icon="bolt" label={leadership ? "Pontos da liderança" : "Seus pontos"} value="0" detail={leadership ? "Aguardando fechamento da rodada" : "Aguardando apuração da rodada"} accent="green" />
-        <StatCard icon="ranking" label={leadership ? "Posição da loja" : "Posição geral"} value={leadership ? `${storeStats.networkPosition}º` : `${user.position || "—"}º`} detail={leadership ? `${storeStats.percent}% da meta` : "Acompanhe sua loja abaixo"} accent="lime" />
-        <StatCard icon="target" label={leadership ? "Vendedores ativos" : "Palpites certos"} value={leadership ? `${storeSellers.length}/${storeSellers.length}` : "0"} detail={leadership ? "Equipe elegível no piloto" : "Aguardando resultado do jogo"} accent="white" />
-        <StatCard icon="fire" label={leadership ? "Meta da loja" : "Meta da loja"} value={`${storeFocus.percent}%`} detail={`${storeFocus.sold} de ${storeFocus.goal} ${storeFocusUnit}`} accent="white" />
+        <StatCard icon="bolt" label={leadership ? "Pontos da liderança" : "Seus pontos"} value={userRanking?.points || 0} detail={leadership ? `Meta ${userRanking?.storeGoalPoints || 0} pts • Loja ${storePercent}%` : `Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`} accent="green" />
+        <StatCard icon="ranking" label="Posição geral" value={`${userPosition || "—"}º`} detail={userRanking?.isTopSeller ? "Destaque do produto foco" : "Ranking atualizado automaticamente"} accent="lime" />
+        <StatCard icon="target" label={leadership ? "Vendedores com venda" : "Palpites certos"} value={leadership ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0} detail={leadership ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`} accent="white" />
+        <StatCard icon="fire" label={leadership ? "Meta da loja" : "Meta da loja"} value={`${storePercent}%`} detail={`${totalSold} de ${storeFocus.goal} ${storeFocusUnit}`} accent="white" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
-        <ProductCard user={user} />
-        <MiniRanking />
+        <ProductCard user={user} totalSold={totalSold} pilotRanking={pilotRanking} />
+        <MiniRanking pilotRanking={pilotRanking} />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
@@ -686,7 +717,7 @@ function Home({ acknowledged, setAcknowledged, setPage, setToast, user }) {
           </div>
         </button>
       </div>
-      {user.accessRole === "seller" && <StoreMiniRanking user={user} />}
+      {user.accessRole !== "admin" && <StoreMiniRanking user={user} pilotRanking={pilotRanking} />}
     </div>
   );
 }
@@ -811,11 +842,11 @@ function Guesses({ acknowledged, setPage, setToast, user, onSavePrediction }) {
   );
 }
 
-function RankingPage({ user }) {
+function RankingPage({ user, pilotRanking }) {
   const [tab, setTab] = useState("geral");
-  const localRanking = getStoreRanking(user.store);
-  const data = tab === "geral" ? ranking : localRanking;
-  const podium = [ranking[1], ranking[0], ranking[2]].filter(Boolean);
+  const localRanking = pilotRanking.filter(person => person.store === user.store);
+  const data = tab === "geral" ? pilotRanking : localRanking;
+  const podium = [pilotRanking[1], pilotRanking[0], pilotRanking[2]].filter(Boolean);
   return (
     <div className="space-y-6">
       <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
@@ -852,7 +883,7 @@ function RankingPage({ user }) {
                 <Avatar initials={person.name.split(" ").map(x=>x[0]).slice(0,2).join("")} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-extrabold text-potiguar-950">{person.name} {isMe && <span className="ml-1 text-[9px] text-potiguar-700">(VOCÊ)</span>}</p>
-                  <p className="truncate text-[10px] text-slate-400">{person.role} • {person.store || user.store}</p>
+                  <p className="truncate text-[10px] text-slate-400">{person.role} • {person.store || user.store} • Palpite {person.predictionPoints} pts • Venda {person.salesPoints + person.topSellerPoints} pts{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p>
                 </div>
                 {person.trend && <span className={`hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`}>{person.trend}</span>}
                 <div className="text-right">
@@ -868,12 +899,13 @@ function RankingPage({ user }) {
   );
 }
 
-function StorePage({ user }) {
-  const storeStats = getStoreStats(user.store);
+function StorePage({ user, pilotRanking, totalSold }) {
   const storeFocus = getStoreFocus(user.store);
   const storeUnit = storeFocus.product.unit || "unidades";
-  const localRanking = getStoreRanking(user.store);
-  const networkRanking = [...stores].sort((a, b) => (b.sold / b.goal) - (a.sold / a.goal));
+  const storeGoal = storeFocus.goal || 1;
+  const storePercent = Math.round((totalSold / storeGoal) * 100);
+  const localRanking = pilotRanking.filter(person => person.store === user.store);
+  const networkRanking = stores.map(store => store.name === user.store ? { ...store, sold: totalSold, goal: storeGoal } : { ...store, sold: 0, goal: storeGoal }).sort((a, b) => (b.sold / b.goal) - (a.sold / a.goal));
   const dayChampion = networkRanking[0];
   return (
     <div className="space-y-6">
@@ -882,16 +914,16 @@ function StorePage({ user }) {
           <div>
             <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"><Icon name="store" size={16}/> Loja {user.store}</div>
             <h2 className="mt-3 font-display text-3xl font-extrabold">Juntos até a meta!</h2>
-            <p className="mt-2 text-sm text-white/60">{storeStats.networkPosition}ª colocada no ranking da rede • {storeStats.score} pontos</p>
+            <p className="mt-2 text-sm text-white/60">Piloto ativo em {user.store} • ranking atualizado pelas vendas reais</p>
           </div>
           <div className="glass rounded-2xl px-5 py-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Atingimento hoje</p>
-            <p className="font-display text-4xl font-extrabold text-potiguar-lime">{storeStats.percent}%</p>
+            <p className="font-display text-4xl font-extrabold text-potiguar-lime">{storePercent}%</p>
           </div>
         </div>
         <div className="mt-7">
-          <div className="mb-2 flex justify-between text-xs font-bold"><span>{storeStats.sold} {storeUnit} vendidos</span><span>Meta: {storeStats.goal} {storeUnit}</span></div>
-          <div className="h-3 overflow-hidden rounded-full bg-black/20"><div className="h-full rounded-full bg-potiguar-lime" style={{width: `${Math.min(storeStats.percent, 100)}%`}}></div></div>
+          <div className="mb-2 flex justify-between text-xs font-bold"><span>{totalSold} {storeUnit} vendidos</span><span>Meta: {storeGoal} {storeUnit}</span></div>
+          <div className="h-3 overflow-hidden rounded-full bg-black/20"><div className="h-full rounded-full bg-potiguar-lime" style={{width: `${Math.min(storePercent, 100)}%`}}></div></div>
         </div>
       </section>
 
@@ -899,14 +931,14 @@ function StorePage({ user }) {
         <section className="soft-card rounded-2xl p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Nosso time</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking {user.store}</h3></div>
-            <span className="rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800">{localRanking.length} VENDEDORES</span>
+            <span className="rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800">{localRanking.length} PARTICIPANTES</span>
           </div>
           <div className="mt-5 space-y-3">
             {localRanking.map((p, i) => (
               <div key={p.name} className={`flex items-center gap-3 rounded-xl p-3 ${p.name === user.name ? "bg-potiguar-lime/15" : "bg-slate-50"}`}>
                 <span className="w-5 text-center text-xs font-extrabold text-slate-400">{i === 0 ? "🥇" : i + 1}</span>
                 <Avatar initials={p.name.split(" ").map(x=>x[0]).slice(0,2).join("")} />
-                <div className="min-w-0 flex-1"><p className="truncate text-sm font-extrabold text-potiguar-950">{p.name}{p.name === user.name && <span className="ml-1 text-[9px] text-potiguar-700">(VOCÊ)</span>}</p><p className="truncate text-[10px] text-slate-400">{p.role}</p></div>
+	                <div className="min-w-0 flex-1"><p className="truncate text-sm font-extrabold text-potiguar-950">{p.name}{p.name === user.name && <span className="ml-1 text-[9px] text-potiguar-700">(VOCÊ)</span>}</p><p className="truncate text-[10px] text-slate-400">{p.role} • {p.soldQuantity} {storeUnit} • {p.predictionHits} acerto(s){p.isTopSeller ? " • destaque" : ""}</p></div>
                 <strong className="font-display text-lg text-potiguar-900">{p.points}</strong>
               </div>
             ))}
@@ -937,7 +969,7 @@ function StorePage({ user }) {
   );
 }
 
-function AdminPage({ setToast, predictionEntries, onRefreshData }) {
+function AdminPage({ setToast, predictionEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, onRefreshData }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
@@ -948,7 +980,6 @@ function AdminPage({ setToast, predictionEntries, onRefreshData }) {
   const [productCatalog, setProductCatalog] = useState(focusProducts);
   const [newProduct, setNewProduct] = useState({ sku: "", name: "", brand: "", price: "", description: "", imageUrl: "", siteUrl: "" });
   const [newAssignment, setNewAssignment] = useState({ store: PILOT_STORE, productId: "piso-house-color-formigres", goal: "200" });
-  const [salesEntries, setSalesEntries] = useState(initialSalesEntries);
   const [newSale, setNewSale] = useState(() => {
     const firstSeller = registeredUsers.find(user => user.profile === "Vendedor") || {};
     const firstAssignment = initialProductAssignments.find(item => item.store === (firstSeller.store || PILOT_STORE)) || initialProductAssignments[0];
@@ -989,26 +1020,11 @@ function AdminPage({ setToast, predictionEntries, onRefreshData }) {
     acc[entry.seller].quantity += Number(entry.quantity);
     return acc;
   }, {})).sort((a, b) => b.quantity - a.quantity);
-  const pilotRanking = buildPilotRanking(users, predictionEntries, salesEntries);
-  const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const storeGoal = assignments.find(item => item.store === PILOT_STORE)?.goal || 200;
-
-  const loadSales = async () => {
-    try {
-      const response = await fetch("/api/sales", { cache: "no-store" });
-      if (!response.ok) return;
-      const data = await response.json();
-      setSalesEntries(data.sales || []);
-    } catch (error) {
-      console.warn("Não foi possível carregar vendas.", error);
-    }
-  };
-
-  useEffect(() => {
-    loadSales();
-    const timer = setInterval(loadSales, 15000);
-    return () => clearInterval(timer);
-  }, []);
+  const sellerCount = users.filter(user => user.profile === "Vendedor").length;
+  const leaderCount = users.filter(user => user.profile === "Liderança").length;
+  const adminCount = users.filter(user => user.profile === "Administrador").length;
+  const participantCount = sellerCount + leaderCount;
 
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11)
     .replace(/^(\d{3})(\d)/, "$1.$2")
@@ -1109,12 +1125,12 @@ function AdminPage({ setToast, predictionEntries, onRefreshData }) {
       <section className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div><p className="text-sm font-semibold text-slate-400">Piloto comercial • acesso administrativo</p><h2 className="font-display text-3xl font-extrabold text-potiguar-950">Central de administração</h2></div>
         <div className="flex gap-2">
-          <button onClick={() => { loadSales(); onRefreshData(); setToast("Dados atualizados."); }} className="flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900"><Icon name="clock" size={17}/> Atualizar</button>
+          <button onClick={() => { onRefreshData(); setToast("Dados atualizados."); }} className="flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900"><Icon name="clock" size={17}/> Atualizar</button>
           <button onClick={() => setToast("Relatório da rodada preparado para exportação.")} className="flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"><Icon name="chart" size={17}/> Exportar relatório</button>
         </div>
       </section>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard icon="users" label="Usuários do piloto" value={users.length} detail={`${users.filter(u => u.profile === "Vendedor").length} vendedores • ${users.filter(u => u.profile === "Liderança").length} líderes`} accent="green"/>
+        <StatCard icon="users" label="Participantes do piloto" value={participantCount} detail={`${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`} accent="green"/>
         <StatCard icon="megaphone" label="Leituras" value="0" detail="Aguardando confirmações" accent="lime"/>
         <StatCard icon="ball" label="Palpites" value={predictionEntries.length} detail={predictionEntries.length ? "Enviados para apuração" : "Aguardando envio"} accent="white"/>
         <StatCard icon="store" label="Meta Imperatriz" value={`${Math.round(totalSold / storeGoal * 100)}%`} detail={`${totalSold} de ${storeGoal} m²`} accent="white"/>
@@ -1151,7 +1167,7 @@ function AdminPage({ setToast, predictionEntries, onRefreshData }) {
 	                  <div key={person.name} className="flex items-center gap-3 px-5 py-3">
 	                    <span className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-extrabold ${index < 3 ? "bg-potiguar-lime/20 text-potiguar-800" : "text-slate-400"}`}>{index < 3 ? ["🥇","🥈","🥉"][index] : index + 1}</span>
 	                    <Avatar initials={person.name.split(" ").map(part => part[0]).slice(0,2).join("")}/>
-	                    <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • {person.role} • Palpite {person.predictionPoints} pts • Venda {person.salesPoints + person.topSellerPoints} pts</p></div>
+	                    <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • {person.role} • Palpite {person.predictionPoints} pts/{person.predictionHits} acerto(s) • Venda {person.salesPoints + person.topSellerPoints} pts/{person.soldQuantity} m²{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p></div>
 	                    <strong className="font-display text-lg text-potiguar-900">{person.points} pts</strong>
 	                  </div>
 	                ))}
@@ -1412,6 +1428,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
+  const [salesEntries, setSalesEntries] = useState([]);
 
   useEffect(() => {
     if (!toast) return;
@@ -1432,11 +1449,29 @@ function App() {
     }
   };
 
+  const loadSales = async () => {
+    try {
+      const response = await fetch("/api/sales", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setSalesEntries(data.sales || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar vendas.", error);
+    }
+  };
+
+  const refreshData = async () => {
+    await Promise.all([loadPredictions(), loadSales()]);
+  };
+
   useEffect(() => {
-    loadPredictions();
-    const timer = setInterval(loadPredictions, 15000);
+    refreshData();
+    const timer = setInterval(refreshData, 15000);
     return () => clearInterval(timer);
   }, []);
+
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries);
+  const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
 
   const savePrediction = async (currentUser, scores) => {
     try {
@@ -1489,11 +1524,11 @@ function App() {
       <div className="main-column">
         <Topbar page={page} user={user} onLogout={logout} />
         <main className="mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10">
-          {page === "home" && <Home acknowledged={acknowledged} setAcknowledged={setAcknowledged} setPage={setPage} setToast={setToast} user={user} />}
+          {page === "home" && <Home acknowledged={acknowledged} setAcknowledged={setAcknowledged} setPage={setPage} setToast={setToast} user={user} pilotRanking={pilotRanking} totalSold={totalSold} />}
           {page === "guesses" && <Guesses acknowledged={acknowledged} setPage={setPage} setToast={setToast} user={user} onSavePrediction={savePrediction} />}
-          {page === "ranking" && <RankingPage user={user} />}
-          {page === "store" && <StorePage user={user} />}
-          {page === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} onRefreshData={loadPredictions} />}
+          {page === "ranking" && <RankingPage user={user} pilotRanking={pilotRanking} />}
+          {page === "store" && <StorePage user={user} pilotRanking={pilotRanking} totalSold={totalSold} />}
+          {page === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} onRefreshData={refreshData} />}
         </main>
       </div>
       <MobileNav page={page} setPage={setPage} user={user} />

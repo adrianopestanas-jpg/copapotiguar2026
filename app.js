@@ -326,6 +326,21 @@ const getPredictionPoints = entry => {
   const resultOutcome = Math.sign(result.homeScore - result.awayScore);
   return predictedOutcome === resultOutcome ? 2 : 0;
 };
+const getPredictionStats = entry => {
+  const points = getPredictionPoints(entry);
+  const result = matchResults[entry.match_id];
+  if (!result) return {
+    points,
+    hit: false,
+    exact: false
+  };
+  const exact = Number(entry.home_score) === result.homeScore && Number(entry.away_score) === result.awayScore;
+  return {
+    points,
+    hit: points > 0,
+    exact
+  };
+};
 const buildPilotRanking = (users, predictionEntries, salesEntries) => {
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
@@ -335,16 +350,26 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
     role: user.profile,
     points: 0,
     predictionPoints: 0,
+    predictionHits: 0,
+    exactPredictions: 0,
     salesPoints: 0,
     topSellerPoints: 0,
-    storeGoalPoints: 0
+    storeGoalPoints: 0,
+    soldQuantity: 0,
+    isTopSeller: false
   }));
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
   predictionEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row) return;
-    const points = getPredictionPoints(entry);
+    const {
+      points,
+      hit,
+      exact
+    } = getPredictionStats(entry);
     row.predictionPoints += points;
+    row.predictionHits += hit ? 1 : 0;
+    row.exactPredictions += exact ? 1 : 0;
     row.points += points;
   });
   const salesByCpf = salesEntries.reduce((acc, entry) => {
@@ -356,6 +381,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
   Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
     const row = byCpf[cpf];
     if (!row || quantity <= 0) return;
+    row.soldQuantity = quantity;
     row.salesPoints += 5;
     row.points += 5;
   });
@@ -364,6 +390,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
     Object.entries(salesByCpf).filter(([, quantity]) => quantity === maxSold).slice(0, 1).forEach(([cpf]) => {
       const row = byCpf[cpf];
       if (!row) return;
+      row.isTopSeller = true;
       row.topSellerPoints += 8;
       row.points += 8;
     });
@@ -626,12 +653,17 @@ function StatCard({
   }))));
 }
 function ProductCard({
-  user
+  user,
+  totalSold,
+  pilotRanking
 }) {
   const leadership = user.accessRole === "leadership";
   const focus = getStoreFocus(user.store);
-  const width = `${Math.min(focus.percent, 100)}%`;
+  const percent = Math.round(totalSold / focus.goal * 100);
+  const remaining = Math.max(focus.goal - totalSold, 0);
+  const width = `${Math.min(percent, 100)}%`;
   const unit = focus.product.unit || "un.";
+  const topSeller = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor" && person.soldQuantity > 0).sort((a, b) => b.soldQuantity - a.soldQuantity || b.points - a.points)[0];
   return /*#__PURE__*/React.createElement("section", {
     className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8"
   }, /*#__PURE__*/React.createElement("div", {
@@ -647,7 +679,7 @@ function ProductCard({
     className: "mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl"
   }, focus.product.name), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
-  }, leadership ? `Desempenho consolidado da equipe ${user.store}` : `Todos os vendedores competem em igualdade • Marca ${focus.product.brand}`), /*#__PURE__*/React.createElement("div", {
+  }, leadership ? `Desempenho consolidado da equipe ${user.store}` : `Todos os vendedores competem em igualdade • SKU ${focus.product.sku} • Marca ${focus.product.brand}`), /*#__PURE__*/React.createElement("div", {
     className: "mt-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-2 flex items-end justify-between"
@@ -655,7 +687,7 @@ function ProductCard({
     className: "text-xs font-bold text-white/55"
   }, "Meta da ", user.store), /*#__PURE__*/React.createElement("span", {
     className: "font-display text-xl font-extrabold"
-  }, focus.sold, " ", /*#__PURE__*/React.createElement("small", {
+  }, totalSold, " ", /*#__PURE__*/React.createElement("small", {
     className: "text-xs font-semibold text-white/55"
   }, "/ ", focus.goal, " ", unit))), /*#__PURE__*/React.createElement("div", {
     className: "h-2.5 overflow-hidden rounded-full bg-black/20"
@@ -666,7 +698,13 @@ function ProductCard({
     }
   })), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-xs font-bold text-potiguar-lime"
-  }, leadership ? "Sua pontuação depende do resultado desta equipe." : focus.remaining > 0 ? `Faltam só ${focus.remaining} ${unit} para bater a meta!` : "Meta batida! Agora é ampliar a vantagem."))), /*#__PURE__*/React.createElement("div", {
+  }, leadership ? `Meta da equipe: ${percent}% atingida.` : remaining > 0 ? `Faltam só ${remaining} ${unit} para bater a meta!` : "Meta batida! Agora é ampliar a vantagem."), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 flex flex-wrap gap-2 text-[10px] font-extrabold"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "rounded-full bg-white/10 px-3 py-1.5 text-white/75"
+  }, percent, "% atingido"), /*#__PURE__*/React.createElement("span", {
+    className: "rounded-full bg-white/10 px-3 py-1.5 text-white/75"
+  }, topSeller ? `Destaque: ${topSeller.name.split(" ")[0]} • ${topSeller.soldQuantity} ${unit}` : "Aguardando vendas")))), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-center"
   }, /*#__PURE__*/React.createElement("div", {
     className: "relative"
@@ -748,7 +786,9 @@ function Announcement({
     size: 17
   }), acknowledged ? "Lido e registrado" : "Li e estou ciente"))));
 }
-function MiniRanking() {
+function MiniRanking({
+  pilotRanking
+}) {
   return /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -762,7 +802,7 @@ function MiniRanking() {
     className: "text-amber-500"
   })), /*#__PURE__*/React.createElement("div", {
     className: "mt-5 space-y-4"
-  }, ranking.slice(0, 3).map((person, idx) => /*#__PURE__*/React.createElement("div", {
+  }, pilotRanking.slice(0, 3).map((person, idx) => /*#__PURE__*/React.createElement("div", {
     key: person.name,
     className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement("span", {
@@ -780,10 +820,12 @@ function MiniRanking() {
   }, person.points)))));
 }
 function StoreMiniRanking({
-  user
+  user,
+  pilotRanking
 }) {
-  const localRanking = getStoreRanking(user.store, 4);
-  const myPosition = getStoreRanking(user.store, 999).findIndex(person => person.name === user.name) + 1;
+  const localRanking = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").slice(0, 4);
+  const myPosition = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").findIndex(person => person.name === user.name) + 1;
+  const unit = getStoreFocus(user.store).product.unit || "un.";
   return /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -813,7 +855,7 @@ function StoreMiniRanking({
       className: "ml-1 text-[9px] text-potiguar-700"
     }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
       className: "text-[10px] text-slate-400"
-    }, "Vendedor")), /*#__PURE__*/React.createElement("strong", {
+    }, person.soldQuantity, " ", unit, " • ", person.predictionHits, " acerto(s)", person.isTopSeller ? " • destaque" : "")), /*#__PURE__*/React.createElement("strong", {
       className: "font-display text-lg text-potiguar-900"
     }, person.points));
   })));
@@ -823,14 +865,21 @@ function Home({
   setAcknowledged,
   setPage,
   setToast,
-  user
+  user,
+  pilotRanking,
+  totalSold
 }) {
   const leadership = user.accessRole === "leadership";
   const predictionsClosed = getPredictionClosed();
-  const storeStats = getStoreStats(user.store);
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
-  const storeSellers = rankedSellers.filter(seller => seller.store === user.store);
+  const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
+  const activeSellers = storeSellers.filter(person => person.soldQuantity > 0).length;
+  const userRanking = pilotRanking.find(row => row.cpf === onlyDigits(user.cpf));
+  const userPosition = pilotRanking.findIndex(row => row.cpf === onlyDigits(user.cpf)) + 1;
+  const storeGoal = storeFocus.goal;
+  const storePercent = Math.round(totalSold / storeGoal * 100);
+  const totalPredictionHits = pilotRanking.reduce((sum, person) => sum + person.predictionHits, 0);
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -853,37 +902,41 @@ function Home({
     className: "text-xs font-semibold text-slate-400"
   }, user.accessRole === "seller" ? "Vendedor" : user.originalRole), /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-extrabold text-potiguar-950"
-  }, user.store, " • ", leadership ? `${storeStats.networkPosition}ª loja da rede` : `${user.position || "—"}º geral`)))), /*#__PURE__*/React.createElement("div", {
+  }, user.store, " • ", leadership ? "Liderança" : `${userPosition || "—"}º geral`)))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-3 xl:grid-cols-4"
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "bolt",
     label: leadership ? "Pontos da liderança" : "Seus pontos",
-    value: "0",
-    detail: leadership ? "Aguardando fechamento da rodada" : "Aguardando apuração da rodada",
+    value: userRanking?.points || 0,
+    detail: leadership ? `Meta ${userRanking?.storeGoalPoints || 0} pts • Loja ${storePercent}%` : `Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`,
     accent: "green"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "ranking",
-    label: leadership ? "Posição da loja" : "Posição geral",
-    value: leadership ? `${storeStats.networkPosition}º` : `${user.position || "—"}º`,
-    detail: leadership ? `${storeStats.percent}% da meta` : "Acompanhe sua loja abaixo",
+    label: "Posição geral",
+    value: `${userPosition || "—"}º`,
+    detail: userRanking?.isTopSeller ? "Destaque do produto foco" : "Ranking atualizado automaticamente",
     accent: "lime"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "target",
-    label: leadership ? "Vendedores ativos" : "Palpites certos",
-    value: leadership ? `${storeSellers.length}/${storeSellers.length}` : "0",
-    detail: leadership ? "Equipe elegível no piloto" : "Aguardando resultado do jogo",
+    label: leadership ? "Vendedores com venda" : "Palpites certos",
+    value: leadership ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0,
+    detail: leadership ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`,
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "fire",
     label: leadership ? "Meta da loja" : "Meta da loja",
-    value: `${storeFocus.percent}%`,
-    detail: `${storeFocus.sold} de ${storeFocus.goal} ${storeFocusUnit}`,
+    value: `${storePercent}%`,
+    detail: `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}`,
     accent: "white"
   })), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
   }, /*#__PURE__*/React.createElement(ProductCard, {
-    user: user
-  }), /*#__PURE__*/React.createElement(MiniRanking, null)), /*#__PURE__*/React.createElement("div", {
+    user: user,
+    totalSold: totalSold,
+    pilotRanking: pilotRanking
+  }), /*#__PURE__*/React.createElement(MiniRanking, {
+    pilotRanking: pilotRanking
+  })), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
   }, /*#__PURE__*/React.createElement(Announcement, {
     acknowledged: acknowledged,
@@ -907,8 +960,9 @@ function Home({
     className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "chevron"
-  }))))), user.accessRole === "seller" && /*#__PURE__*/React.createElement(StoreMiniRanking, {
-    user: user
+  }))))), user.accessRole !== "admin" && /*#__PURE__*/React.createElement(StoreMiniRanking, {
+    user: user,
+    pilotRanking: pilotRanking
   }));
 }
 function Guesses({
@@ -1080,12 +1134,13 @@ function Guesses({
   }), saved ? "Palpites salvos" : complete ? "Salvar palpites" : "Preencha todos os placares")));
 }
 function RankingPage({
-  user
+  user,
+  pilotRanking
 }) {
   const [tab, setTab] = useState("geral");
-  const localRanking = getStoreRanking(user.store);
-  const data = tab === "geral" ? ranking : localRanking;
-  const podium = [ranking[1], ranking[0], ranking[2]].filter(Boolean);
+  const localRanking = pilotRanking.filter(person => person.store === user.store);
+  const data = tab === "geral" ? pilotRanking : localRanking;
+  const podium = [pilotRanking[1], pilotRanking[0], pilotRanking[2]].filter(Boolean);
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -1143,7 +1198,7 @@ function RankingPage({
       className: "ml-1 text-[9px] text-potiguar-700"
     }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
       className: "truncate text-[10px] text-slate-400"
-    }, person.role, " • ", person.store || user.store)), person.trend && /*#__PURE__*/React.createElement("span", {
+    }, person.role, " • ", person.store || user.store, " • Palpite ", person.predictionPoints, " pts • Venda ", person.salesPoints + person.topSellerPoints, " pts", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), person.trend && /*#__PURE__*/React.createElement("span", {
       className: `hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`
     }, person.trend), /*#__PURE__*/React.createElement("div", {
       className: "text-right"
@@ -1155,13 +1210,24 @@ function RankingPage({
   }))));
 }
 function StorePage({
-  user
+  user,
+  pilotRanking,
+  totalSold
 }) {
-  const storeStats = getStoreStats(user.store);
   const storeFocus = getStoreFocus(user.store);
   const storeUnit = storeFocus.product.unit || "unidades";
-  const localRanking = getStoreRanking(user.store);
-  const networkRanking = [...stores].sort((a, b) => b.sold / b.goal - a.sold / a.goal);
+  const storeGoal = storeFocus.goal || 1;
+  const storePercent = Math.round(totalSold / storeGoal * 100);
+  const localRanking = pilotRanking.filter(person => person.store === user.store);
+  const networkRanking = stores.map(store => store.name === user.store ? {
+    ...store,
+    sold: totalSold,
+    goal: storeGoal
+  } : {
+    ...store,
+    sold: 0,
+    goal: storeGoal
+  }).sort((a, b) => b.sold / b.goal - a.sold / a.goal);
   const dayChampion = networkRanking[0];
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
@@ -1178,22 +1244,22 @@ function StorePage({
     className: "mt-3 font-display text-3xl font-extrabold"
   }, "Juntos até a meta!"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
-  }, storeStats.networkPosition, "ª colocada no ranking da rede • ", storeStats.score, " pontos")), /*#__PURE__*/React.createElement("div", {
+  }, "Piloto ativo em ", user.store, " • ranking atualizado pelas vendas reais")), /*#__PURE__*/React.createElement("div", {
     className: "glass rounded-2xl px-5 py-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
   }, "Atingimento hoje"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-4xl font-extrabold text-potiguar-lime"
-  }, storeStats.percent, "%"))), /*#__PURE__*/React.createElement("div", {
+  }, storePercent, "%"))), /*#__PURE__*/React.createElement("div", {
     className: "mt-7"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-2 flex justify-between text-xs font-bold"
-  }, /*#__PURE__*/React.createElement("span", null, storeStats.sold, " ", storeUnit, " vendidos"), /*#__PURE__*/React.createElement("span", null, "Meta: ", storeStats.goal, " ", storeUnit)), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, totalSold, " ", storeUnit, " vendidos"), /*#__PURE__*/React.createElement("span", null, "Meta: ", storeGoal, " ", storeUnit)), /*#__PURE__*/React.createElement("div", {
     className: "h-3 overflow-hidden rounded-full bg-black/20"
   }, /*#__PURE__*/React.createElement("div", {
     className: "h-full rounded-full bg-potiguar-lime",
     style: {
-      width: `${Math.min(storeStats.percent, 100)}%`
+      width: `${Math.min(storePercent, 100)}%`
     }
   })))), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1fr_.82fr]"
@@ -1207,7 +1273,7 @@ function StorePage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Ranking ", user.store)), /*#__PURE__*/React.createElement("span", {
     className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, localRanking.length, " VENDEDORES")), /*#__PURE__*/React.createElement("div", {
+  }, localRanking.length, " PARTICIPANTES")), /*#__PURE__*/React.createElement("div", {
     className: "mt-5 space-y-3"
   }, localRanking.map((p, i) => /*#__PURE__*/React.createElement("div", {
     key: p.name,
@@ -1224,7 +1290,7 @@ function StorePage({
     className: "ml-1 text-[9px] text-potiguar-700"
   }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
     className: "truncate text-[10px] text-slate-400"
-  }, p.role)), /*#__PURE__*/React.createElement("strong", {
+  }, p.role, " • ", p.soldQuantity, " ", storeUnit, " • ", p.predictionHits, " acerto(s)", p.isTopSeller ? " • destaque" : "")), /*#__PURE__*/React.createElement("strong", {
     className: "font-display text-lg text-potiguar-900"
   }, p.points))))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
@@ -1271,6 +1337,10 @@ function StorePage({
 function AdminPage({
   setToast,
   predictionEntries,
+  salesEntries,
+  setSalesEntries,
+  pilotRanking,
+  totalSold,
   onRefreshData
 }) {
   const [module, setModule] = useState("dashboard");
@@ -1301,7 +1371,6 @@ function AdminPage({
     productId: "piso-house-color-formigres",
     goal: "200"
   });
-  const [salesEntries, setSalesEntries] = useState(initialSalesEntries);
   const [newSale, setNewSale] = useState(() => {
     const firstSeller = registeredUsers.find(user => user.profile === "Vendedor") || {};
     const firstAssignment = initialProductAssignments.find(item => item.store === (firstSeller.store || PILOT_STORE)) || initialProductAssignments[0];
@@ -1363,26 +1432,11 @@ function AdminPage({
     acc[entry.seller].quantity += Number(entry.quantity);
     return acc;
   }, {})).sort((a, b) => b.quantity - a.quantity);
-  const pilotRanking = buildPilotRanking(users, predictionEntries, salesEntries);
-  const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const storeGoal = assignments.find(item => item.store === PILOT_STORE)?.goal || 200;
-  const loadSales = async () => {
-    try {
-      const response = await fetch("/api/sales", {
-        cache: "no-store"
-      });
-      if (!response.ok) return;
-      const data = await response.json();
-      setSalesEntries(data.sales || []);
-    } catch (error) {
-      console.warn("Não foi possível carregar vendas.", error);
-    }
-  };
-  useEffect(() => {
-    loadSales();
-    const timer = setInterval(loadSales, 15000);
-    return () => clearInterval(timer);
-  }, []);
+  const sellerCount = users.filter(user => user.profile === "Vendedor").length;
+  const leaderCount = users.filter(user => user.profile === "Liderança").length;
+  const adminCount = users.filter(user => user.profile === "Administrador").length;
+  const participantCount = sellerCount + leaderCount;
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const createUser = event => {
     event.preventDefault();
@@ -1506,7 +1560,6 @@ function AdminPage({
     className: "flex gap-2"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
-      loadSales();
       onRefreshData();
       setToast("Dados atualizados.");
     },
@@ -1524,9 +1577,9 @@ function AdminPage({
     className: "grid grid-cols-2 gap-3 xl:grid-cols-4"
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "users",
-    label: "Usuários do piloto",
-    value: users.length,
-    detail: `${users.filter(u => u.profile === "Vendedor").length} vendedores • ${users.filter(u => u.profile === "Liderança").length} líderes`,
+    label: "Participantes do piloto",
+    value: participantCount,
+    detail: `${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`,
     accent: "green"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "megaphone",
@@ -1610,7 +1663,7 @@ function AdminPage({
     className: "truncate text-xs font-extrabold text-potiguar-950"
   }, person.name), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-slate-400"
-  }, person.store, " • ", person.role, " • Palpite ", person.predictionPoints, " pts • Venda ", person.salesPoints + person.topSellerPoints, " pts")), /*#__PURE__*/React.createElement("strong", {
+  }, person.store, " • ", person.role, " • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s) • Venda ", person.salesPoints + person.topSellerPoints, " pts/", person.soldQuantity, " m²", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), /*#__PURE__*/React.createElement("strong", {
     className: "font-display text-lg text-potiguar-900"
   }, person.points, " pts"))))), /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
@@ -2296,6 +2349,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
+  const [salesEntries, setSalesEntries] = useState([]);
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(""), 3200);
@@ -2317,11 +2371,28 @@ function App() {
       console.warn("Não foi possível carregar palpites.", error);
     }
   };
+  const loadSales = async () => {
+    try {
+      const response = await fetch("/api/sales", {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      setSalesEntries(data.sales || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar vendas.", error);
+    }
+  };
+  const refreshData = async () => {
+    await Promise.all([loadPredictions(), loadSales()]);
+  };
   useEffect(() => {
-    loadPredictions();
-    const timer = setInterval(loadPredictions, 15000);
+    refreshData();
+    const timer = setInterval(refreshData, 15000);
     return () => clearInterval(timer);
   }, []);
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries);
+  const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const savePrediction = async (currentUser, scores) => {
     try {
       const predictions = games.map(game => ({
@@ -2387,7 +2458,9 @@ function App() {
     setAcknowledged: setAcknowledged,
     setPage: setPage,
     setToast: setToast,
-    user: user
+    user: user,
+    pilotRanking: pilotRanking,
+    totalSold: totalSold
   }), page === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
     acknowledged: acknowledged,
     setPage: setPage,
@@ -2395,13 +2468,20 @@ function App() {
     user: user,
     onSavePrediction: savePrediction
   }), page === "ranking" && /*#__PURE__*/React.createElement(RankingPage, {
-    user: user
+    user: user,
+    pilotRanking: pilotRanking
   }), page === "store" && /*#__PURE__*/React.createElement(StorePage, {
-    user: user
+    user: user,
+    pilotRanking: pilotRanking,
+    totalSold: totalSold
   }), page === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     setToast: setToast,
     predictionEntries: predictionEntries,
-    onRefreshData: loadPredictions
+    salesEntries: salesEntries,
+    setSalesEntries: setSalesEntries,
+    pilotRanking: pilotRanking,
+    totalSold: totalSold,
+    onRefreshData: refreshData
   }))), /*#__PURE__*/React.createElement(MobileNav, {
     page: page,
     setPage: setPage,
