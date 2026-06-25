@@ -1532,7 +1532,14 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
 function App() {
   const [page, setPage] = useState("home");
   const [acknowledged, setAcknowledged] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const savedCpf = localStorage.getItem("copaPotiguarSessionCpf");
+      return savedCpf ? demoUsers[onlyDigits(savedCpf)] || null : null;
+    } catch (error) {
+      return null;
+    }
+  });
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
@@ -1688,12 +1695,22 @@ function App() {
   };
 
   const login = (nextUser) => {
+    try {
+      localStorage.setItem("copaPotiguarSessionCpf", onlyDigits(nextUser.cpf));
+    } catch (error) {
+      console.warn("Não foi possível salvar a sessão local.", error);
+    }
     setUser(nextUser);
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
     setAcknowledged(false);
   };
 
   const logout = () => {
+    try {
+      localStorage.removeItem("copaPotiguarSessionCpf");
+    } catch (error) {
+      console.warn("Não foi possível limpar a sessão local.", error);
+    }
     setUser(null);
     setPage("home");
     setAcknowledged(false);
