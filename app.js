@@ -2475,16 +2475,17 @@ function AdminPage({
   }, "Encerrar rodada"))));
 }
 function App() {
-  const [page, setPage] = useState("home");
-  const [acknowledged, setAcknowledged] = useState(false);
-  const [user, setUser] = useState(() => {
+  const restoredUser = (() => {
     try {
       const savedCpf = localStorage.getItem("copaPotiguarSessionCpf");
       return savedCpf ? demoUsers[onlyDigits(savedCpf)] || null : null;
     } catch (error) {
       return null;
     }
-  });
+  })();
+  const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [user, setUser] = useState(restoredUser);
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
@@ -2558,8 +2559,19 @@ function App() {
   }, []);
   const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const currentUserRead = user ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(user.cpf) && entry.announcementId === currentAnnouncement.id) : false;
+  const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
+  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === currentAnnouncement.id) : false;
   const announcementAcknowledged = acknowledged || currentUserRead;
+  const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
+  useEffect(() => {
+    if (!effectiveUser) return;
+    if (effectiveUser.accessRole === "admin" && page !== "admin") {
+      setPage("admin");
+    }
+    if (effectiveUser.accessRole !== "admin" && page === "admin") {
+      setPage("home");
+    }
+  }, [effectiveUser?.accessRole, page]);
   const savePrediction = async (currentUser, scores) => {
     try {
       const predictions = games.map(game => ({
@@ -2667,50 +2679,50 @@ function App() {
     setAcknowledged(false);
     setToast("");
   };
-  if (!user) return /*#__PURE__*/React.createElement(LoginScreen, {
+  if (!effectiveUser) return /*#__PURE__*/React.createElement(LoginScreen, {
     onLogin: login
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "app-shell"
   }, /*#__PURE__*/React.createElement(Sidebar, {
-    page: page,
+    page: activePage,
     setPage: setPage,
-    user: user,
+    user: effectiveUser,
     onLogout: logout,
     profilePhotos: profilePhotos
   }), /*#__PURE__*/React.createElement("div", {
     className: "main-column"
   }, /*#__PURE__*/React.createElement(Topbar, {
-    page: page,
-    user: user,
+    page: activePage,
+    user: effectiveUser,
     onLogout: logout,
     profilePhotos: profilePhotos
   }), /*#__PURE__*/React.createElement("main", {
     className: "mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10"
-  }, page === "home" && /*#__PURE__*/React.createElement(Home, {
+  }, activePage === "home" && /*#__PURE__*/React.createElement(Home, {
     acknowledged: announcementAcknowledged,
     setPage: setPage,
     setToast: setToast,
-    user: user,
+    user: effectiveUser,
     pilotRanking: pilotRanking,
     totalSold: totalSold,
     profilePhotos: profilePhotos,
     onAcknowledge: saveAnnouncementRead,
     onSaveProfilePhoto: saveProfilePhoto
-  }), page === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
+  }), activePage === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
     acknowledged: announcementAcknowledged,
     setPage: setPage,
     setToast: setToast,
-    user: user,
+    user: effectiveUser,
     onSavePrediction: savePrediction
-  }), page === "ranking" && /*#__PURE__*/React.createElement(RankingPage, {
-    user: user,
+  }), activePage === "ranking" && /*#__PURE__*/React.createElement(RankingPage, {
+    user: effectiveUser,
     pilotRanking: pilotRanking
-  }), page === "store" && /*#__PURE__*/React.createElement(StorePage, {
-    user: user,
+  }), activePage === "store" && /*#__PURE__*/React.createElement(StorePage, {
+    user: effectiveUser,
     pilotRanking: pilotRanking,
     totalSold: totalSold
-  }), page === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
+  }), activePage === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     setToast: setToast,
     predictionEntries: predictionEntries,
     readEntries: readEntries,
@@ -2721,9 +2733,9 @@ function App() {
     profilePhotos: profilePhotos,
     onRefreshData: refreshData
   }))), /*#__PURE__*/React.createElement(MobileNav, {
-    page: page,
+    page: activePage,
     setPage: setPage,
-    user: user
+    user: effectiveUser
   }), toast && /*#__PURE__*/React.createElement("div", {
     className: "toast fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-potiguar-950 px-5 py-3 text-xs font-bold text-white shadow-2xl lg:bottom-8"
   }, /*#__PURE__*/React.createElement("span", {

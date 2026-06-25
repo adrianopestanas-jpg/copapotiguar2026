@@ -1530,16 +1530,17 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
 }
 
 function App() {
-  const [page, setPage] = useState("home");
-  const [acknowledged, setAcknowledged] = useState(false);
-  const [user, setUser] = useState(() => {
+  const restoredUser = (() => {
     try {
       const savedCpf = localStorage.getItem("copaPotiguarSessionCpf");
       return savedCpf ? demoUsers[onlyDigits(savedCpf)] || null : null;
     } catch (error) {
       return null;
     }
-  });
+  })();
+  const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
+  const [acknowledged, setAcknowledged] = useState(false);
+  const [user, setUser] = useState(restoredUser);
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
@@ -1611,8 +1612,20 @@ function App() {
 
   const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
-  const currentUserRead = user ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(user.cpf) && entry.announcementId === currentAnnouncement.id) : false;
+  const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
+  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === currentAnnouncement.id) : false;
   const announcementAcknowledged = acknowledged || currentUserRead;
+  const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
+
+  useEffect(() => {
+    if (!effectiveUser) return;
+    if (effectiveUser.accessRole === "admin" && page !== "admin") {
+      setPage("admin");
+    }
+    if (effectiveUser.accessRole !== "admin" && page === "admin") {
+      setPage("home");
+    }
+  }, [effectiveUser?.accessRole, page]);
 
   const savePrediction = async (currentUser, scores) => {
     try {
@@ -1717,22 +1730,22 @@ function App() {
     setToast("");
   };
 
-  if (!user) return <LoginScreen onLogin={login} />;
+  if (!effectiveUser) return <LoginScreen onLogin={login} />;
 
   return (
     <div className="app-shell">
-      <Sidebar page={page} setPage={setPage} user={user} onLogout={logout} profilePhotos={profilePhotos} />
+      <Sidebar page={activePage} setPage={setPage} user={effectiveUser} onLogout={logout} profilePhotos={profilePhotos} />
       <div className="main-column">
-        <Topbar page={page} user={user} onLogout={logout} profilePhotos={profilePhotos} />
+        <Topbar page={activePage} user={effectiveUser} onLogout={logout} profilePhotos={profilePhotos} />
         <main className="mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10">
-          {page === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={user} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
-          {page === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={user} onSavePrediction={savePrediction} />}
-          {page === "ranking" && <RankingPage user={user} pilotRanking={pilotRanking} />}
-          {page === "store" && <StorePage user={user} pilotRanking={pilotRanking} totalSold={totalSold} />}
-          {page === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} onRefreshData={refreshData} />}
+          {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
+          {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} onSavePrediction={savePrediction} />}
+          {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
+          {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} />}
+          {activePage === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} onRefreshData={refreshData} />}
         </main>
       </div>
-      <MobileNav page={page} setPage={setPage} user={user} />
+      <MobileNav page={activePage} setPage={setPage} user={effectiveUser} />
       {toast && <div className="toast fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-potiguar-950 px-5 py-3 text-xs font-bold text-white shadow-2xl lg:bottom-8"><span className="grid h-5 w-5 place-items-center rounded-full bg-potiguar-lime text-potiguar-950"><Icon name="check" size={12}/></span>{toast}</div>}
     </div>
   );
