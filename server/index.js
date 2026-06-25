@@ -55,6 +55,19 @@ const ensureSchema = async () => {
       quantity numeric(12,2) not null check (quantity > 0),
       created_at timestamptz not null default now()
     );
+
+    create table if not exists announcement_read_entries (
+      id bigserial primary key,
+      cpf varchar(11) not null,
+      full_name text not null,
+      access_role text not null,
+      store text not null,
+      announcement_id text not null,
+      announcement_title text not null,
+      watched_seconds integer not null default 0 check (watched_seconds >= 0),
+      read_at timestamptz not null default now(),
+      unique (cpf, announcement_id)
+    );
   `);
 };
 
@@ -153,6 +166,90 @@ const server = http.createServer(async (request, response) => {
           productName: row.product_name,
           quantity: Number(row.quantity),
           createdAt: row.created_at,
+        })),
+      });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/announcement-reads") {
+      const result = await pool.query(`
+        select id, cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at
+          from announcement_read_entries
+         order by read_at desc, id desc
+      `);
+      sendJson(response, 200, {
+        reads: result.rows.map(row => ({
+          id: row.id,
+          cpf: row.cpf,
+          fullName: row.full_name,
+          accessRole: row.access_role,
+          store: row.store,
+          announcementId: row.announcement_id,
+          announcementTitle: row.announcement_title,
+          watchedSeconds: Number(row.watched_seconds),
+          readAt: row.read_at,
+        })),
+      });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/announcement-reads") {
+      const payload = JSON.parse(await readBody(request) || "{}");
+      const cpf = String(payload.cpf || "").replace(/\D/g, "");
+      const fullName = String(payload.fullName || "").trim();
+      const accessRole = String(payload.accessRole || "").trim();
+      const store = String(payload.store || "").trim();
+      const announcementId = String(payload.announcementId || "").trim();
+      const announcementTitle = String(payload.announcementTitle || "").trim();
+      const watchedSeconds = Math.max(0, Math.floor(Number(payload.watchedSeconds || 0)));
+
+      if (cpf.length !== 11 || !fullName || !store || !announcementId || !announcementTitle) {
+        sendJson(response, 400, { error: "Dados da leitura incompletos." });
+        return;
+      }
+
+      const result = await pool.query(`
+        insert into announcement_read_entries
+          (cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at)
+        values ($1,$2,$3,$4,$5,$6,$7,now())
+        on conflict (cpf, announcement_id) do update set
+          full_name = excluded.full_name,
+          access_role = excluded.access_role,
+          store = excluded.store,
+          announcement_title = excluded.announcement_title,
+          watched_seconds = greatest(announcement_read_entries.watched_seconds, excluded.watched_seconds),
+          read_at = announcement_read_entries.read_at
+        returning id, cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at
+      `, [cpf, fullName, accessRole, store, announcementId, announcementTitle, watchedSeconds]);
+
+      const readsResult = await pool.query(`
+        select id, cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at
+          from announcement_read_entries
+         order by read_at desc, id desc
+      `);
+
+      sendJson(response, 200, {
+        read: {
+          id: result.rows[0].id,
+          cpf: result.rows[0].cpf,
+          fullName: result.rows[0].full_name,
+          accessRole: result.rows[0].access_role,
+          store: result.rows[0].store,
+          announcementId: result.rows[0].announcement_id,
+          announcementTitle: result.rows[0].announcement_title,
+          watchedSeconds: Number(result.rows[0].watched_seconds),
+          readAt: result.rows[0].read_at,
+        },
+        reads: readsResult.rows.map(row => ({
+          id: row.id,
+          cpf: row.cpf,
+          fullName: row.full_name,
+          accessRole: row.access_role,
+          store: row.store,
+          announcementId: row.announcement_id,
+          announcementTitle: row.announcement_title,
+          watchedSeconds: Number(row.watched_seconds),
+          readAt: row.read_at,
         })),
       });
       return;

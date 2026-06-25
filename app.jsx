@@ -215,6 +215,11 @@ const games = [
 
 const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
 const getPredictionClosed = () => new Date() > predictionClosesAt;
+const currentAnnouncement = {
+  id: "copa-potiguar-video-2026-06-25",
+  title: "Copa Potiguar 2026: começou o jogo",
+  minimumSeconds: 30,
+};
 const matchResults = {
   1: { homeScore: 0, awayScore: 3 },
 };
@@ -239,7 +244,7 @@ const getPredictionStats = entry => {
   return { points, hit: points > 0, exact };
 };
 
-const buildPilotRanking = (users, predictionEntries, salesEntries) => {
+const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries) => {
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
     name: user.name,
@@ -247,6 +252,8 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
     store: user.store,
     role: user.profile,
     points: 0,
+    announcementPoints: 0,
+    announcementRead: false,
     predictionPoints: 0,
     predictionHits: 0,
     exactPredictions: 0,
@@ -257,6 +264,14 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
     isTopSeller: false,
   }));
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
+
+  readEntries.forEach(entry => {
+    const row = byCpf[onlyDigits(entry.cpf)];
+    if (!row || entry.announcementId !== currentAnnouncement.id || row.announcementRead) return;
+    row.announcementRead = true;
+    row.announcementPoints += 1;
+    row.points += 1;
+  });
 
   predictionEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
@@ -543,7 +558,23 @@ function ProductCard({ user, totalSold, pilotRanking }) {
   );
 }
 
-function Announcement({ acknowledged, setAcknowledged, setToast }) {
+function Announcement({ acknowledged, setToast, user, onAcknowledge }) {
+  const [secondsViewed, setSecondsViewed] = useState(0);
+  const readyToConfirm = secondsViewed >= currentAnnouncement.minimumSeconds;
+  const remainingSeconds = Math.max(currentAnnouncement.minimumSeconds - secondsViewed, 0);
+
+  useEffect(() => {
+    if (acknowledged || readyToConfirm) return;
+    const timer = setInterval(() => setSecondsViewed(value => value + 1), 1000);
+    return () => clearInterval(timer);
+  }, [acknowledged, readyToConfirm]);
+
+  const confirmRead = async () => {
+    if (!readyToConfirm || acknowledged) return;
+    const ok = await onAcknowledge(user, secondsViewed);
+    if (ok) setToast("+1 ponto! Comunicado registrado.");
+  };
+
   return (
     <section className="soft-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-start gap-4">
@@ -552,7 +583,7 @@ function Announcement({ acknowledged, setAcknowledged, setToast }) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600">Comunicado obrigatório</p>
-              <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Copa Potiguar 2026: começou o jogo</h3>
+              <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">{currentAnnouncement.title}</h3>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500">19 JUN • 19:56</span>
           </div>
@@ -568,7 +599,7 @@ function Announcement({ acknowledged, setAcknowledged, setToast }) {
                 <p className="mt-0.5 text-xs font-semibold text-white/65">Assista antes de liberar seu palpite</p>
               </div>
               <span className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white/70">
-                <Icon name="play" size={11} /> Tutorial
+                <Icon name="play" size={11} /> {acknowledged ? "Concluído" : readyToConfirm ? "Liberado" : `${remainingSeconds}s`}
               </span>
             </div>
             <div className="mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl">
@@ -589,13 +620,18 @@ function Announcement({ acknowledged, setAcknowledged, setToast }) {
               Abrir vídeo no YouTube <Icon name="chevron" size={14} />
             </a>
           </div>
+          {!acknowledged && (
+            <div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-500">
+              {readyToConfirm ? "Pronto: agora você pode confirmar ciência e liberar o palpite." : `Assista/permaneça no comunicado por mais ${remainingSeconds} segundo(s) para liberar o botão.`}
+            </div>
+          )}
           <button
-            disabled={acknowledged}
-            onClick={() => { setAcknowledged(true); setToast("+1 ponto! Comunicado registrado às 20:00."); }}
-            className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:w-auto ${acknowledged ? "bg-emerald-50 text-potiguar-700" : "bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 hover:bg-potiguar-800"}`}
+            disabled={acknowledged || !readyToConfirm}
+            onClick={confirmRead}
+            className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:w-auto ${acknowledged ? "bg-emerald-50 text-potiguar-700" : readyToConfirm ? "bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 hover:bg-potiguar-800" : "cursor-not-allowed bg-slate-100 text-slate-400"}`}
           >
             <Icon name={acknowledged ? "check" : "megaphone"} size={17} />
-            {acknowledged ? "Lido e registrado" : "Li e estou ciente"}
+            {acknowledged ? "Lido e registrado" : readyToConfirm ? "Li e estou ciente" : `Liberando em ${remainingSeconds}s`}
           </button>
         </div>
       </div>
@@ -663,7 +699,7 @@ function StoreMiniRanking({ user, pilotRanking }) {
   );
 }
 
-function Home({ acknowledged, setAcknowledged, setPage, setToast, user, pilotRanking, totalSold }) {
+function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, onAcknowledge }) {
   const leadership = user.accessRole === "leadership";
   const predictionsClosed = getPredictionClosed();
   const storeFocus = getStoreFocus(user.store);
@@ -693,7 +729,7 @@ function Home({ acknowledged, setAcknowledged, setPage, setToast, user, pilotRan
       </section>
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard icon="bolt" label={leadership ? "Pontos da liderança" : "Seus pontos"} value={userRanking?.points || 0} detail={leadership ? `Meta ${userRanking?.storeGoalPoints || 0} pts • Loja ${storePercent}%` : `Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`} accent="green" />
+        <StatCard icon="bolt" label={leadership ? "Pontos da liderança" : "Seus pontos"} value={userRanking?.points || 0} detail={leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`} accent="green" />
         <StatCard icon="ranking" label="Posição geral" value={`${userPosition || "—"}º`} detail={userRanking?.isTopSeller ? "Destaque do produto foco" : "Ranking atualizado automaticamente"} accent="lime" />
         <StatCard icon="target" label={leadership ? "Vendedores com venda" : "Palpites certos"} value={leadership ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0} detail={leadership ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`} accent="white" />
         <StatCard icon="fire" label={leadership ? "Meta da loja" : "Meta da loja"} value={`${storePercent}%`} detail={`${totalSold} de ${storeFocus.goal} ${storeFocusUnit}`} accent="white" />
@@ -705,7 +741,7 @@ function Home({ acknowledged, setAcknowledged, setPage, setToast, user, pilotRan
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
-        <Announcement acknowledged={acknowledged} setAcknowledged={setAcknowledged} setToast={setToast} />
+        <Announcement acknowledged={acknowledged} setToast={setToast} user={user} onAcknowledge={onAcknowledge} />
         <button onClick={() => setPage(predictionsClosed ? "store" : "guesses")} className="group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6">
           <div className="flex h-full items-center justify-between gap-5">
             <div>
@@ -883,7 +919,7 @@ function RankingPage({ user, pilotRanking }) {
                 <Avatar initials={person.name.split(" ").map(x=>x[0]).slice(0,2).join("")} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-extrabold text-potiguar-950">{person.name} {isMe && <span className="ml-1 text-[9px] text-potiguar-700">(VOCÊ)</span>}</p>
-                  <p className="truncate text-[10px] text-slate-400">{person.role} • {person.store || user.store} • Palpite {person.predictionPoints} pts • Venda {person.salesPoints + person.topSellerPoints} pts{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p>
+                  <p className="truncate text-[10px] text-slate-400">{person.role} • {person.store || user.store} • Comunicado {person.announcementPoints} • Palpite {person.predictionPoints} pts • Venda {person.salesPoints + person.topSellerPoints} pts{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p>
                 </div>
                 {person.trend && <span className={`hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`}>{person.trend}</span>}
                 <div className="text-right">
@@ -969,7 +1005,7 @@ function StorePage({ user, pilotRanking, totalSold }) {
   );
 }
 
-function AdminPage({ setToast, predictionEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, onRefreshData }) {
+function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, onRefreshData }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
@@ -1131,7 +1167,7 @@ function AdminPage({ setToast, predictionEntries, salesEntries, setSalesEntries,
       </section>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard icon="users" label="Participantes do piloto" value={participantCount} detail={`${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`} accent="green"/>
-        <StatCard icon="megaphone" label="Leituras" value="0" detail="Aguardando confirmações" accent="lime"/>
+        <StatCard icon="megaphone" label="Leituras" value={readEntries.length} detail={readEntries.length ? "Comunicados confirmados" : "Aguardando confirmações"} accent="lime"/>
         <StatCard icon="ball" label="Palpites" value={predictionEntries.length} detail={predictionEntries.length ? "Enviados para apuração" : "Aguardando envio"} accent="white"/>
         <StatCard icon="store" label="Meta Imperatriz" value={`${Math.round(totalSold / storeGoal * 100)}%`} detail={`${totalSold} de ${storeGoal} m²`} accent="white"/>
       </div>
@@ -1167,7 +1203,7 @@ function AdminPage({ setToast, predictionEntries, salesEntries, setSalesEntries,
 	                  <div key={person.name} className="flex items-center gap-3 px-5 py-3">
 	                    <span className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-extrabold ${index < 3 ? "bg-potiguar-lime/20 text-potiguar-800" : "text-slate-400"}`}>{index < 3 ? ["🥇","🥈","🥉"][index] : index + 1}</span>
 	                    <Avatar initials={person.name.split(" ").map(part => part[0]).slice(0,2).join("")}/>
-	                    <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • {person.role} • Palpite {person.predictionPoints} pts/{person.predictionHits} acerto(s) • Venda {person.salesPoints + person.topSellerPoints} pts/{person.soldQuantity} m²{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p></div>
+	                    <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • {person.role} • Comunicado {person.announcementPoints} pt • Palpite {person.predictionPoints} pts/{person.predictionHits} acerto(s) • Venda {person.salesPoints + person.topSellerPoints} pts/{person.soldQuantity} m²{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p></div>
 	                    <strong className="font-display text-lg text-potiguar-900">{person.points} pts</strong>
 	                  </div>
 	                ))}
@@ -1429,6 +1465,7 @@ function App() {
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
+  const [readEntries, setReadEntries] = useState([]);
 
   useEffect(() => {
     if (!toast) return;
@@ -1460,8 +1497,19 @@ function App() {
     }
   };
 
+  const loadAnnouncementReads = async () => {
+    try {
+      const response = await fetch("/api/announcement-reads", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setReadEntries(data.reads || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar leituras do comunicado.", error);
+    }
+  };
+
   const refreshData = async () => {
-    await Promise.all([loadPredictions(), loadSales()]);
+    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads()]);
   };
 
   useEffect(() => {
@@ -1470,8 +1518,10 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries);
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const currentUserRead = user ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(user.cpf) && entry.announcementId === currentAnnouncement.id) : false;
+  const announcementAcknowledged = acknowledged || currentUserRead;
 
   const savePrediction = async (currentUser, scores) => {
     try {
@@ -1503,6 +1553,33 @@ function App() {
     }
   };
 
+  const saveAnnouncementRead = async (currentUser, watchedSeconds) => {
+    try {
+      const response = await fetch("/api/announcement-reads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cpf: currentUser.cpf,
+          fullName: currentUser.name,
+          accessRole: currentUser.accessRole,
+          store: currentUser.store,
+          announcementId: currentAnnouncement.id,
+          announcementTitle: currentAnnouncement.title,
+          watchedSeconds,
+        }),
+      });
+      if (!response.ok) throw new Error("Falha ao registrar comunicado.");
+      const data = await response.json();
+      setReadEntries(data.reads || []);
+      setAcknowledged(true);
+      return true;
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível registrar a leitura do comunicado.");
+      return false;
+    }
+  };
+
   const login = (nextUser) => {
     setUser(nextUser);
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
@@ -1524,11 +1601,11 @@ function App() {
       <div className="main-column">
         <Topbar page={page} user={user} onLogout={logout} />
         <main className="mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10">
-          {page === "home" && <Home acknowledged={acknowledged} setAcknowledged={setAcknowledged} setPage={setPage} setToast={setToast} user={user} pilotRanking={pilotRanking} totalSold={totalSold} />}
-          {page === "guesses" && <Guesses acknowledged={acknowledged} setPage={setPage} setToast={setToast} user={user} onSavePrediction={savePrediction} />}
+          {page === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={user} pilotRanking={pilotRanking} totalSold={totalSold} onAcknowledge={saveAnnouncementRead} />}
+          {page === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={user} onSavePrediction={savePrediction} />}
           {page === "ranking" && <RankingPage user={user} pilotRanking={pilotRanking} />}
           {page === "store" && <StorePage user={user} pilotRanking={pilotRanking} totalSold={totalSold} />}
-          {page === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} onRefreshData={refreshData} />}
+          {page === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} onRefreshData={refreshData} />}
         </main>
       </div>
       <MobileNav page={page} setPage={setPage} user={user} />

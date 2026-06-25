@@ -182,6 +182,19 @@ create table if not exists sales_entries (
   created_at timestamptz not null default now()
 );
 
+create table if not exists announcement_read_entries (
+  id bigserial primary key,
+  cpf varchar(11) not null,
+  full_name text not null,
+  access_role text not null,
+  store text not null,
+  announcement_id text not null,
+  announcement_title text not null,
+  watched_seconds integer not null default 0 check (watched_seconds >= 0),
+  read_at timestamptz not null default now(),
+  unique (cpf, announcement_id)
+);
+
 create table awards (
   id uuid primary key default gen_random_uuid(),
   name text not null,

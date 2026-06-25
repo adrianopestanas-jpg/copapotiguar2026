@@ -309,6 +309,11 @@ const games = [{
 }];
 const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
 const getPredictionClosed = () => new Date() > predictionClosesAt;
+const currentAnnouncement = {
+  id: "copa-potiguar-video-2026-06-25",
+  title: "Copa Potiguar 2026: começou o jogo",
+  minimumSeconds: 30
+};
 const matchResults = {
   1: {
     homeScore: 0,
@@ -341,7 +346,7 @@ const getPredictionStats = entry => {
     exact
   };
 };
-const buildPilotRanking = (users, predictionEntries, salesEntries) => {
+const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries) => {
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
     name: user.name,
@@ -349,6 +354,8 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
     store: user.store,
     role: user.profile,
     points: 0,
+    announcementPoints: 0,
+    announcementRead: false,
     predictionPoints: 0,
     predictionHits: 0,
     exactPredictions: 0,
@@ -359,6 +366,13 @@ const buildPilotRanking = (users, predictionEntries, salesEntries) => {
     isTopSeller: false
   }));
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
+  readEntries.forEach(entry => {
+    const row = byCpf[onlyDigits(entry.cpf)];
+    if (!row || entry.announcementId !== currentAnnouncement.id || row.announcementRead) return;
+    row.announcementRead = true;
+    row.announcementPoints += 1;
+    row.points += 1;
+  });
   predictionEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row) return;
@@ -718,9 +732,23 @@ function ProductCard({
 }
 function Announcement({
   acknowledged,
-  setAcknowledged,
-  setToast
+  setToast,
+  user,
+  onAcknowledge
 }) {
+  const [secondsViewed, setSecondsViewed] = useState(0);
+  const readyToConfirm = secondsViewed >= currentAnnouncement.minimumSeconds;
+  const remainingSeconds = Math.max(currentAnnouncement.minimumSeconds - secondsViewed, 0);
+  useEffect(() => {
+    if (acknowledged || readyToConfirm) return;
+    const timer = setInterval(() => setSecondsViewed(value => value + 1), 1000);
+    return () => clearInterval(timer);
+  }, [acknowledged, readyToConfirm]);
+  const confirmRead = async () => {
+    if (!readyToConfirm || acknowledged) return;
+    const ok = await onAcknowledge(user, secondsViewed);
+    if (ok) setToast("+1 ponto! Comunicado registrado.");
+  };
   return /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -737,7 +765,7 @@ function Announcement({
     className: "text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600"
   }, "Comunicado obrigatório"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, "Copa Potiguar 2026: começou o jogo")), /*#__PURE__*/React.createElement("span", {
+  }, currentAnnouncement.title)), /*#__PURE__*/React.createElement("span", {
     className: "rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500"
   }, "19 JUN • 19:56")), /*#__PURE__*/React.createElement("p", {
     className: "mt-3 text-sm leading-6 text-slate-500"
@@ -758,7 +786,7 @@ function Announcement({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "play",
     size: 11
-  }), " Tutorial")), /*#__PURE__*/React.createElement("div", {
+  }), " ", acknowledged ? "Concluído" : readyToConfirm ? "Liberado" : `${remainingSeconds}s`)), /*#__PURE__*/React.createElement("div", {
     className: "mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl"
   }, /*#__PURE__*/React.createElement("iframe", {
     className: "h-full w-full",
@@ -774,17 +802,16 @@ function Announcement({
   }, "Abrir vídeo no YouTube ", /*#__PURE__*/React.createElement(Icon, {
     name: "chevron",
     size: 14
-  }))), /*#__PURE__*/React.createElement("button", {
-    disabled: acknowledged,
-    onClick: () => {
-      setAcknowledged(true);
-      setToast("+1 ponto! Comunicado registrado às 20:00.");
-    },
-    className: `mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:w-auto ${acknowledged ? "bg-emerald-50 text-potiguar-700" : "bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 hover:bg-potiguar-800"}`
+  }))), !acknowledged && /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-500"
+  }, readyToConfirm ? "Pronto: agora você pode confirmar ciência e liberar o palpite." : `Assista/permaneça no comunicado por mais ${remainingSeconds} segundo(s) para liberar o botão.`), /*#__PURE__*/React.createElement("button", {
+    disabled: acknowledged || !readyToConfirm,
+    onClick: confirmRead,
+    className: `mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:w-auto ${acknowledged ? "bg-emerald-50 text-potiguar-700" : readyToConfirm ? "bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 hover:bg-potiguar-800" : "cursor-not-allowed bg-slate-100 text-slate-400"}`
   }, /*#__PURE__*/React.createElement(Icon, {
     name: acknowledged ? "check" : "megaphone",
     size: 17
-  }), acknowledged ? "Lido e registrado" : "Li e estou ciente"))));
+  }), acknowledged ? "Lido e registrado" : readyToConfirm ? "Li e estou ciente" : `Liberando em ${remainingSeconds}s`))));
 }
 function MiniRanking({
   pilotRanking
@@ -862,12 +889,12 @@ function StoreMiniRanking({
 }
 function Home({
   acknowledged,
-  setAcknowledged,
   setPage,
   setToast,
   user,
   pilotRanking,
-  totalSold
+  totalSold,
+  onAcknowledge
 }) {
   const leadership = user.accessRole === "leadership";
   const predictionsClosed = getPredictionClosed();
@@ -908,7 +935,7 @@ function Home({
     icon: "bolt",
     label: leadership ? "Pontos da liderança" : "Seus pontos",
     value: userRanking?.points || 0,
-    detail: leadership ? `Meta ${userRanking?.storeGoalPoints || 0} pts • Loja ${storePercent}%` : `Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`,
+    detail: leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`,
     accent: "green"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "ranking",
@@ -940,8 +967,9 @@ function Home({
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
   }, /*#__PURE__*/React.createElement(Announcement, {
     acknowledged: acknowledged,
-    setAcknowledged: setAcknowledged,
-    setToast: setToast
+    setToast: setToast,
+    user: user,
+    onAcknowledge: onAcknowledge
   }), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage(predictionsClosed ? "store" : "guesses"),
     className: "group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6"
@@ -1198,7 +1226,7 @@ function RankingPage({
       className: "ml-1 text-[9px] text-potiguar-700"
     }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
       className: "truncate text-[10px] text-slate-400"
-    }, person.role, " • ", person.store || user.store, " • Palpite ", person.predictionPoints, " pts • Venda ", person.salesPoints + person.topSellerPoints, " pts", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), person.trend && /*#__PURE__*/React.createElement("span", {
+    }, person.role, " • ", person.store || user.store, " • Comunicado ", person.announcementPoints, " • Palpite ", person.predictionPoints, " pts • Venda ", person.salesPoints + person.topSellerPoints, " pts", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), person.trend && /*#__PURE__*/React.createElement("span", {
       className: `hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`
     }, person.trend), /*#__PURE__*/React.createElement("div", {
       className: "text-right"
@@ -1337,6 +1365,7 @@ function StorePage({
 function AdminPage({
   setToast,
   predictionEntries,
+  readEntries,
   salesEntries,
   setSalesEntries,
   pilotRanking,
@@ -1584,8 +1613,8 @@ function AdminPage({
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "megaphone",
     label: "Leituras",
-    value: "0",
-    detail: "Aguardando confirmações",
+    value: readEntries.length,
+    detail: readEntries.length ? "Comunicados confirmados" : "Aguardando confirmações",
     accent: "lime"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "ball",
@@ -1663,7 +1692,7 @@ function AdminPage({
     className: "truncate text-xs font-extrabold text-potiguar-950"
   }, person.name), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-slate-400"
-  }, person.store, " • ", person.role, " • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s) • Venda ", person.salesPoints + person.topSellerPoints, " pts/", person.soldQuantity, " m²", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), /*#__PURE__*/React.createElement("strong", {
+  }, person.store, " • ", person.role, " • Comunicado ", person.announcementPoints, " pt • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s) • Venda ", person.salesPoints + person.topSellerPoints, " pts/", person.soldQuantity, " m²", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), /*#__PURE__*/React.createElement("strong", {
     className: "font-display text-lg text-potiguar-900"
   }, person.points, " pts"))))), /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
@@ -2350,6 +2379,7 @@ function App() {
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
+  const [readEntries, setReadEntries] = useState([]);
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(""), 3200);
@@ -2383,16 +2413,30 @@ function App() {
       console.warn("Não foi possível carregar vendas.", error);
     }
   };
+  const loadAnnouncementReads = async () => {
+    try {
+      const response = await fetch("/api/announcement-reads", {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      setReadEntries(data.reads || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar leituras do comunicado.", error);
+    }
+  };
   const refreshData = async () => {
-    await Promise.all([loadPredictions(), loadSales()]);
+    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads()]);
   };
   useEffect(() => {
     refreshData();
     const timer = setInterval(refreshData, 15000);
     return () => clearInterval(timer);
   }, []);
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries);
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const currentUserRead = user ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(user.cpf) && entry.announcementId === currentAnnouncement.id) : false;
+  const announcementAcknowledged = acknowledged || currentUserRead;
   const savePrediction = async (currentUser, scores) => {
     try {
       const predictions = games.map(game => ({
@@ -2421,6 +2465,34 @@ function App() {
     } catch (error) {
       console.error(error);
       setToast("Não foi possível enviar o palpite para o servidor.");
+      return false;
+    }
+  };
+  const saveAnnouncementRead = async (currentUser, watchedSeconds) => {
+    try {
+      const response = await fetch("/api/announcement-reads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          cpf: currentUser.cpf,
+          fullName: currentUser.name,
+          accessRole: currentUser.accessRole,
+          store: currentUser.store,
+          announcementId: currentAnnouncement.id,
+          announcementTitle: currentAnnouncement.title,
+          watchedSeconds
+        })
+      });
+      if (!response.ok) throw new Error("Falha ao registrar comunicado.");
+      const data = await response.json();
+      setReadEntries(data.reads || []);
+      setAcknowledged(true);
+      return true;
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível registrar a leitura do comunicado.");
       return false;
     }
   };
@@ -2454,15 +2526,15 @@ function App() {
   }), /*#__PURE__*/React.createElement("main", {
     className: "mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10"
   }, page === "home" && /*#__PURE__*/React.createElement(Home, {
-    acknowledged: acknowledged,
-    setAcknowledged: setAcknowledged,
+    acknowledged: announcementAcknowledged,
     setPage: setPage,
     setToast: setToast,
     user: user,
     pilotRanking: pilotRanking,
-    totalSold: totalSold
+    totalSold: totalSold,
+    onAcknowledge: saveAnnouncementRead
   }), page === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
-    acknowledged: acknowledged,
+    acknowledged: announcementAcknowledged,
     setPage: setPage,
     setToast: setToast,
     user: user,
@@ -2477,6 +2549,7 @@ function App() {
   }), page === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     setToast: setToast,
     predictionEntries: predictionEntries,
+    readEntries: readEntries,
     salesEntries: salesEntries,
     setSalesEntries: setSalesEntries,
     pilotRanking: pilotRanking,
