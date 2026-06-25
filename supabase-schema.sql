@@ -195,6 +195,14 @@ create table if not exists announcement_read_entries (
   unique (cpf, announcement_id)
 );
 
+create table if not exists profile_photo_entries (
+  cpf varchar(11) primary key,
+  full_name text not null,
+  store text not null,
+  photo_data text not null,
+  updated_at timestamptz not null default now()
+);
+
 create table awards (
   id uuid primary key default gen_random_uuid(),
   name text not null,

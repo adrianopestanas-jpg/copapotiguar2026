@@ -346,11 +346,12 @@ const getPredictionStats = entry => {
     exact
   };
 };
-const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries) => {
+const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}) => {
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
     name: user.name,
     cpf: onlyDigits(user.cpf),
+    photoUrl: profilePhotos[onlyDigits(user.cpf)] || "",
     store: user.store,
     role: user.profile,
     points: 0,
@@ -524,7 +525,8 @@ function Sidebar({
   page,
   setPage,
   user,
-  onLogout
+  onLogout,
+  profilePhotos
 }) {
   const isAdmin = user.accessRole === "admin";
   const items = isAdmin ? [["shield", "Painel admin", "admin"]] : [["home", "Início", "home"], ["ball", "Palpites", "guesses"], ["ranking", "Ranking", "ranking"], ["store", "Minha loja", "store"]];
@@ -543,7 +545,8 @@ function Sidebar({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 border-t border-white/10 pt-5"
   }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.initials
+    initials: user.initials,
+    photoUrl: profilePhotos[onlyDigits(user.cpf)]
   }), /*#__PURE__*/React.createElement("div", {
     className: "min-w-0 flex-1"
   }, /*#__PURE__*/React.createElement("p", {
@@ -580,21 +583,89 @@ function MobileNav({
 function Avatar({
   initials,
   size = "normal",
-  rank
+  rank,
+  photoUrl
 }) {
   const cls = size === "large" ? "h-14 w-14 text-base" : "h-10 w-10 text-xs";
   return /*#__PURE__*/React.createElement("div", {
     className: "relative shrink-0"
   }, /*#__PURE__*/React.createElement("div", {
-    className: `${cls} grid place-items-center rounded-full border-2 border-white/70 bg-gradient-to-br from-potiguar-lime to-potiguar-yellow font-extrabold text-potiguar-950 shadow-sm`
-  }, initials), rank && /*#__PURE__*/React.createElement("span", {
+    className: `${cls} grid place-items-center overflow-hidden rounded-full border-2 border-white/70 bg-gradient-to-br from-potiguar-lime to-potiguar-yellow font-extrabold text-potiguar-950 shadow-sm`
+  }, photoUrl ? /*#__PURE__*/React.createElement("img", {
+    src: photoUrl,
+    alt: "",
+    className: "h-full w-full object-cover"
+  }) : initials), rank && /*#__PURE__*/React.createElement("span", {
     className: "absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-potiguar-900 text-[9px] font-extrabold text-white"
   }, rank));
+}
+function ProfilePhotoUploader({
+  user,
+  photoUrl,
+  onSaveProfilePhoto,
+  setToast
+}) {
+  const [saving, setSaving] = useState(false);
+  const resizeImage = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const image = new Image();
+      image.onload = () => {
+        const size = 360;
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        const ratio = Math.max(size / image.width, size / image.height);
+        const width = image.width * ratio;
+        const height = image.height * ratio;
+        canvas.width = size;
+        canvas.height = size;
+        context.drawImage(image, (size - width) / 2, (size - height) / 2, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      image.onerror = reject;
+      image.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+  const handleFile = async event => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setToast("Escolha um arquivo de imagem.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const photoData = await resizeImage(file);
+      const ok = await onSaveProfilePhoto(user, photoData);
+      if (ok) setToast("Foto de perfil atualizada.");
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível carregar a foto.");
+    } finally {
+      setSaving(false);
+    }
+  };
+  return /*#__PURE__*/React.createElement("label", {
+    className: "inline-flex cursor-pointer items-center gap-2 rounded-full bg-potiguar-900 px-3 py-2 text-[10px] font-extrabold text-white shadow-sm"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: photoUrl ? "check" : "users",
+    size: 13
+  }), saving ? "Enviando..." : photoUrl ? "Trocar foto" : "Colocar foto", /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/*",
+    onChange: handleFile,
+    disabled: saving,
+    className: "hidden"
+  }));
 }
 function Topbar({
   page,
   user,
-  onLogout
+  onLogout,
+  profilePhotos
 }) {
   const labels = {
     home: "Visão geral",
@@ -631,7 +702,8 @@ function Topbar({
   })), /*#__PURE__*/React.createElement("div", {
     className: "hidden items-center gap-3 lg:flex"
   }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.initials
+    initials: user.initials,
+    photoUrl: profilePhotos[onlyDigits(user.cpf)]
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-extrabold text-potiguar-950"
   }, user.name), /*#__PURE__*/React.createElement("p", {
@@ -737,13 +809,14 @@ function Announcement({
   onAcknowledge
 }) {
   const [secondsViewed, setSecondsViewed] = useState(0);
+  const [videoStarted, setVideoStarted] = useState(false);
   const readyToConfirm = secondsViewed >= currentAnnouncement.minimumSeconds;
   const remainingSeconds = Math.max(currentAnnouncement.minimumSeconds - secondsViewed, 0);
   useEffect(() => {
-    if (acknowledged || readyToConfirm) return;
+    if (!videoStarted || acknowledged || readyToConfirm) return;
     const timer = setInterval(() => setSecondsViewed(value => value + 1), 1000);
     return () => clearInterval(timer);
-  }, [acknowledged, readyToConfirm]);
+  }, [videoStarted, acknowledged, readyToConfirm]);
   const confirmRead = async () => {
     if (!readyToConfirm || acknowledged) return;
     const ok = await onAcknowledge(user, secondsViewed);
@@ -781,16 +854,26 @@ function Announcement({
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
   }, "Vídeo da campanha"), /*#__PURE__*/React.createElement("p", {
     className: "mt-0.5 text-xs font-semibold text-white/65"
-  }, "Assista antes de liberar seu palpite")), /*#__PURE__*/React.createElement("span", {
+  }, "Clique em iniciar para começar a validação")), /*#__PURE__*/React.createElement("span", {
     className: "flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white/70"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "play",
     size: 11
-  }), " ", acknowledged ? "Concluído" : readyToConfirm ? "Liberado" : `${remainingSeconds}s`)), /*#__PURE__*/React.createElement("div", {
+  }), " ", acknowledged ? "Concluído" : readyToConfirm ? "Liberado" : videoStarted ? `${remainingSeconds}s` : "Aguardando")), !videoStarted && !acknowledged ? /*#__PURE__*/React.createElement("button", {
+    onClick: () => setVideoStarted(true),
+    className: "mx-auto grid aspect-[9/16] w-full max-w-[260px] place-items-center overflow-hidden rounded-xl bg-black text-center text-white shadow-xl"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "grid h-16 w-16 place-items-center rounded-full bg-potiguar-lime text-potiguar-950"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "play",
+    size: 30
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "-mt-20 px-6 text-xs font-extrabold text-white/75"
+  }, "Iniciar vídeo e validação de 30 segundos")) : /*#__PURE__*/React.createElement("div", {
     className: "mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl"
   }, /*#__PURE__*/React.createElement("iframe", {
     className: "h-full w-full",
-    src: "https://www.youtube-nocookie.com/embed/7EzZjpmw6FQ?rel=0",
+    src: "https://www.youtube-nocookie.com/embed/7EzZjpmw6FQ?rel=0&autoplay=1",
     title: "Vídeo da Copa Potiguar 2026",
     allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
     allowFullScreen: true
@@ -804,7 +887,7 @@ function Announcement({
     size: 14
   }))), !acknowledged && /*#__PURE__*/React.createElement("div", {
     className: "mt-4 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-500"
-  }, readyToConfirm ? "Pronto: agora você pode confirmar ciência e liberar o palpite." : `Assista/permaneça no comunicado por mais ${remainingSeconds} segundo(s) para liberar o botão.`), /*#__PURE__*/React.createElement("button", {
+  }, !videoStarted ? "Clique em “Iniciar vídeo” para começar a contar o tempo mínimo." : readyToConfirm ? "Pronto: agora você pode confirmar ciência e liberar o palpite." : `Assista/permaneça no vídeo por mais ${remainingSeconds} segundo(s) para liberar o botão.`), /*#__PURE__*/React.createElement("button", {
     disabled: acknowledged || !readyToConfirm,
     onClick: confirmRead,
     className: `mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:w-auto ${acknowledged ? "bg-emerald-50 text-potiguar-700" : readyToConfirm ? "bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 hover:bg-potiguar-800" : "cursor-not-allowed bg-slate-100 text-slate-400"}`
@@ -835,7 +918,8 @@ function MiniRanking({
   }, /*#__PURE__*/React.createElement("span", {
     className: `grid h-7 w-7 place-items-center rounded-lg text-xs font-extrabold ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-500" : "bg-orange-100 text-orange-700"}`
   }, idx + 1), /*#__PURE__*/React.createElement(Avatar, {
-    initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join("")
+    initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+    photoUrl: person.photoUrl
   }), /*#__PURE__*/React.createElement("div", {
     className: "min-w-0 flex-1"
   }, /*#__PURE__*/React.createElement("p", {
@@ -873,7 +957,8 @@ function StoreMiniRanking({
     }, /*#__PURE__*/React.createElement("span", {
       className: "w-5 text-center text-xs font-extrabold text-slate-400"
     }, idx === 0 ? "🥇" : idx + 1), /*#__PURE__*/React.createElement(Avatar, {
-      initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join("")
+      initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+      photoUrl: person.photoUrl
     }), /*#__PURE__*/React.createElement("div", {
       className: "min-w-0 flex-1"
     }, /*#__PURE__*/React.createElement("p", {
@@ -894,7 +979,9 @@ function Home({
   user,
   pilotRanking,
   totalSold,
-  onAcknowledge
+  profilePhotos,
+  onAcknowledge,
+  onSaveProfilePhoto
 }) {
   const leadership = user.accessRole === "leadership";
   const predictionsClosed = getPredictionClosed();
@@ -903,6 +990,7 @@ function Home({
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
   const activeSellers = storeSellers.filter(person => person.soldQuantity > 0).length;
   const userRanking = pilotRanking.find(row => row.cpf === onlyDigits(user.cpf));
+  const userPhotoUrl = profilePhotos[onlyDigits(user.cpf)] || userRanking?.photoUrl || "";
   const userPosition = pilotRanking.findIndex(row => row.cpf === onlyDigits(user.cpf)) + 1;
   const storeGoal = storeFocus.goal;
   const storePercent = Math.round(totalSold / storeGoal * 100);
@@ -924,12 +1012,20 @@ function Home({
   }, /*#__PURE__*/React.createElement(Avatar, {
     initials: user.initials,
     size: "large",
-    rank: user.position
+    rank: user.position,
+    photoUrl: userPhotoUrl
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs font-semibold text-slate-400"
   }, user.accessRole === "seller" ? "Vendedor" : user.originalRole), /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-extrabold text-potiguar-950"
-  }, user.store, " • ", leadership ? "Liderança" : `${userPosition || "—"}º geral`)))), /*#__PURE__*/React.createElement("div", {
+  }, user.store, " • ", leadership ? "Liderança" : `${userPosition || "—"}º geral`), /*#__PURE__*/React.createElement("div", {
+    className: "mt-2"
+  }, /*#__PURE__*/React.createElement(ProfilePhotoUploader, {
+    user: user,
+    photoUrl: userPhotoUrl,
+    onSaveProfilePhoto: onSaveProfilePhoto,
+    setToast: setToast
+  }))))), /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-2 gap-3 xl:grid-cols-4"
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "bolt",
@@ -1191,7 +1287,8 @@ function RankingPage({
     }, /*#__PURE__*/React.createElement(Avatar, {
       initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
       size: rank === 1 ? "large" : "normal",
-      rank: rank
+      rank: rank,
+      photoUrl: p.photoUrl
     }), /*#__PURE__*/React.createElement("p", {
       className: "mt-2 max-w-[82px] truncate text-[10px] font-bold"
     }, p.name.split(" ")[0]), /*#__PURE__*/React.createElement("p", {
@@ -1217,7 +1314,8 @@ function RankingPage({
     }, /*#__PURE__*/React.createElement("span", {
       className: `grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-extrabold ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-500" : idx === 2 ? "bg-orange-100 text-orange-700" : "text-slate-400"}`
     }, idx < 3 ? ["🥇", "🥈", "🥉"][idx] : idx + 1), /*#__PURE__*/React.createElement(Avatar, {
-      initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join("")
+      initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+      photoUrl: person.photoUrl
     }), /*#__PURE__*/React.createElement("div", {
       className: "min-w-0 flex-1"
     }, /*#__PURE__*/React.createElement("p", {
@@ -1309,7 +1407,8 @@ function StorePage({
   }, /*#__PURE__*/React.createElement("span", {
     className: "w-5 text-center text-xs font-extrabold text-slate-400"
   }, i === 0 ? "🥇" : i + 1), /*#__PURE__*/React.createElement(Avatar, {
-    initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join("")
+    initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+    photoUrl: p.photoUrl
   }), /*#__PURE__*/React.createElement("div", {
     className: "min-w-0 flex-1"
   }, /*#__PURE__*/React.createElement("p", {
@@ -1370,6 +1469,7 @@ function AdminPage({
   setSalesEntries,
   pilotRanking,
   totalSold,
+  profilePhotos,
   onRefreshData
 }) {
   const [module, setModule] = useState("dashboard");
@@ -1685,7 +1785,8 @@ function AdminPage({
   }, /*#__PURE__*/React.createElement("span", {
     className: `grid h-8 w-8 place-items-center rounded-lg text-xs font-extrabold ${index < 3 ? "bg-potiguar-lime/20 text-potiguar-800" : "text-slate-400"}`
   }, index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1), /*#__PURE__*/React.createElement(Avatar, {
-    initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join("")
+    initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
+    photoUrl: person.photoUrl
   }), /*#__PURE__*/React.createElement("div", {
     className: "min-w-0 flex-1"
   }, /*#__PURE__*/React.createElement("p", {
@@ -2256,7 +2357,8 @@ function AdminPage({
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3"
   }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.name.split(" ").map(x => x[0]).slice(0, 2).join("")
+    initials: user.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+    photoUrl: profilePhotos[onlyDigits(user.cpf)]
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-xs font-extrabold text-potiguar-950"
   }, user.name), /*#__PURE__*/React.createElement("p", {
@@ -2380,6 +2482,7 @@ function App() {
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
   const [readEntries, setReadEntries] = useState([]);
+  const [profilePhotos, setProfilePhotos] = useState({});
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(""), 3200);
@@ -2425,15 +2528,28 @@ function App() {
       console.warn("Não foi possível carregar leituras do comunicado.", error);
     }
   };
+  const loadProfilePhotos = async () => {
+    try {
+      const response = await fetch("/api/profile-photos", {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      const photos = Object.fromEntries((data.photos || []).map(item => [onlyDigits(item.cpf), item.photoData]));
+      setProfilePhotos(photos);
+    } catch (error) {
+      console.warn("Não foi possível carregar fotos de perfil.", error);
+    }
+  };
   const refreshData = async () => {
-    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads()]);
+    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos()]);
   };
   useEffect(() => {
     refreshData();
     const timer = setInterval(refreshData, 15000);
     return () => clearInterval(timer);
   }, []);
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries);
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const currentUserRead = user ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(user.cpf) && entry.announcementId === currentAnnouncement.id) : false;
   const announcementAcknowledged = acknowledged || currentUserRead;
@@ -2496,6 +2612,33 @@ function App() {
       return false;
     }
   };
+  const saveProfilePhoto = async (currentUser, photoData) => {
+    try {
+      const response = await fetch("/api/profile-photos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          cpf: currentUser.cpf,
+          fullName: currentUser.name,
+          store: currentUser.store,
+          photoData
+        })
+      });
+      if (!response.ok) throw new Error("Falha ao salvar foto.");
+      const data = await response.json();
+      setProfilePhotos(photos => ({
+        ...photos,
+        [onlyDigits(data.photo.cpf)]: data.photo.photoData
+      }));
+      return true;
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível salvar a foto de perfil.");
+      return false;
+    }
+  };
   const login = nextUser => {
     setUser(nextUser);
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
@@ -2516,13 +2659,15 @@ function App() {
     page: page,
     setPage: setPage,
     user: user,
-    onLogout: logout
+    onLogout: logout,
+    profilePhotos: profilePhotos
   }), /*#__PURE__*/React.createElement("div", {
     className: "main-column"
   }, /*#__PURE__*/React.createElement(Topbar, {
     page: page,
     user: user,
-    onLogout: logout
+    onLogout: logout,
+    profilePhotos: profilePhotos
   }), /*#__PURE__*/React.createElement("main", {
     className: "mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10"
   }, page === "home" && /*#__PURE__*/React.createElement(Home, {
@@ -2532,7 +2677,9 @@ function App() {
     user: user,
     pilotRanking: pilotRanking,
     totalSold: totalSold,
-    onAcknowledge: saveAnnouncementRead
+    profilePhotos: profilePhotos,
+    onAcknowledge: saveAnnouncementRead,
+    onSaveProfilePhoto: saveProfilePhoto
   }), page === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
     acknowledged: announcementAcknowledged,
     setPage: setPage,
@@ -2554,6 +2701,7 @@ function App() {
     setSalesEntries: setSalesEntries,
     pilotRanking: pilotRanking,
     totalSold: totalSold,
+    profilePhotos: profilePhotos,
     onRefreshData: refreshData
   }))), /*#__PURE__*/React.createElement(MobileNav, {
     page: page,

@@ -68,6 +68,14 @@ const ensureSchema = async () => {
       read_at timestamptz not null default now(),
       unique (cpf, announcement_id)
     );
+
+    create table if not exists profile_photo_entries (
+      cpf varchar(11) primary key,
+      full_name text not null,
+      store text not null,
+      photo_data text not null,
+      updated_at timestamptz not null default now()
+    );
   `);
 };
 
@@ -251,6 +259,65 @@ const server = http.createServer(async (request, response) => {
           watchedSeconds: Number(row.watched_seconds),
           readAt: row.read_at,
         })),
+      });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/profile-photos") {
+      const result = await pool.query(`
+        select cpf, full_name, store, photo_data, updated_at
+          from profile_photo_entries
+         order by updated_at desc
+      `);
+      sendJson(response, 200, {
+        photos: result.rows.map(row => ({
+          cpf: row.cpf,
+          fullName: row.full_name,
+          store: row.store,
+          photoData: row.photo_data,
+          updatedAt: row.updated_at,
+        })),
+      });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/profile-photos") {
+      const payload = JSON.parse(await readBody(request) || "{}");
+      const cpf = String(payload.cpf || "").replace(/\D/g, "");
+      const fullName = String(payload.fullName || "").trim();
+      const store = String(payload.store || "").trim();
+      const photoData = String(payload.photoData || "").trim();
+
+      if (cpf.length !== 11 || !fullName || !store || !photoData.startsWith("data:image/")) {
+        sendJson(response, 400, { error: "Dados da foto incompletos." });
+        return;
+      }
+
+      if (photoData.length > 700000) {
+        sendJson(response, 413, { error: "Foto muito grande." });
+        return;
+      }
+
+      const result = await pool.query(`
+        insert into profile_photo_entries
+          (cpf, full_name, store, photo_data, updated_at)
+        values ($1,$2,$3,$4,now())
+        on conflict (cpf) do update set
+          full_name = excluded.full_name,
+          store = excluded.store,
+          photo_data = excluded.photo_data,
+          updated_at = now()
+        returning cpf, full_name, store, photo_data, updated_at
+      `, [cpf, fullName, store, photoData]);
+
+      sendJson(response, 200, {
+        photo: {
+          cpf: result.rows[0].cpf,
+          fullName: result.rows[0].full_name,
+          store: result.rows[0].store,
+          photoData: result.rows[0].photo_data,
+          updatedAt: result.rows[0].updated_at,
+        },
       });
       return;
     }
