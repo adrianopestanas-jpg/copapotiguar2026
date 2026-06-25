@@ -1533,7 +1533,8 @@ function App() {
   const restoredUser = (() => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
-      const savedCpf = sessionStorage.getItem("copaPotiguarSessionCpf");
+      sessionStorage.removeItem("copaPotiguarSessionCpf");
+      const savedCpf = localStorage.getItem("copaPotiguarSessionCpfV2");
       return savedCpf ? demoUsers[onlyDigits(savedCpf)] || null : null;
     } catch (error) {
       return null;
@@ -1711,7 +1712,8 @@ function App() {
   const login = (nextUser) => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
-      sessionStorage.setItem("copaPotiguarSessionCpf", onlyDigits(nextUser.cpf));
+      sessionStorage.removeItem("copaPotiguarSessionCpf");
+      localStorage.setItem("copaPotiguarSessionCpfV2", onlyDigits(nextUser.cpf));
     } catch (error) {
       console.warn("Não foi possível salvar a sessão local.", error);
     }
@@ -1724,6 +1726,7 @@ function App() {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
       sessionStorage.removeItem("copaPotiguarSessionCpf");
+      localStorage.removeItem("copaPotiguarSessionCpfV2");
     } catch (error) {
       console.warn("Não foi possível limpar a sessão local.", error);
     }
