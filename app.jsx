@@ -215,16 +215,43 @@ const games = [
 
 const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
 const getPredictionClosed = () => new Date() > predictionClosesAt;
-const currentAnnouncement = {
+const defaultAnnouncement = {
   id: "copa-potiguar-video-2026-06-25",
   title: "Copa Potiguar 2026: começou o jogo",
+  body: "Hoje começa o piloto da Copa Potiguar 2026 em Imperatriz. Leia o comunicado, assista ao vídeo e participe da rodada: o jogo vale palpite, o produto foco vale venda e o desempenho da loja vale reconhecimento para o time.",
+  videoUrl: "https://youtu.be/7EzZjpmw6FQ",
   minimumSeconds: 30,
+  publishedAt: "25 JUN • ativo",
 };
-const matchResults = {
+const defaultMatchResults = {
   1: { homeScore: 0, awayScore: 3 },
 };
+const defaultRoundConfig = {
+  id: "rodada-piloto-imperatriz",
+  name: "Rodada Piloto Imperatriz",
+  status: "open",
+  predictionsCloseAt: "2026-06-25T23:59:59-03:00",
+};
+const defaultAward = {
+  name: "Robô Aspirador Potiguar",
+  criterion: "Maior pontuação geral da rodada",
+  description: "Prêmio para o ganhador da rodada piloto.",
+};
+const defaultAppSettings = {
+  announcement: defaultAnnouncement,
+  round: defaultRoundConfig,
+  award: defaultAward,
+  matchResults: defaultMatchResults,
+};
 
-const getPredictionPoints = entry => {
+const youtubeEmbedUrl = url => {
+  const text = String(url || "");
+  const match = text.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([^?&/]+)/);
+  const id = match?.[1] || "7EzZjpmw6FQ";
+  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&autoplay=1`;
+};
+
+const getPredictionPoints = (entry, matchResults = defaultMatchResults) => {
   const result = matchResults[entry.match_id];
   if (!result) return 0;
   const predictedHome = Number(entry.home_score);
@@ -236,15 +263,17 @@ const getPredictionPoints = entry => {
   return predictedOutcome === resultOutcome ? 2 : 0;
 };
 
-const getPredictionStats = entry => {
-  const points = getPredictionPoints(entry);
+const getPredictionStats = (entry, matchResults = defaultMatchResults) => {
+  const points = getPredictionPoints(entry, matchResults);
   const result = matchResults[entry.match_id];
   if (!result) return { points, hit: false, exact: false };
   const exact = Number(entry.home_score) === result.homeScore && Number(entry.away_score) === result.awayScore;
   return { points, hit: points > 0, exact };
 };
 
-const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}) => {
+const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
+  const activeAnnouncement = settings.announcement || defaultAnnouncement;
+  const activeMatchResults = settings.matchResults || defaultMatchResults;
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
     name: user.name,
@@ -268,7 +297,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
 
   readEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
-    if (!row || entry.announcementId !== currentAnnouncement.id || row.announcementRead) return;
+    if (!row || entry.announcementId !== activeAnnouncement.id || row.announcementRead) return;
     row.announcementRead = true;
     row.announcementPoints += 1;
     row.points += 1;
@@ -277,7 +306,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   predictionEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row) return;
-    const { points, hit, exact } = getPredictionStats(entry);
+    const { points, hit, exact } = getPredictionStats(entry, activeMatchResults);
     row.predictionPoints += points;
     row.predictionHits += hit ? 1 : 0;
     row.exactPredictions += exact ? 1 : 0;
@@ -617,11 +646,12 @@ function ProductCard({ user, totalSold, pilotRanking }) {
   );
 }
 
-function Announcement({ acknowledged, setToast, user, onAcknowledge }) {
+function Announcement({ acknowledged, setToast, user, onAcknowledge, announcement }) {
   const [secondsViewed, setSecondsViewed] = useState(0);
   const [videoStarted, setVideoStarted] = useState(false);
-  const readyToConfirm = secondsViewed >= currentAnnouncement.minimumSeconds;
-  const remainingSeconds = Math.max(currentAnnouncement.minimumSeconds - secondsViewed, 0);
+  const activeAnnouncement = announcement || defaultAnnouncement;
+  const readyToConfirm = secondsViewed >= Number(activeAnnouncement.minimumSeconds || 30);
+  const remainingSeconds = Math.max(Number(activeAnnouncement.minimumSeconds || 30) - secondsViewed, 0);
 
   useEffect(() => {
     if (!videoStarted || acknowledged || readyToConfirm) return;
@@ -643,11 +673,11 @@ function Announcement({ acknowledged, setToast, user, onAcknowledge }) {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600">Comunicado obrigatório</p>
-              <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">{currentAnnouncement.title}</h3>
+              <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">{activeAnnouncement.title}</h3>
             </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500">19 JUN • 19:56</span>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500">{activeAnnouncement.publishedAt || "ATIVO"}</span>
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-500">Hoje começa o piloto da Copa Potiguar 2026 em Imperatriz. Leia o comunicado, assista ao vídeo e participe da rodada: o jogo vale palpite, o produto foco vale venda e o desempenho da loja vale reconhecimento para o time.</p>
+          <p className="mt-3 text-sm leading-6 text-slate-500">{activeAnnouncement.body}</p>
           <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
             <strong className="block font-extrabold">Como participar hoje</strong>
             Assista ao vídeo → confirme a leitura → envie seu palpite antes das 18h59 → acompanhe as vendas do produto foco.
@@ -665,13 +695,13 @@ function Announcement({ acknowledged, setToast, user, onAcknowledge }) {
             {!videoStarted && !acknowledged ? (
               <button onClick={() => setVideoStarted(true)} className="mx-auto grid aspect-[9/16] w-full max-w-[260px] place-items-center overflow-hidden rounded-xl bg-black text-center text-white shadow-xl">
                 <span className="grid h-16 w-16 place-items-center rounded-full bg-potiguar-lime text-potiguar-950"><Icon name="play" size={30} /></span>
-                <span className="-mt-20 px-6 text-xs font-extrabold text-white/75">Iniciar vídeo e validação de 30 segundos</span>
+                <span className="-mt-20 px-6 text-xs font-extrabold text-white/75">Iniciar vídeo e validação de {activeAnnouncement.minimumSeconds || 30} segundos</span>
               </button>
             ) : (
               <div className="mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl">
                 <iframe
                   className="h-full w-full"
-                  src="https://www.youtube-nocookie.com/embed/7EzZjpmw6FQ?rel=0&autoplay=1"
+                  src={youtubeEmbedUrl(activeAnnouncement.videoUrl)}
                   title="Vídeo da Copa Potiguar 2026"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -679,7 +709,7 @@ function Announcement({ acknowledged, setToast, user, onAcknowledge }) {
               </div>
             )}
             <a
-              href="https://youtu.be/7EzZjpmw6FQ"
+              href={activeAnnouncement.videoUrl || defaultAnnouncement.videoUrl}
               target="_blank"
               rel="noreferrer"
               className="mt-3 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-[11px] font-extrabold text-white transition hover:bg-white/15"
@@ -766,9 +796,10 @@ function StoreMiniRanking({ user, pilotRanking }) {
   );
 }
 
-function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, profilePhotos, onAcknowledge, onSaveProfilePhoto }) {
+function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, profilePhotos, settings, onAcknowledge, onSaveProfilePhoto }) {
   const leadership = user.accessRole === "leadership";
-  const predictionsClosed = getPredictionClosed();
+  const round = settings.round || defaultRoundConfig;
+  const predictionsClosed = round.status !== "open" || new Date() > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
@@ -779,6 +810,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
   const storeGoal = storeFocus.goal;
   const storePercent = Math.round((totalSold / storeGoal) * 100);
   const totalPredictionHits = pilotRanking.reduce((sum, person) => sum + person.predictionHits, 0);
+  const award = settings.award || defaultAward;
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -808,11 +840,18 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
         <ProductCard user={user} totalSold={totalSold} pilotRanking={pilotRanking} />
-        <MiniRanking pilotRanking={pilotRanking} />
+        <div className="space-y-6">
+          <MiniRanking pilotRanking={pilotRanking} />
+          <section className="soft-card rounded-2xl p-5 sm:p-6">
+            <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600">Prêmio da rodada</p>
+            <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">{award.name}</h3>
+            <p className="mt-2 text-xs leading-5 text-slate-500">{award.criterion} • {award.description}</p>
+          </section>
+        </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
-        <Announcement acknowledged={acknowledged} setToast={setToast} user={user} onAcknowledge={onAcknowledge} />
+        <Announcement acknowledged={acknowledged} setToast={setToast} user={user} onAcknowledge={onAcknowledge} announcement={settings.announcement} />
         <button onClick={() => setPage(predictionsClosed ? "store" : "guesses")} className="group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6">
           <div className="flex h-full items-center justify-between gap-5">
             <div>
@@ -829,11 +868,12 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
   );
 }
 
-function Guesses({ acknowledged, setPage, setToast, user, onSavePrediction }) {
+function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePrediction }) {
   const [scores, setScores] = useState({ 1: ["", ""] });
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
-  const predictionsClosed = now > predictionClosesAt;
+  const round = settings.round || defaultRoundConfig;
+  const predictionsClosed = round.status !== "open" || now > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
   const complete = Object.values(scores).every(pair => pair[0] !== "" && pair[1] !== "");
 
   useEffect(() => {
@@ -1076,7 +1116,7 @@ function StorePage({ user, pilotRanking, totalSold }) {
   );
 }
 
-function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, onRefreshData }) {
+function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, onSaveSetting, onRefreshData }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
@@ -1087,11 +1127,26 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
   const [productCatalog, setProductCatalog] = useState(focusProducts);
   const [newProduct, setNewProduct] = useState({ sku: "", name: "", brand: "", price: "", description: "", imageUrl: "", siteUrl: "" });
   const [newAssignment, setNewAssignment] = useState({ store: PILOT_STORE, productId: "piso-house-color-formigres", goal: "200" });
+  const [announcementForm, setAnnouncementForm] = useState(settings.announcement || defaultAnnouncement);
+  const [awardForm, setAwardForm] = useState(settings.award || defaultAward);
+  const [roundForm, setRoundForm] = useState(settings.round || defaultRoundConfig);
+  const [resultForm, setResultForm] = useState(() => {
+    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    return { homeScore: String(result.homeScore), awayScore: String(result.awayScore) };
+  });
   const [newSale, setNewSale] = useState(() => {
     const firstSeller = registeredUsers.find(user => user.profile === "Vendedor") || {};
     const firstAssignment = initialProductAssignments.find(item => item.store === (firstSeller.store || PILOT_STORE)) || initialProductAssignments[0];
     return { store: firstSeller.store || PILOT_STORE, seller: firstSeller.name || "", productId: firstAssignment?.productId || "", quantity: "1" };
   });
+
+  useEffect(() => {
+    setAnnouncementForm(settings.announcement || defaultAnnouncement);
+    setAwardForm(settings.award || defaultAward);
+    setRoundForm(settings.round || defaultRoundConfig);
+    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    setResultForm({ homeScore: String(result.homeScore), awayScore: String(result.awayScore) });
+  }, [settings]);
   const actions = [
     ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"],
     ["fire", "Produtos", "Cadastrar o produto foco", "products"],
@@ -1105,15 +1160,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
     ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"],
   ];
 
-  const moduleContent = {
-    announcements: { title: "Manutenção de comunicados", fields: ["Título do comunicado", "Data de publicação", "URL do vídeo"], button: "Publicar comunicado" },
-    products: { title: "Cadastro de produto foco", fields: ["Nome do produto", "Marca", "URL da imagem"], button: "Salvar produto" },
-    goals: { title: "Definição de metas", fields: ["Loja", "Meta em unidades", "Data da campanha"], button: "Aplicar meta" },
-    users: { title: "Cadastro de colaboradores", fields: ["Nome completo", "CPF", "Loja"], button: "Criar acesso" },
-    awards: { title: "Administração de premiações", fields: ["Nome da premiação", "Critério", "Descrição do prêmio"], button: "Salvar premiação" },
-    rounds: { title: "Controle de rodadas", fields: ["Nome da rodada", "Abertura dos palpites", "Encerramento"], button: "Salvar rodada" },
-  };
-  const formModule = ["users", "products", "sales"].includes(module) ? null : moduleContent[module];
+  const formModule = null;
   const visibleUsers = users.filter(user => {
     const search = userSearch.trim().toLowerCase();
     const matchesSearch = !search || `${user.name} ${user.cpf} ${user.email} ${user.job}`.toLowerCase().includes(search);
@@ -1227,13 +1274,77 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
     }
   };
 
+  const saveAnnouncement = async event => {
+    event.preventDefault();
+    const next = {
+      ...announcementForm,
+      id: announcementForm.id || `comunicado-${Date.now()}`,
+      minimumSeconds: Number(announcementForm.minimumSeconds || 30),
+      publishedAt: announcementForm.publishedAt || "ATIVO",
+    };
+    const ok = await onSaveSetting("announcement", next);
+    if (ok) setToast("Comunicado publicado e disponível na Home.");
+  };
+
+  const saveAward = async event => {
+    event.preventDefault();
+    const ok = await onSaveSetting("award", awardForm);
+    if (ok) setToast("Prêmio da rodada salvo e exibido aos participantes.");
+  };
+
+  const saveRound = async event => {
+    event.preventDefault();
+    const ok = await onSaveSetting("round", roundForm);
+    if (ok) setToast("Rodada atualizada.");
+  };
+
+  const saveResult = async event => {
+    event.preventDefault();
+    const next = {
+      ...(settings.matchResults || defaultMatchResults),
+      1: { homeScore: Number(resultForm.homeScore), awayScore: Number(resultForm.awayScore) },
+    };
+    const ok = await onSaveSetting("matchResults", next);
+    if (ok) setToast("Resultado salvo. Ranking recalculado.");
+  };
+
+  const exportReport = () => {
+    const rows = [
+      ["posicao","nome","cpf","loja","perfil","pontos","comunicado","palpite_pts","acertos","placar_exato","venda_pts","quantidade","meta_pts"],
+      ...pilotRanking.map((person, index) => [
+        index + 1,
+        person.name,
+        person.cpf,
+        person.store,
+        person.role,
+        person.points,
+        person.announcementPoints,
+        person.predictionPoints,
+        person.predictionHits,
+        person.exactPredictions,
+        person.salesPoints + person.topSellerPoints,
+        person.soldQuantity,
+        person.storeGoalPoints,
+      ]),
+    ];
+    const csv = rows.map(row => row.map(value => `"${String(value ?? "").replace(/"/g, '""')}"`).join(";")).join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `relatorio-copa-potiguar-${new Date().toISOString().slice(0,10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setToast("Relatório CSV exportado.");
+  };
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div><p className="text-sm font-semibold text-slate-400">Piloto comercial • acesso administrativo</p><h2 className="font-display text-3xl font-extrabold text-potiguar-950">Central de administração</h2></div>
         <div className="flex gap-2">
           <button onClick={() => { onRefreshData(); setToast("Dados atualizados."); }} className="flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900"><Icon name="clock" size={17}/> Atualizar</button>
-          <button onClick={() => setToast("Relatório da rodada preparado para exportação.")} className="flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"><Icon name="chart" size={17}/> Exportar relatório</button>
+          <button onClick={exportReport} className="flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"><Icon name="chart" size={17}/> Exportar relatório</button>
         </div>
       </section>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
@@ -1248,6 +1359,54 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
           {actions.map(([icon,title,desc,value]) => <button key={title} onClick={() => setModule(value)} className={`lift rounded-2xl border p-4 text-left ${module === value ? "border-potiguar-500 bg-potiguar-lime/10" : "border-slate-100 bg-slate-50"}`}><span className="grid h-10 w-10 place-items-center rounded-xl bg-potiguar-900 text-potiguar-lime"><Icon name={icon} size={19}/></span><strong className="mt-4 block text-sm text-potiguar-950">{title}</strong><span className="mt-1 block text-[10px] leading-4 text-slate-400">{desc}</span></button>)}
         </div>
       </section>
+      {module === "announcements" && (
+        <section className="soft-card rounded-2xl p-5 sm:p-6">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Endomarketing</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Comunicado ativo</h3><p className="mt-1 text-xs text-slate-400">Ao publicar, a Home passa a mostrar este comunicado e a leitura vale +1 ponto para este ID.</p></div>
+          <form onSubmit={saveAnnouncement} className="mt-5 grid gap-4">
+            <div className="grid gap-4 md:grid-cols-[1fr_.7fr_.5fr]">
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Título</span><input value={announcementForm.title || ""} onChange={e=>setAnnouncementForm({...announcementForm,title:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">ID do comunicado</span><input value={announcementForm.id || ""} onChange={e=>setAnnouncementForm({...announcementForm,id:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Tempo mínimo</span><input type="number" min="0" value={announcementForm.minimumSeconds || 30} onChange={e=>setAnnouncementForm({...announcementForm,minimumSeconds:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            </div>
+            <div className="grid gap-4 md:grid-cols-[1fr_.4fr]">
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">URL do vídeo</span><input value={announcementForm.videoUrl || ""} onChange={e=>setAnnouncementForm({...announcementForm,videoUrl:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Data/Status</span><input value={announcementForm.publishedAt || ""} onChange={e=>setAnnouncementForm({...announcementForm,publishedAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            </div>
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Texto do comunicado</span><textarea rows="5" value={announcementForm.body || ""} onChange={e=>setAnnouncementForm({...announcementForm,body:e.target.value})} className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"></textarea></label>
+            <div className="flex justify-end"><button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Publicar comunicado</button></div>
+          </form>
+        </section>
+      )}
+      {module === "awards" && (
+        <section className="soft-card rounded-2xl p-5 sm:p-6">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600">Premiação</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Prêmio da rodada</h3><p className="mt-1 text-xs text-slate-400">Este prêmio aparece na Home dos participantes.</p></div>
+          <form onSubmit={saveAward} className="mt-5 grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Prêmio</span><input value={awardForm.name || ""} onChange={e=>setAwardForm({...awardForm,name:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Critério</span><input value={awardForm.criterion || ""} onChange={e=>setAwardForm({...awardForm,criterion:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            </div>
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Descrição</span><textarea rows="3" value={awardForm.description || ""} onChange={e=>setAwardForm({...awardForm,description:e.target.value})} className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"></textarea></label>
+            <div className="flex justify-end"><button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Salvar premiação</button></div>
+          </form>
+        </section>
+      )}
+      {module === "rounds" && (
+        <section className="soft-card rounded-2xl p-5 sm:p-6">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Rodada</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Controle da rodada e resultado</h3><p className="mt-1 text-xs text-slate-400">Use o status para comunicar o momento da rodada. O resultado recalcula os pontos de palpite.</p></div>
+          <form onSubmit={saveRound} className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_auto] md:items-end">
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Nome da rodada</span><input value={roundForm.name || ""} onChange={e=>setRoundForm({...roundForm,name:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status</span><select value={roundForm.status || "open"} onChange={e=>setRoundForm({...roundForm,status:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="open">Aberta</option><option value="predictions_closed">Palpites encerrados</option><option value="results">Resultado lançado</option><option value="closed">Rodada encerrada</option></select></label>
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Limite dos palpites</span><input type="datetime-local" value={(roundForm.predictionsCloseAt || "").slice(0,16)} onChange={e=>setRoundForm({...roundForm,predictionsCloseAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            <button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Salvar rodada</button>
+          </form>
+          <form onSubmit={saveResult} className="mt-5 grid gap-4 rounded-2xl bg-potiguar-950 p-4 text-white md:grid-cols-[1fr_.4fr_.4fr_auto] md:items-end">
+            <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime">Resultado do jogo</p><p className="mt-1 text-sm font-extrabold">{games[0].home} x {games[0].away}</p></div>
+            <label><span className="mb-2 block text-xs font-extrabold text-white/70">{games[0].home}</span><input type="number" min="0" value={resultForm.homeScore} onChange={e=>setResultForm({...resultForm,homeScore:e.target.value})} className="w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"/></label>
+            <label><span className="mb-2 block text-xs font-extrabold text-white/70">{games[0].away}</span><input type="number" min="0" value={resultForm.awayScore} onChange={e=>setResultForm({...resultForm,awayScore:e.target.value})} className="w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"/></label>
+            <button type="submit" className="rounded-xl bg-potiguar-lime px-5 py-3 text-xs font-extrabold text-potiguar-950">Salvar resultado</button>
+          </form>
+        </section>
+      )}
       {module === "rankings" && (
         <section className="space-y-6">
           <div className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
@@ -1328,9 +1487,9 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
                   <tr><th className="px-5 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Jogo</th><th className="px-4 py-3">Palpite</th><th className="px-4 py-3">Resultado</th><th className="px-4 py-3">Pontos</th><th className="px-5 py-3 text-right">Enviado em</th></tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {predictionEntries.map(entry => {
-                    const result = matchResults[entry.match_id];
-                    const points = getPredictionPoints(entry);
+	                  {predictionEntries.map(entry => {
+	                    const result = (settings.matchResults || defaultMatchResults)[entry.match_id];
+	                    const points = getPredictionPoints(entry, settings.matchResults || defaultMatchResults);
                     return (
                       <tr key={`${entry.cpf}-${entry.match_id}-${entry.submitted_at}`}>
                         <td className="px-5 py-4"><p className="text-xs font-extrabold text-potiguar-950">{entry.full_name}</p><p className="text-[10px] text-slate-400">CPF {formatCpf(entry.cpf)}</p></td>
@@ -1549,6 +1708,7 @@ function App() {
   const [salesEntries, setSalesEntries] = useState([]);
   const [readEntries, setReadEntries] = useState([]);
   const [profilePhotos, setProfilePhotos] = useState({});
+  const [appSettings, setAppSettings] = useState(defaultAppSettings);
 
   useEffect(() => {
     if (!toast) return;
@@ -1603,8 +1763,19 @@ function App() {
     }
   };
 
+  const loadSettings = async () => {
+    try {
+      const response = await fetch("/api/settings", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setAppSettings({ ...defaultAppSettings, ...(data.settings || {}) });
+    } catch (error) {
+      console.warn("Não foi possível carregar configurações da rodada.", error);
+    }
+  };
+
   const refreshData = async () => {
-    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos()]);
+    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos(), loadSettings()]);
   };
 
   useEffect(() => {
@@ -1613,10 +1784,11 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos);
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, appSettings);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
-  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === currentAnnouncement.id) : false;
+  const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
+  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === activeAnnouncement.id) : false;
   const announcementAcknowledged = acknowledged || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
 
@@ -1670,8 +1842,8 @@ function App() {
           fullName: currentUser.name,
           accessRole: currentUser.accessRole,
           store: currentUser.store,
-          announcementId: currentAnnouncement.id,
-          announcementTitle: currentAnnouncement.title,
+          announcementId: activeAnnouncement.id,
+          announcementTitle: activeAnnouncement.title,
           watchedSeconds,
         }),
       });
@@ -1706,6 +1878,24 @@ function App() {
     } catch (error) {
       console.error(error);
       setToast("Não foi possível salvar a foto de perfil.");
+      return false;
+    }
+  };
+
+  const saveSetting = async (key, value) => {
+    try {
+      const response = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key, value }),
+      });
+      if (!response.ok) throw new Error("Falha ao salvar configuração.");
+      const data = await response.json();
+      setAppSettings({ ...defaultAppSettings, ...(data.settings || {}) });
+      return true;
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível salvar a configuração.");
       return false;
     }
   };
@@ -1747,11 +1937,11 @@ function App() {
       <div className="main-column">
         <Topbar page={activePage} user={effectiveUser} onLogout={logout} profilePhotos={profilePhotos} />
         <main className="mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10">
-          {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
-          {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} onSavePrediction={savePrediction} />}
+          {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={appSettings} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
+          {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} onSavePrediction={savePrediction} />}
           {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
           {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} />}
-          {activePage === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} onRefreshData={refreshData} />}
+          {activePage === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={appSettings} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
         </main>
       </div>
       <MobileNav page={activePage} setPage={setPage} user={effectiveUser} />

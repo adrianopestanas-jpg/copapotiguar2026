@@ -76,6 +76,12 @@ const ensureSchema = async () => {
       photo_data text not null,
       updated_at timestamptz not null default now()
     );
+
+    create table if not exists app_settings (
+      key text primary key,
+      value jsonb not null,
+      updated_at timestamptz not null default now()
+    );
   `);
 };
 
@@ -98,6 +104,44 @@ const server = http.createServer(async (request, response) => {
          order by submitted_at desc, id desc
       `);
       sendJson(response, 200, { predictions: result.rows });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/settings") {
+      const result = await pool.query(`
+        select key, value, updated_at
+          from app_settings
+      `);
+      sendJson(response, 200, {
+        settings: Object.fromEntries(result.rows.map(row => [row.key, row.value])),
+      });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/settings") {
+      const payload = JSON.parse(await readBody(request) || "{}");
+      const key = String(payload.key || "").trim();
+      const value = payload.value;
+
+      if (!key || typeof value !== "object" || value === null || Array.isArray(value)) {
+        sendJson(response, 400, { error: "Configuração inválida." });
+        return;
+      }
+
+      const result = await pool.query(`
+        insert into app_settings (key, value, updated_at)
+        values ($1, $2::jsonb, now())
+        on conflict (key) do update set
+          value = excluded.value,
+          updated_at = now()
+        returning key, value, updated_at
+      `, [key, JSON.stringify(value)]);
+
+      const allSettings = await pool.query(`select key, value from app_settings`);
+      sendJson(response, 200, {
+        setting: result.rows[0],
+        settings: Object.fromEntries(allSettings.rows.map(row => [row.key, row.value])),
+      });
       return;
     }
 

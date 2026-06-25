@@ -203,6 +203,12 @@ create table if not exists profile_photo_entries (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists app_settings (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
 create table awards (
   id uuid primary key default gen_random_uuid(),
   name text not null,

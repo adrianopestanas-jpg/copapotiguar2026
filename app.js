@@ -309,18 +309,44 @@ const games = [{
 }];
 const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
 const getPredictionClosed = () => new Date() > predictionClosesAt;
-const currentAnnouncement = {
+const defaultAnnouncement = {
   id: "copa-potiguar-video-2026-06-25",
   title: "Copa Potiguar 2026: começou o jogo",
-  minimumSeconds: 30
+  body: "Hoje começa o piloto da Copa Potiguar 2026 em Imperatriz. Leia o comunicado, assista ao vídeo e participe da rodada: o jogo vale palpite, o produto foco vale venda e o desempenho da loja vale reconhecimento para o time.",
+  videoUrl: "https://youtu.be/7EzZjpmw6FQ",
+  minimumSeconds: 30,
+  publishedAt: "25 JUN • ativo"
 };
-const matchResults = {
+const defaultMatchResults = {
   1: {
     homeScore: 0,
     awayScore: 3
   }
 };
-const getPredictionPoints = entry => {
+const defaultRoundConfig = {
+  id: "rodada-piloto-imperatriz",
+  name: "Rodada Piloto Imperatriz",
+  status: "open",
+  predictionsCloseAt: "2026-06-25T23:59:59-03:00"
+};
+const defaultAward = {
+  name: "Robô Aspirador Potiguar",
+  criterion: "Maior pontuação geral da rodada",
+  description: "Prêmio para o ganhador da rodada piloto."
+};
+const defaultAppSettings = {
+  announcement: defaultAnnouncement,
+  round: defaultRoundConfig,
+  award: defaultAward,
+  matchResults: defaultMatchResults
+};
+const youtubeEmbedUrl = url => {
+  const text = String(url || "");
+  const match = text.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([^?&/]+)/);
+  const id = match?.[1] || "7EzZjpmw6FQ";
+  return `https://www.youtube-nocookie.com/embed/${id}?rel=0&autoplay=1`;
+};
+const getPredictionPoints = (entry, matchResults = defaultMatchResults) => {
   const result = matchResults[entry.match_id];
   if (!result) return 0;
   const predictedHome = Number(entry.home_score);
@@ -331,8 +357,8 @@ const getPredictionPoints = entry => {
   const resultOutcome = Math.sign(result.homeScore - result.awayScore);
   return predictedOutcome === resultOutcome ? 2 : 0;
 };
-const getPredictionStats = entry => {
-  const points = getPredictionPoints(entry);
+const getPredictionStats = (entry, matchResults = defaultMatchResults) => {
+  const points = getPredictionPoints(entry, matchResults);
   const result = matchResults[entry.match_id];
   if (!result) return {
     points,
@@ -346,7 +372,9 @@ const getPredictionStats = entry => {
     exact
   };
 };
-const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}) => {
+const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
+  const activeAnnouncement = settings.announcement || defaultAnnouncement;
+  const activeMatchResults = settings.matchResults || defaultMatchResults;
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
     name: user.name,
@@ -369,7 +397,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
   readEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
-    if (!row || entry.announcementId !== currentAnnouncement.id || row.announcementRead) return;
+    if (!row || entry.announcementId !== activeAnnouncement.id || row.announcementRead) return;
     row.announcementRead = true;
     row.announcementPoints += 1;
     row.points += 1;
@@ -381,7 +409,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
       points,
       hit,
       exact
-    } = getPredictionStats(entry);
+    } = getPredictionStats(entry, activeMatchResults);
     row.predictionPoints += points;
     row.predictionHits += hit ? 1 : 0;
     row.exactPredictions += exact ? 1 : 0;
@@ -806,12 +834,14 @@ function Announcement({
   acknowledged,
   setToast,
   user,
-  onAcknowledge
+  onAcknowledge,
+  announcement
 }) {
   const [secondsViewed, setSecondsViewed] = useState(0);
   const [videoStarted, setVideoStarted] = useState(false);
-  const readyToConfirm = secondsViewed >= currentAnnouncement.minimumSeconds;
-  const remainingSeconds = Math.max(currentAnnouncement.minimumSeconds - secondsViewed, 0);
+  const activeAnnouncement = announcement || defaultAnnouncement;
+  const readyToConfirm = secondsViewed >= Number(activeAnnouncement.minimumSeconds || 30);
+  const remainingSeconds = Math.max(Number(activeAnnouncement.minimumSeconds || 30) - secondsViewed, 0);
   useEffect(() => {
     if (!videoStarted || acknowledged || readyToConfirm) return;
     const timer = setInterval(() => setSecondsViewed(value => value + 1), 1000);
@@ -838,11 +868,11 @@ function Announcement({
     className: "text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600"
   }, "Comunicado obrigatório"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, currentAnnouncement.title)), /*#__PURE__*/React.createElement("span", {
+  }, activeAnnouncement.title)), /*#__PURE__*/React.createElement("span", {
     className: "rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500"
-  }, "19 JUN • 19:56")), /*#__PURE__*/React.createElement("p", {
+  }, activeAnnouncement.publishedAt || "ATIVO")), /*#__PURE__*/React.createElement("p", {
     className: "mt-3 text-sm leading-6 text-slate-500"
-  }, "Hoje começa o piloto da Copa Potiguar 2026 em Imperatriz. Leia o comunicado, assista ao vídeo e participe da rodada: o jogo vale palpite, o produto foco vale venda e o desempenho da loja vale reconhecimento para o time."), /*#__PURE__*/React.createElement("div", {
+  }, activeAnnouncement.body), /*#__PURE__*/React.createElement("div", {
     className: "mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block font-extrabold"
@@ -869,16 +899,16 @@ function Announcement({
     size: 30
   })), /*#__PURE__*/React.createElement("span", {
     className: "-mt-20 px-6 text-xs font-extrabold text-white/75"
-  }, "Iniciar vídeo e validação de 30 segundos")) : /*#__PURE__*/React.createElement("div", {
+  }, "Iniciar vídeo e validação de ", activeAnnouncement.minimumSeconds || 30, " segundos")) : /*#__PURE__*/React.createElement("div", {
     className: "mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl"
   }, /*#__PURE__*/React.createElement("iframe", {
     className: "h-full w-full",
-    src: "https://www.youtube-nocookie.com/embed/7EzZjpmw6FQ?rel=0&autoplay=1",
+    src: youtubeEmbedUrl(activeAnnouncement.videoUrl),
     title: "Vídeo da Copa Potiguar 2026",
     allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
     allowFullScreen: true
   })), /*#__PURE__*/React.createElement("a", {
-    href: "https://youtu.be/7EzZjpmw6FQ",
+    href: activeAnnouncement.videoUrl || defaultAnnouncement.videoUrl,
     target: "_blank",
     rel: "noreferrer",
     className: "mt-3 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-[11px] font-extrabold text-white transition hover:bg-white/15"
@@ -980,11 +1010,13 @@ function Home({
   pilotRanking,
   totalSold,
   profilePhotos,
+  settings,
   onAcknowledge,
   onSaveProfilePhoto
 }) {
   const leadership = user.accessRole === "leadership";
-  const predictionsClosed = getPredictionClosed();
+  const round = settings.round || defaultRoundConfig;
+  const predictionsClosed = round.status !== "open" || new Date() > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
@@ -995,6 +1027,7 @@ function Home({
   const storeGoal = storeFocus.goal;
   const storePercent = Math.round(totalSold / storeGoal * 100);
   const totalPredictionHits = pilotRanking.reduce((sum, person) => sum + person.predictionHits, 0);
+  const award = settings.award || defaultAward;
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -1057,15 +1090,26 @@ function Home({
     user: user,
     totalSold: totalSold,
     pilotRanking: pilotRanking
-  }), /*#__PURE__*/React.createElement(MiniRanking, {
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "space-y-6"
+  }, /*#__PURE__*/React.createElement(MiniRanking, {
     pilotRanking: pilotRanking
-  })), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600"
+  }, "Prêmio da rodada"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, award.name), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 text-xs leading-5 text-slate-500"
+  }, award.criterion, " • ", award.description)))), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
   }, /*#__PURE__*/React.createElement(Announcement, {
     acknowledged: acknowledged,
     setToast: setToast,
     user: user,
-    onAcknowledge: onAcknowledge
+    onAcknowledge: onAcknowledge,
+    announcement: settings.announcement
   }), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage(predictionsClosed ? "store" : "guesses"),
     className: "group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6"
@@ -1094,6 +1138,7 @@ function Guesses({
   setPage,
   setToast,
   user,
+  settings,
   onSavePrediction
 }) {
   const [scores, setScores] = useState({
@@ -1101,7 +1146,8 @@ function Guesses({
   });
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
-  const predictionsClosed = now > predictionClosesAt;
+  const round = settings.round || defaultRoundConfig;
+  const predictionsClosed = round.status !== "open" || now > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
   const complete = Object.values(scores).every(pair => pair[0] !== "" && pair[1] !== "");
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 15000);
@@ -1470,6 +1516,8 @@ function AdminPage({
   pilotRanking,
   totalSold,
   profilePhotos,
+  settings,
+  onSaveSetting,
   onRefreshData
 }) {
   const [module, setModule] = useState("dashboard");
@@ -1500,6 +1548,16 @@ function AdminPage({
     productId: "piso-house-color-formigres",
     goal: "200"
   });
+  const [announcementForm, setAnnouncementForm] = useState(settings.announcement || defaultAnnouncement);
+  const [awardForm, setAwardForm] = useState(settings.award || defaultAward);
+  const [roundForm, setRoundForm] = useState(settings.round || defaultRoundConfig);
+  const [resultForm, setResultForm] = useState(() => {
+    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    return {
+      homeScore: String(result.homeScore),
+      awayScore: String(result.awayScore)
+    };
+  });
   const [newSale, setNewSale] = useState(() => {
     const firstSeller = registeredUsers.find(user => user.profile === "Vendedor") || {};
     const firstAssignment = initialProductAssignments.find(item => item.store === (firstSeller.store || PILOT_STORE)) || initialProductAssignments[0];
@@ -1510,40 +1568,18 @@ function AdminPage({
       quantity: "1"
     };
   });
+  useEffect(() => {
+    setAnnouncementForm(settings.announcement || defaultAnnouncement);
+    setAwardForm(settings.award || defaultAward);
+    setRoundForm(settings.round || defaultRoundConfig);
+    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    setResultForm({
+      homeScore: String(result.homeScore),
+      awayScore: String(result.awayScore)
+    });
+  }, [settings]);
   const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Produtos", "Cadastrar o produto foco", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
-  const moduleContent = {
-    announcements: {
-      title: "Manutenção de comunicados",
-      fields: ["Título do comunicado", "Data de publicação", "URL do vídeo"],
-      button: "Publicar comunicado"
-    },
-    products: {
-      title: "Cadastro de produto foco",
-      fields: ["Nome do produto", "Marca", "URL da imagem"],
-      button: "Salvar produto"
-    },
-    goals: {
-      title: "Definição de metas",
-      fields: ["Loja", "Meta em unidades", "Data da campanha"],
-      button: "Aplicar meta"
-    },
-    users: {
-      title: "Cadastro de colaboradores",
-      fields: ["Nome completo", "CPF", "Loja"],
-      button: "Criar acesso"
-    },
-    awards: {
-      title: "Administração de premiações",
-      fields: ["Nome da premiação", "Critério", "Descrição do prêmio"],
-      button: "Salvar premiação"
-    },
-    rounds: {
-      title: "Controle de rodadas",
-      fields: ["Nome da rodada", "Abertura dos palpites", "Encerramento"],
-      button: "Salvar rodada"
-    }
-  };
-  const formModule = ["users", "products", "sales"].includes(module) ? null : moduleContent[module];
+  const formModule = null;
   const visibleUsers = users.filter(user => {
     const search = userSearch.trim().toLowerCase();
     const matchesSearch = !search || `${user.name} ${user.cpf} ${user.email} ${user.job}`.toLowerCase().includes(search);
@@ -1677,6 +1713,53 @@ function AdminPage({
       setToast("Não foi possível registrar a venda no servidor.");
     }
   };
+  const saveAnnouncement = async event => {
+    event.preventDefault();
+    const next = {
+      ...announcementForm,
+      id: announcementForm.id || `comunicado-${Date.now()}`,
+      minimumSeconds: Number(announcementForm.minimumSeconds || 30),
+      publishedAt: announcementForm.publishedAt || "ATIVO"
+    };
+    const ok = await onSaveSetting("announcement", next);
+    if (ok) setToast("Comunicado publicado e disponível na Home.");
+  };
+  const saveAward = async event => {
+    event.preventDefault();
+    const ok = await onSaveSetting("award", awardForm);
+    if (ok) setToast("Prêmio da rodada salvo e exibido aos participantes.");
+  };
+  const saveRound = async event => {
+    event.preventDefault();
+    const ok = await onSaveSetting("round", roundForm);
+    if (ok) setToast("Rodada atualizada.");
+  };
+  const saveResult = async event => {
+    event.preventDefault();
+    const next = {
+      ...(settings.matchResults || defaultMatchResults),
+      1: {
+        homeScore: Number(resultForm.homeScore),
+        awayScore: Number(resultForm.awayScore)
+      }
+    };
+    const ok = await onSaveSetting("matchResults", next);
+    if (ok) setToast("Resultado salvo. Ranking recalculado.");
+  };
+  const exportReport = () => {
+    const rows = [["posicao", "nome", "cpf", "loja", "perfil", "pontos", "comunicado", "palpite_pts", "acertos", "placar_exato", "venda_pts", "quantidade", "meta_pts"], ...pilotRanking.map((person, index) => [index + 1, person.name, person.cpf, person.store, person.role, person.points, person.announcementPoints, person.predictionPoints, person.predictionHits, person.exactPredictions, person.salesPoints + person.topSellerPoints, person.soldQuantity, person.storeGoalPoints])];
+    const csv = rows.map(row => row.map(value => `"${String(value ?? "").replace(/"/g, '""')}"`).join(";")).join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], {
+      type: "text/csv;charset=utf-8"
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `relatorio-copa-potiguar-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setToast("Relatório CSV exportado.");
+  };
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -1697,7 +1780,7 @@ function AdminPage({
     name: "clock",
     size: 17
   }), " Atualizar"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setToast("Relatório da rodada preparado para exportação."),
+    onClick: exportReport,
     className: "flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "chart",
@@ -1749,7 +1832,212 @@ function AdminPage({
     className: "mt-4 block text-sm text-potiguar-950"
   }, title), /*#__PURE__*/React.createElement("span", {
     className: "mt-1 block text-[10px] leading-4 text-slate-400"
-  }, desc))))), module === "rankings" && /*#__PURE__*/React.createElement("section", {
+  }, desc))))), module === "announcements" && /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Endomarketing"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Comunicado ativo"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-400"
+  }, "Ao publicar, a Home passa a mostrar este comunicado e a leitura vale +1 ponto para este ID.")), /*#__PURE__*/React.createElement("form", {
+    onSubmit: saveAnnouncement,
+    className: "mt-5 grid gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid gap-4 md:grid-cols-[1fr_.7fr_.5fr]"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Título"), /*#__PURE__*/React.createElement("input", {
+    value: announcementForm.title || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      title: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "ID do comunicado"), /*#__PURE__*/React.createElement("input", {
+    value: announcementForm.id || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      id: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Tempo mínimo"), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "0",
+    value: announcementForm.minimumSeconds || 30,
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      minimumSeconds: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid gap-4 md:grid-cols-[1fr_.4fr]"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "URL do vídeo"), /*#__PURE__*/React.createElement("input", {
+    value: announcementForm.videoUrl || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      videoUrl: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Data/Status"), /*#__PURE__*/React.createElement("input", {
+    value: announcementForm.publishedAt || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      publishedAt: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  }))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Texto do comunicado"), /*#__PURE__*/React.createElement("textarea", {
+    rows: "5",
+    value: announcementForm.body || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      body: e.target.value
+    }),
+    className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
+  }, "Publicar comunicado")))), module === "awards" && /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600"
+  }, "Premiação"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Prêmio da rodada"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-400"
+  }, "Este prêmio aparece na Home dos participantes.")), /*#__PURE__*/React.createElement("form", {
+    onSubmit: saveAward,
+    className: "mt-5 grid gap-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid gap-4 md:grid-cols-2"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Prêmio"), /*#__PURE__*/React.createElement("input", {
+    value: awardForm.name || "",
+    onChange: e => setAwardForm({
+      ...awardForm,
+      name: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Critério"), /*#__PURE__*/React.createElement("input", {
+    value: awardForm.criterion || "",
+    onChange: e => setAwardForm({
+      ...awardForm,
+      criterion: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  }))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Descrição"), /*#__PURE__*/React.createElement("textarea", {
+    rows: "3",
+    value: awardForm.description || "",
+    onChange: e => setAwardForm({
+      ...awardForm,
+      description: e.target.value
+    }),
+    className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
+  }, "Salvar premiação")))), module === "rounds" && /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Rodada"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Controle da rodada e resultado"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-400"
+  }, "Use o status para comunicar o momento da rodada. O resultado recalcula os pontos de palpite.")), /*#__PURE__*/React.createElement("form", {
+    onSubmit: saveRound,
+    className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_auto] md:items-end"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Nome da rodada"), /*#__PURE__*/React.createElement("input", {
+    value: roundForm.name || "",
+    onChange: e => setRoundForm({
+      ...roundForm,
+      name: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Status"), /*#__PURE__*/React.createElement("select", {
+    value: roundForm.status || "open",
+    onChange: e => setRoundForm({
+      ...roundForm,
+      status: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "open"
+  }, "Aberta"), /*#__PURE__*/React.createElement("option", {
+    value: "predictions_closed"
+  }, "Palpites encerrados"), /*#__PURE__*/React.createElement("option", {
+    value: "results"
+  }, "Resultado lançado"), /*#__PURE__*/React.createElement("option", {
+    value: "closed"
+  }, "Rodada encerrada"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Limite dos palpites"), /*#__PURE__*/React.createElement("input", {
+    type: "datetime-local",
+    value: (roundForm.predictionsCloseAt || "").slice(0, 16),
+    onChange: e => setRoundForm({
+      ...roundForm,
+      predictionsCloseAt: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
+  }, "Salvar rodada")), /*#__PURE__*/React.createElement("form", {
+    onSubmit: saveResult,
+    className: "mt-5 grid gap-4 rounded-2xl bg-potiguar-950 p-4 text-white md:grid-cols-[1fr_.4fr_.4fr_auto] md:items-end"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
+  }, "Resultado do jogo"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-sm font-extrabold"
+  }, games[0].home, " x ", games[0].away)), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-white/70"
+  }, games[0].home), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "0",
+    value: resultForm.homeScore,
+    onChange: e => setResultForm({
+      ...resultForm,
+      homeScore: e.target.value
+    }),
+    className: "w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-white/70"
+  }, games[0].away), /*#__PURE__*/React.createElement("input", {
+    type: "number",
+    min: "0",
+    value: resultForm.awayScore,
+    onChange: e => setResultForm({
+      ...resultForm,
+      awayScore: e.target.value
+    }),
+    className: "w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "rounded-xl bg-potiguar-lime px-5 py-3 text-xs font-extrabold text-potiguar-950"
+  }, "Salvar resultado"))), module === "rankings" && /*#__PURE__*/React.createElement("section", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
@@ -1883,8 +2171,8 @@ function AdminPage({
   }, "Enviado em"))), /*#__PURE__*/React.createElement("tbody", {
     className: "divide-y divide-slate-100"
   }, predictionEntries.map(entry => {
-    const result = matchResults[entry.match_id];
-    const points = getPredictionPoints(entry);
+    const result = (settings.matchResults || defaultMatchResults)[entry.match_id];
+    const points = getPredictionPoints(entry, settings.matchResults || defaultMatchResults);
     return /*#__PURE__*/React.createElement("tr", {
       key: `${entry.cpf}-${entry.match_id}-${entry.submitted_at}`
     }, /*#__PURE__*/React.createElement("td", {
@@ -2494,6 +2782,7 @@ function App() {
   const [salesEntries, setSalesEntries] = useState([]);
   const [readEntries, setReadEntries] = useState([]);
   const [profilePhotos, setProfilePhotos] = useState({});
+  const [appSettings, setAppSettings] = useState(defaultAppSettings);
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(""), 3200);
@@ -2552,18 +2841,34 @@ function App() {
       console.warn("Não foi possível carregar fotos de perfil.", error);
     }
   };
+  const loadSettings = async () => {
+    try {
+      const response = await fetch("/api/settings", {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      setAppSettings({
+        ...defaultAppSettings,
+        ...(data.settings || {})
+      });
+    } catch (error) {
+      console.warn("Não foi possível carregar configurações da rodada.", error);
+    }
+  };
   const refreshData = async () => {
-    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos()]);
+    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos(), loadSettings()]);
   };
   useEffect(() => {
     refreshData();
     const timer = setInterval(refreshData, 15000);
     return () => clearInterval(timer);
   }, []);
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos);
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, appSettings);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
-  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === currentAnnouncement.id) : false;
+  const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
+  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === activeAnnouncement.id) : false;
   const announcementAcknowledged = acknowledged || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
   useEffect(() => {
@@ -2618,8 +2923,8 @@ function App() {
           fullName: currentUser.name,
           accessRole: currentUser.accessRole,
           store: currentUser.store,
-          announcementId: currentAnnouncement.id,
-          announcementTitle: currentAnnouncement.title,
+          announcementId: activeAnnouncement.id,
+          announcementTitle: activeAnnouncement.title,
           watchedSeconds
         })
       });
@@ -2658,6 +2963,31 @@ function App() {
     } catch (error) {
       console.error(error);
       setToast("Não foi possível salvar a foto de perfil.");
+      return false;
+    }
+  };
+  const saveSetting = async (key, value) => {
+    try {
+      const response = await fetch("/api/settings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          key,
+          value
+        })
+      });
+      if (!response.ok) throw new Error("Falha ao salvar configuração.");
+      const data = await response.json();
+      setAppSettings({
+        ...defaultAppSettings,
+        ...(data.settings || {})
+      });
+      return true;
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível salvar a configuração.");
       return false;
     }
   };
@@ -2716,6 +3046,7 @@ function App() {
     pilotRanking: pilotRanking,
     totalSold: totalSold,
     profilePhotos: profilePhotos,
+    settings: appSettings,
     onAcknowledge: saveAnnouncementRead,
     onSaveProfilePhoto: saveProfilePhoto
   }), activePage === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
@@ -2723,6 +3054,7 @@ function App() {
     setPage: setPage,
     setToast: setToast,
     user: effectiveUser,
+    settings: appSettings,
     onSavePrediction: savePrediction
   }), activePage === "ranking" && /*#__PURE__*/React.createElement(RankingPage, {
     user: effectiveUser,
@@ -2740,6 +3072,8 @@ function App() {
     pilotRanking: pilotRanking,
     totalSold: totalSold,
     profilePhotos: profilePhotos,
+    settings: appSettings,
+    onSaveSetting: saveSetting,
     onRefreshData: refreshData
   }))), /*#__PURE__*/React.createElement(MobileNav, {
     page: activePage,
