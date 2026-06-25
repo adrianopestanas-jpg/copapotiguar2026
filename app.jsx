@@ -213,8 +213,23 @@ const games = [
   { id: 1, time: "19:00", group: "Grupo C", home: "Escócia", away: "Brasil", homeFlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", awayFlag: "🇧🇷", venue: "Miami Stadium" },
 ];
 
-const predictionClosesAt = new Date("2026-06-24T18:59:59-03:00");
+const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
 const getPredictionClosed = () => new Date() > predictionClosesAt;
+const matchResults = {
+  1: { homeScore: 0, awayScore: 3 },
+};
+
+const getPredictionPoints = entry => {
+  const result = matchResults[entry.match_id];
+  if (!result) return 0;
+  const predictedHome = Number(entry.home_score);
+  const predictedAway = Number(entry.away_score);
+  const exact = predictedHome === result.homeScore && predictedAway === result.awayScore;
+  if (exact) return 4;
+  const predictedOutcome = Math.sign(predictedHome - predictedAway);
+  const resultOutcome = Math.sign(result.homeScore - result.awayScore);
+  return predictedOutcome === resultOutcome ? 2 : 0;
+};
 
 function Brand({ compact = false }) {
   return (
@@ -644,7 +659,7 @@ function Guesses({ acknowledged, setPage, setToast, user, onSavePrediction }) {
         <div className="p-6 sm:p-8">
           <div className="rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800">
             <strong className="block">Regra da rodada</strong>
-            A janela fica aberta hoje, 24 de junho, somente até 18h59.
+            Janela reaberta para teste hoje até 23h59.
           </div>
           <button onClick={() => setPage("home")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Voltar e ler o comunicado</button>
         </div>
@@ -658,7 +673,7 @@ function Guesses({ acknowledged, setPage, setToast, user, onSavePrediction }) {
         <div className="hero-pattern pitch-lines px-6 py-12 text-white">
           <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime"><Icon name="lock" size={38} /></div>
           <h2 className="mt-6 font-display text-3xl font-extrabold">Palpites encerrados</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">A janela de palpites fechou às 18h59 de hoje, antes do jogo Escócia x Brasil.</p>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">A janela de teste de palpites foi encerrada.</p>
         </div>
         <div className="p-6 sm:p-8">
           <div className="rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900">
@@ -676,15 +691,15 @@ function Guesses({ acknowledged, setPage, setToast, user, onSavePrediction }) {
       <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> Aberto até 18:59</div>
-            <h2 className="mt-3 font-display text-3xl font-extrabold">Palpite teste: Brasil hoje</h2>
-            <p className="mt-2 text-sm text-white/60">Escócia x Brasil • Horário de Fortaleza. Placar exato vale 4 pontos!</p>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> Teste aberto até 23:59</div>
+            <h2 className="mt-3 font-display text-3xl font-extrabold">Teste de palpite: Brasil</h2>
+            <p className="mt-2 text-sm text-white/60">Resultado simulado: Escócia 0 x 3 Brasil. Placar exato vale 4 pontos; vencedor vale 2.</p>
           </div>
           <div className="glass flex items-center gap-3 rounded-2xl px-4 py-3">
             <Icon name="clock" className="text-potiguar-lime" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Fechamento</p>
-              <p className="font-display text-lg font-extrabold">18h59</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Fechamento do teste</p>
+              <p className="font-display text-lg font-extrabold">23h59</p>
             </div>
           </div>
         </div>
@@ -913,6 +928,21 @@ function AdminPage({ setToast, predictionEntries }) {
     return acc;
   }, {})).sort((a, b) => b.quantity - a.quantity);
 
+  const loadSales = async () => {
+    try {
+      const response = await fetch("/api/sales", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setSalesEntries(data.sales || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar vendas.", error);
+    }
+  };
+
+  useEffect(() => {
+    loadSales();
+  }, []);
+
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11)
     .replace(/^(\d{3})(\d)/, "$1.$2")
     .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
@@ -975,14 +1005,36 @@ function AdminPage({ setToast, predictionEntries }) {
     setToast("Produto cadastrado no piloto.");
   };
 
-  const addSale = event => {
+  const addSale = async event => {
     event.preventDefault();
-    if (!newSale.seller || !newSale.productId || Number(newSale.quantity) < 1) {
+    if (!newSale.seller || !newSale.productId || Number(newSale.quantity) <= 0) {
       setToast("Selecione vendedor, produto e quantidade.");
       return;
     }
-    setSalesEntries([{ id: Date.now(), ...newSale, quantity: Number(newSale.quantity) }, ...salesEntries]);
-    setToast("Venda do produto foco registrada.");
+    const seller = users.find(user => user.name === newSale.seller && user.store === newSale.store);
+    const product = productCatalog.find(product => product.id === newSale.productId);
+    try {
+      const response = await fetch("/api/sales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sellerCpf: seller?.cpf,
+          seller: newSale.seller,
+          store: newSale.store,
+          productId: newSale.productId,
+          productSku: product?.sku,
+          productName: product?.name,
+          quantity: Number(newSale.quantity),
+        }),
+      });
+      if (!response.ok) throw new Error("Falha ao registrar venda.");
+      const data = await response.json();
+      setSalesEntries(data.sales || []);
+      setToast("Venda do produto foco registrada no servidor.");
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível registrar a venda no servidor.");
+    }
   };
 
   return (
@@ -1080,18 +1132,24 @@ function AdminPage({ setToast, predictionEntries }) {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[760px] text-left">
                 <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                  <tr><th className="px-5 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Jogo</th><th className="px-4 py-3">Palpite</th><th className="px-5 py-3 text-right">Enviado em</th></tr>
+                  <tr><th className="px-5 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Jogo</th><th className="px-4 py-3">Palpite</th><th className="px-4 py-3">Resultado</th><th className="px-4 py-3">Pontos</th><th className="px-5 py-3 text-right">Enviado em</th></tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {predictionEntries.map(entry => (
-                    <tr key={`${entry.cpf}-${entry.match_id}-${entry.submitted_at}`}>
-                      <td className="px-5 py-4"><p className="text-xs font-extrabold text-potiguar-950">{entry.full_name}</p><p className="text-[10px] text-slate-400">CPF {formatCpf(entry.cpf)}</p></td>
-                      <td className="px-4 py-4 text-xs font-bold text-potiguar-800">{entry.store}</td>
-                      <td className="px-4 py-4 text-xs text-slate-500">{entry.home_team} x {entry.away_team}</td>
-                      <td className="px-4 py-4 font-display text-lg font-extrabold text-potiguar-900">{entry.home_score} × {entry.away_score}</td>
-                      <td className="px-5 py-4 text-right text-xs text-slate-400">{new Date(entry.submitted_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</td>
-                    </tr>
-                  ))}
+                  {predictionEntries.map(entry => {
+                    const result = matchResults[entry.match_id];
+                    const points = getPredictionPoints(entry);
+                    return (
+                      <tr key={`${entry.cpf}-${entry.match_id}-${entry.submitted_at}`}>
+                        <td className="px-5 py-4"><p className="text-xs font-extrabold text-potiguar-950">{entry.full_name}</p><p className="text-[10px] text-slate-400">CPF {formatCpf(entry.cpf)}</p></td>
+                        <td className="px-4 py-4 text-xs font-bold text-potiguar-800">{entry.store}</td>
+                        <td className="px-4 py-4 text-xs text-slate-500">{entry.home_team} x {entry.away_team}</td>
+                        <td className="px-4 py-4 font-display text-lg font-extrabold text-potiguar-900">{entry.home_score} × {entry.away_score}</td>
+                        <td className="px-4 py-4 font-display text-lg font-extrabold text-potiguar-900">{result ? `${result.homeScore} × ${result.awayScore}` : "—"}</td>
+                        <td className="px-4 py-4"><span className={`rounded-xl px-3 py-2 text-xs font-extrabold ${points === 4 ? "bg-potiguar-lime/25 text-potiguar-800" : points === 2 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400"}`}>{points} pts</span></td>
+                        <td className="px-5 py-4 text-right text-xs text-slate-400">{new Date(entry.submitted_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -1171,13 +1229,13 @@ function AdminPage({ setToast, predictionEntries }) {
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Loja</span><select aria-label="Loja da venda" value={newSale.store} onChange={e=>{const store=e.target.value; const sellers=users.filter(user=>user.profile==="Vendedor"&&user.store===store); const products=assignments.filter(item=>item.store===store); setNewSale({...newSale,store,seller:sellers[0]?.name||"",productId:products[0]?.productId||""});}} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs">{fixedStores.map(store=><option key={store}>{store}</option>)}</select></label>
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Vendedor</span><select aria-label="Vendedor da venda" value={newSale.seller} onChange={e=>setNewSale({...newSale,seller:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="">Selecione</option>{sellersForSale.map(user=><option key={user.cpf}>{user.name}</option>)}</select></label>
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Produto foco</span><select aria-label="Produto vendido" value={newSale.productId} onChange={e=>setNewSale({...newSale,productId:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="">Selecione</option>{productsForSale.map(item=>{const product=productCatalog.find(product=>product.id===item.productId);return <option key={item.productId} value={item.productId}>{product?.sku} • {product?.name}</option>;})}</select></label>
-            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Quantidade</span><input aria-label="Quantidade vendida" type="number" min="1" value={newSale.quantity} onChange={e=>setNewSale({...newSale,quantity:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"/></label>
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Quantidade</span><input aria-label="Quantidade vendida" type="number" min="0.01" step="0.01" value={newSale.quantity} onChange={e=>setNewSale({...newSale,quantity:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"/></label>
             <button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Registrar venda</button>
           </form>
           <div className="mt-5 overflow-x-auto">
             <table className="w-full min-w-[650px] text-left">
               <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"><tr><th className="px-4 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Produto</th><th className="px-4 py-3 text-right">Quantidade</th></tr></thead>
-              <tbody className="divide-y divide-slate-100">{salesEntries.map(entry=>{const product=productCatalog.find(product=>product.id===entry.productId);return <tr key={entry.id}><td className="px-4 py-3 text-xs font-extrabold text-potiguar-950">{entry.seller}</td><td className="px-4 py-3 text-xs text-slate-500">{entry.store}</td><td className="px-4 py-3 text-xs text-slate-500">{product?.sku} • {product?.name}</td><td className="px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800">{entry.quantity}</td></tr>;})}</tbody>
+              <tbody className="divide-y divide-slate-100">{salesEntries.map(entry=>{const product=productCatalog.find(product=>product.id===entry.productId);return <tr key={entry.id}><td className="px-4 py-3 text-xs font-extrabold text-potiguar-950">{entry.seller}</td><td className="px-4 py-3 text-xs text-slate-500">{entry.store}</td><td className="px-4 py-3 text-xs text-slate-500">{entry.productSku || product?.sku} • {entry.productName || product?.name}</td><td className="px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800">{entry.quantity}</td></tr>;})}</tbody>
             </table>
           </div>
         </section>

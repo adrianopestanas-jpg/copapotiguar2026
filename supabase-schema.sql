@@ -170,6 +170,18 @@ create table if not exists prediction_submissions (
   unique (cpf, match_id)
 );
 
+create table if not exists sales_entries (
+  id bigserial primary key,
+  seller_cpf varchar(11) not null,
+  seller_name text not null,
+  store text not null,
+  product_id text not null,
+  product_sku text not null,
+  product_name text not null,
+  quantity numeric(12,2) not null check (quantity > 0),
+  created_at timestamptz not null default now()
+);
+
 create table awards (
   id uuid primary key default gen_random_uuid(),
   name text not null,

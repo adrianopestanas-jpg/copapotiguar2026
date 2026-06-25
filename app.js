@@ -307,8 +307,25 @@ const games = [{
   awayFlag: "🇧🇷",
   venue: "Miami Stadium"
 }];
-const predictionClosesAt = new Date("2026-06-24T18:59:59-03:00");
+const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
 const getPredictionClosed = () => new Date() > predictionClosesAt;
+const matchResults = {
+  1: {
+    homeScore: 0,
+    awayScore: 3
+  }
+};
+const getPredictionPoints = entry => {
+  const result = matchResults[entry.match_id];
+  if (!result) return 0;
+  const predictedHome = Number(entry.home_score);
+  const predictedAway = Number(entry.away_score);
+  const exact = predictedHome === result.homeScore && predictedAway === result.awayScore;
+  if (exact) return 4;
+  const predictedOutcome = Math.sign(predictedHome - predictedAway);
+  const resultOutcome = Math.sign(result.homeScore - result.awayScore);
+  return predictedOutcome === resultOutcome ? 2 : 0;
+};
 function Brand({
   compact = false
 }) {
@@ -890,7 +907,7 @@ function Guesses({
     className: "rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block"
-  }, "Regra da rodada"), "A janela fica aberta hoje, 24 de junho, somente até 18h59."), /*#__PURE__*/React.createElement("button", {
+  }, "Regra da rodada"), "Janela reaberta para teste hoje até 23h59."), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage("home"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
   }, "Voltar e ler o comunicado"))));
@@ -909,7 +926,7 @@ function Guesses({
     className: "mt-6 font-display text-3xl font-extrabold"
   }, "Palpites encerrados"), /*#__PURE__*/React.createElement("p", {
     className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60"
-  }, "A janela de palpites fechou às 18h59 de hoje, antes do jogo Escócia x Brasil.")), /*#__PURE__*/React.createElement("div", {
+  }, "A janela de teste de palpites foi encerrada.")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 sm:p-8"
   }, /*#__PURE__*/React.createElement("div", {
     className: "rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900"
@@ -929,20 +946,20 @@ function Guesses({
     className: "flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"
   }, /*#__PURE__*/React.createElement("span", {
     className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
-  }), " Aberto até 18:59"), /*#__PURE__*/React.createElement("h2", {
+  }), " Teste aberto até 23:59"), /*#__PURE__*/React.createElement("h2", {
     className: "mt-3 font-display text-3xl font-extrabold"
-  }, "Palpite teste: Brasil hoje"), /*#__PURE__*/React.createElement("p", {
+  }, "Teste de palpite: Brasil"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
-  }, "Escócia x Brasil • Horário de Fortaleza. Placar exato vale 4 pontos!")), /*#__PURE__*/React.createElement("div", {
+  }, "Resultado simulado: Escócia 0 x 3 Brasil. Placar exato vale 4 pontos; vencedor vale 2.")), /*#__PURE__*/React.createElement("div", {
     className: "glass flex items-center gap-3 rounded-2xl px-4 py-3"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "clock",
     className: "text-potiguar-lime"
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
-  }, "Fechamento"), /*#__PURE__*/React.createElement("p", {
+  }, "Fechamento do teste"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-lg font-extrabold"
-  }, "18h59"))))), /*#__PURE__*/React.createElement("div", {
+  }, "23h59"))))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, games.map(game => /*#__PURE__*/React.createElement("article", {
     key: game.id,
@@ -1293,6 +1310,21 @@ function AdminPage({
     acc[entry.seller].quantity += Number(entry.quantity);
     return acc;
   }, {})).sort((a, b) => b.quantity - a.quantity);
+  const loadSales = async () => {
+    try {
+      const response = await fetch("/api/sales", {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      setSalesEntries(data.sales || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar vendas.", error);
+    }
+  };
+  useEffect(() => {
+    loadSales();
+  }, []);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const createUser = event => {
     event.preventDefault();
@@ -1371,18 +1403,38 @@ function AdminPage({
     });
     setToast("Produto cadastrado no piloto.");
   };
-  const addSale = event => {
+  const addSale = async event => {
     event.preventDefault();
-    if (!newSale.seller || !newSale.productId || Number(newSale.quantity) < 1) {
+    if (!newSale.seller || !newSale.productId || Number(newSale.quantity) <= 0) {
       setToast("Selecione vendedor, produto e quantidade.");
       return;
     }
-    setSalesEntries([{
-      id: Date.now(),
-      ...newSale,
-      quantity: Number(newSale.quantity)
-    }, ...salesEntries]);
-    setToast("Venda do produto foco registrada.");
+    const seller = users.find(user => user.name === newSale.seller && user.store === newSale.store);
+    const product = productCatalog.find(product => product.id === newSale.productId);
+    try {
+      const response = await fetch("/api/sales", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          sellerCpf: seller?.cpf,
+          seller: newSale.seller,
+          store: newSale.store,
+          productId: newSale.productId,
+          productSku: product?.sku,
+          productName: product?.name,
+          quantity: Number(newSale.quantity)
+        })
+      });
+      if (!response.ok) throw new Error("Falha ao registrar venda.");
+      const data = await response.json();
+      setSalesEntries(data.sales || []);
+      setToast("Venda do produto foco registrada no servidor.");
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível registrar a venda no servidor.");
+    }
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
@@ -1570,29 +1622,43 @@ function AdminPage({
   }, "Jogo"), /*#__PURE__*/React.createElement("th", {
     className: "px-4 py-3"
   }, "Palpite"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-3"
+  }, "Resultado"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-3"
+  }, "Pontos"), /*#__PURE__*/React.createElement("th", {
     className: "px-5 py-3 text-right"
   }, "Enviado em"))), /*#__PURE__*/React.createElement("tbody", {
     className: "divide-y divide-slate-100"
-  }, predictionEntries.map(entry => /*#__PURE__*/React.createElement("tr", {
-    key: `${entry.cpf}-${entry.match_id}-${entry.submitted_at}`
-  }, /*#__PURE__*/React.createElement("td", {
-    className: "px-5 py-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold text-potiguar-950"
-  }, entry.full_name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, "CPF ", formatCpf(entry.cpf))), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4 text-xs font-bold text-potiguar-800"
-  }, entry.store), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4 text-xs text-slate-500"
-  }, entry.home_team, " x ", entry.away_team), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900"
-  }, entry.home_score, " × ", entry.away_score), /*#__PURE__*/React.createElement("td", {
-    className: "px-5 py-4 text-right text-xs text-slate-400"
-  }, new Date(entry.submitted_at).toLocaleString("pt-BR", {
-    dateStyle: "short",
-    timeStyle: "short"
-  })))))))), module === "dashboard" && /*#__PURE__*/React.createElement("section", {
+  }, predictionEntries.map(entry => {
+    const result = matchResults[entry.match_id];
+    const points = getPredictionPoints(entry);
+    return /*#__PURE__*/React.createElement("tr", {
+      key: `${entry.cpf}-${entry.match_id}-${entry.submitted_at}`
+    }, /*#__PURE__*/React.createElement("td", {
+      className: "px-5 py-4"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "text-xs font-extrabold text-potiguar-950"
+    }, entry.full_name), /*#__PURE__*/React.createElement("p", {
+      className: "text-[10px] text-slate-400"
+    }, "CPF ", formatCpf(entry.cpf))), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4 text-xs font-bold text-potiguar-800"
+    }, entry.store), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4 text-xs text-slate-500"
+    }, entry.home_team, " x ", entry.away_team), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900"
+    }, entry.home_score, " × ", entry.away_score), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900"
+    }, result ? `${result.homeScore} × ${result.awayScore}` : "—"), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `rounded-xl px-3 py-2 text-xs font-extrabold ${points === 4 ? "bg-potiguar-lime/25 text-potiguar-800" : points === 2 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400"}`
+    }, points, " pts")), /*#__PURE__*/React.createElement("td", {
+      className: "px-5 py-4 text-right text-xs text-slate-400"
+    }, new Date(entry.submitted_at).toLocaleString("pt-BR", {
+      dateStyle: "short",
+      timeStyle: "short"
+    })));
+  }))))), module === "dashboard" && /*#__PURE__*/React.createElement("section", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.25fr_.75fr]"
@@ -1873,7 +1939,8 @@ function AdminPage({
   }, "Quantidade"), /*#__PURE__*/React.createElement("input", {
     "aria-label": "Quantidade vendida",
     type: "number",
-    min: "1",
+    min: "0.01",
+    step: "0.01",
     value: newSale.quantity,
     onChange: e => setNewSale({
       ...newSale,
@@ -1909,7 +1976,7 @@ function AdminPage({
       className: "px-4 py-3 text-xs text-slate-500"
     }, entry.store), /*#__PURE__*/React.createElement("td", {
       className: "px-4 py-3 text-xs text-slate-500"
-    }, product?.sku, " • ", product?.name), /*#__PURE__*/React.createElement("td", {
+    }, entry.productSku || product?.sku, " • ", entry.productName || product?.name), /*#__PURE__*/React.createElement("td", {
       className: "px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800"
     }, entry.quantity));
   }))))), module === "users" && /*#__PURE__*/React.createElement("section", {

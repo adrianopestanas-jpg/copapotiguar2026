@@ -43,6 +43,18 @@ const ensureSchema = async () => {
       submitted_at timestamptz not null default now(),
       unique (cpf, match_id)
     );
+
+    create table if not exists sales_entries (
+      id bigserial primary key,
+      seller_cpf varchar(11) not null,
+      seller_name text not null,
+      store text not null,
+      product_id text not null,
+      product_sku text not null,
+      product_name text not null,
+      quantity numeric(12,2) not null check (quantity > 0),
+      created_at timestamptz not null default now()
+    );
   `);
 };
 
@@ -121,6 +133,72 @@ const server = http.createServer(async (request, response) => {
       } finally {
         client.release();
       }
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/sales") {
+      const result = await pool.query(`
+        select id, seller_cpf, seller_name, store, product_id, product_sku, product_name, quantity, created_at
+          from sales_entries
+         order by created_at desc, id desc
+      `);
+      sendJson(response, 200, {
+        sales: result.rows.map(row => ({
+          id: row.id,
+          sellerCpf: row.seller_cpf,
+          seller: row.seller_name,
+          store: row.store,
+          productId: row.product_id,
+          productSku: row.product_sku,
+          productName: row.product_name,
+          quantity: Number(row.quantity),
+          createdAt: row.created_at,
+        })),
+      });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/sales") {
+      const payload = JSON.parse(await readBody(request) || "{}");
+      const sellerCpf = String(payload.sellerCpf || "").replace(/\D/g, "");
+      const sellerName = String(payload.seller || "").trim();
+      const store = String(payload.store || "").trim();
+      const productId = String(payload.productId || "").trim();
+      const productSku = String(payload.productSku || "").trim();
+      const productName = String(payload.productName || "").trim();
+      const quantity = Number(payload.quantity);
+
+      if (sellerCpf.length !== 11 || !sellerName || !store || !productId || !productSku || !productName || !Number.isFinite(quantity) || quantity <= 0) {
+        sendJson(response, 400, { error: "Dados da venda incompletos." });
+        return;
+      }
+
+      const result = await pool.query(`
+        insert into sales_entries
+          (seller_cpf, seller_name, store, product_id, product_sku, product_name, quantity, created_at)
+        values ($1,$2,$3,$4,$5,$6,$7,now())
+        returning id, seller_cpf, seller_name, store, product_id, product_sku, product_name, quantity, created_at
+      `, [sellerCpf, sellerName, store, productId, productSku, productName, quantity]);
+
+      const salesResult = await pool.query(`
+        select id, seller_cpf, seller_name, store, product_id, product_sku, product_name, quantity, created_at
+          from sales_entries
+         order by created_at desc, id desc
+      `);
+      sendJson(response, 200, {
+        sale: result.rows[0],
+        sales: salesResult.rows.map(row => ({
+          id: row.id,
+          sellerCpf: row.seller_cpf,
+          seller: row.seller_name,
+          store: row.store,
+          productId: row.product_id,
+          productSku: row.product_sku,
+          productName: row.product_name,
+          quantity: Number(row.quantity),
+          createdAt: row.created_at,
+        })),
+      });
       return;
     }
 
