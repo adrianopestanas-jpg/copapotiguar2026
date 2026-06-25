@@ -2477,7 +2477,8 @@ function AdminPage({
 function App() {
   const restoredUser = (() => {
     try {
-      const savedCpf = localStorage.getItem("copaPotiguarSessionCpf");
+      localStorage.removeItem("copaPotiguarSessionCpf");
+      const savedCpf = sessionStorage.getItem("copaPotiguarSessionCpf");
       return savedCpf ? demoUsers[onlyDigits(savedCpf)] || null : null;
     } catch (error) {
       return null;
@@ -2660,7 +2661,8 @@ function App() {
   };
   const login = nextUser => {
     try {
-      localStorage.setItem("copaPotiguarSessionCpf", onlyDigits(nextUser.cpf));
+      localStorage.removeItem("copaPotiguarSessionCpf");
+      sessionStorage.setItem("copaPotiguarSessionCpf", onlyDigits(nextUser.cpf));
     } catch (error) {
       console.warn("Não foi possível salvar a sessão local.", error);
     }
@@ -2671,6 +2673,7 @@ function App() {
   const logout = () => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
+      sessionStorage.removeItem("copaPotiguarSessionCpf");
     } catch (error) {
       console.warn("Não foi possível limpar a sessão local.", error);
     }
