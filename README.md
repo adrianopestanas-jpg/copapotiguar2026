@@ -58,6 +58,7 @@ A aplicação ficará em `http://IP-DA-VPS` ou `http://copa2026.apotiguar.com.br
 ## Estrutura preparada
 
 - `Dockerfile`: imagem Nginx para o frontend.
+- `Dockerfile.api`: API Node.js para gravar e listar palpites no PostgreSQL.
 - `docker-compose.yml`: frontend e PostgreSQL 16.
 - `docker-compose.https.yml`: override para publicar HTTPS com certificado Let’s Encrypt.
 - `nginx.conf`: SPA, cache, cabeçalhos e health check.
@@ -78,6 +79,7 @@ A aplicação ficará em `http://IP-DA-VPS` ou `http://copa2026.apotiguar.com.br
 - administrar premiações;
 - acompanhar rankings;
 - consultar, pesquisar e filtrar todos os usuários cadastrados;
+- visualizar palpites enviados pelos vendedores;
 - visualizar dashboards;
 - controlar e encerrar rodadas.
 

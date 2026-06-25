@@ -3,6 +3,7 @@
 Este roteiro publica a aplicação em uma VPS Ubuntu usando Docker Compose com:
 
 - Nginx servindo a aplicação web;
+- API Node.js para gravar e listar palpites;
 - PostgreSQL 16 em container separado;
 - código-fonte vindo do GitHub;
 - porta HTTP exposta pela VPS.

@@ -130,6 +130,7 @@ const demoUsers = registeredUsers.reduce((acc, participant, index) => {
     originalRole: participant.originalJob || participant.job,
     accessRole: participant.profile === "Administrador" ? "admin" : participant.profile === "Liderança" ? "leadership" : "seller",
     store: participant.store,
+    cpf: participant.cpf,
     points: 0,
     position: null,
     initials: makeInitials(participant.name),
@@ -613,7 +614,7 @@ function Home({ acknowledged, setAcknowledged, setPage, setToast, user }) {
   );
 }
 
-function Guesses({ acknowledged, setPage, setToast }) {
+function Guesses({ acknowledged, setPage, setToast, user, onSavePrediction }) {
   const [scores, setScores] = useState({ 1: ["", ""] });
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
@@ -718,7 +719,13 @@ function Guesses({ acknowledged, setPage, setToast }) {
         ))}
       </div>
       <div className="sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5">
-        <button disabled={!complete || saved} onClick={() => { setSaved(true); setToast("Palpites salvos! Boa sorte na rodada."); }} className={`flex w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-extrabold transition ${complete && !saved ? "bg-potiguar-900 text-white hover:bg-potiguar-800" : saved ? "bg-emerald-50 text-potiguar-700" : "cursor-not-allowed bg-slate-100 text-slate-400"}`}>
+        <button disabled={!complete || saved} onClick={async () => {
+          const ok = await onSavePrediction(user, scores);
+          if (ok) {
+            setSaved(true);
+            setToast("Palpites salvos e enviados para o admin.");
+          }
+        }} className={`flex w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-extrabold transition ${complete && !saved ? "bg-potiguar-900 text-white hover:bg-potiguar-800" : saved ? "bg-emerald-50 text-potiguar-700" : "cursor-not-allowed bg-slate-100 text-slate-400"}`}>
           <Icon name={saved ? "check" : "ball"} />
           {saved ? "Palpites salvos" : complete ? "Salvar palpites" : "Preencha todos os placares"}
         </button>
@@ -853,7 +860,7 @@ function StorePage({ user }) {
   );
 }
 
-function AdminPage({ setToast }) {
+function AdminPage({ setToast, predictionEntries }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
@@ -874,6 +881,7 @@ function AdminPage({ setToast }) {
     ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"],
     ["fire", "Produtos", "Cadastrar o produto foco", "products"],
     ["target", "Metas", "Definir objetivos por loja", "goals"],
+    ["ball", "Palpites", "Visualizar palpites enviados", "predictions"],
     ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"],
     ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"],
     ["trophy", "Premiações", "Administrar reconhecimentos", "awards"],
@@ -986,7 +994,7 @@ function AdminPage({ setToast }) {
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard icon="users" label="Usuários do piloto" value={users.length} detail={`${users.filter(u => u.profile === "Vendedor").length} vendedores • ${users.filter(u => u.profile === "Liderança").length} líderes`} accent="green"/>
         <StatCard icon="megaphone" label="Leituras" value="0" detail="Aguardando confirmações" accent="lime"/>
-        <StatCard icon="ball" label="Palpites" value="0" detail="Aguardando envio" accent="white"/>
+        <StatCard icon="ball" label="Palpites" value={predictionEntries.length} detail={predictionEntries.length ? "Enviados para apuração" : "Aguardando envio"} accent="white"/>
         <StatCard icon="store" label="Loja na meta" value="0/1" detail="Imperatriz em apuração" accent="white"/>
       </div>
       <section className="soft-card rounded-2xl p-5 sm:p-6">
@@ -1054,6 +1062,40 @@ function AdminPage({ setToast }) {
               ))}
             </div>
           </section>
+        </section>
+      )}
+      {module === "predictions" && (
+        <section className="soft-card overflow-hidden rounded-2xl">
+          <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Palpites enviados</p>
+              <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Escócia x Brasil</h3>
+              <p className="mt-1 text-xs text-slate-400">Lista consolidada dos palpites gravados no servidor.</p>
+            </div>
+            <span className="rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800">{predictionEntries.length} PALPITES</span>
+          </div>
+          {predictionEntries.length === 0 ? (
+            <div className="p-6 text-sm text-slate-400">Nenhum palpite gravado ainda. Os palpites feitos antes desta atualização não foram armazenados no servidor.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[760px] text-left">
+                <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                  <tr><th className="px-5 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Jogo</th><th className="px-4 py-3">Palpite</th><th className="px-5 py-3 text-right">Enviado em</th></tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {predictionEntries.map(entry => (
+                    <tr key={`${entry.cpf}-${entry.match_id}-${entry.submitted_at}`}>
+                      <td className="px-5 py-4"><p className="text-xs font-extrabold text-potiguar-950">{entry.full_name}</p><p className="text-[10px] text-slate-400">CPF {formatCpf(entry.cpf)}</p></td>
+                      <td className="px-4 py-4 text-xs font-bold text-potiguar-800">{entry.store}</td>
+                      <td className="px-4 py-4 text-xs text-slate-500">{entry.home_team} x {entry.away_team}</td>
+                      <td className="px-4 py-4 font-display text-lg font-extrabold text-potiguar-900">{entry.home_score} × {entry.away_score}</td>
+                      <td className="px-5 py-4 text-right text-xs text-slate-400">{new Date(entry.submitted_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
       )}
       {module === "dashboard" && (
@@ -1241,6 +1283,7 @@ function App() {
   const [acknowledged, setAcknowledged] = useState(false);
   const [user, setUser] = useState(null);
   const [toast, setToast] = useState("");
+  const [predictionEntries, setPredictionEntries] = useState([]);
 
   useEffect(() => {
     if (!toast) return;
@@ -1249,6 +1292,51 @@ function App() {
   }, [toast]);
 
   useEffect(() => window.scrollTo({ top: 0, behavior: "smooth" }), [page]);
+
+  const loadPredictions = async () => {
+    try {
+      const response = await fetch("/api/predictions", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setPredictionEntries(data.predictions || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar palpites.", error);
+    }
+  };
+
+  useEffect(() => {
+    loadPredictions();
+  }, []);
+
+  const savePrediction = async (currentUser, scores) => {
+    try {
+      const predictions = games.map(game => ({
+        matchId: game.id,
+        homeTeam: game.home,
+        awayTeam: game.away,
+        homeScore: Number(scores[game.id]?.[0]),
+        awayScore: Number(scores[game.id]?.[1]),
+      }));
+      const response = await fetch("/api/predictions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cpf: currentUser.cpf,
+          fullName: currentUser.name,
+          accessRole: currentUser.accessRole,
+          store: currentUser.store,
+          predictions,
+        }),
+      });
+      if (!response.ok) throw new Error("Falha ao salvar palpite.");
+      await loadPredictions();
+      return true;
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível enviar o palpite para o servidor.");
+      return false;
+    }
+  };
 
   const login = (nextUser) => {
     setUser(nextUser);
@@ -1272,10 +1360,10 @@ function App() {
         <Topbar page={page} user={user} onLogout={logout} />
         <main className="mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10">
           {page === "home" && <Home acknowledged={acknowledged} setAcknowledged={setAcknowledged} setPage={setPage} setToast={setToast} user={user} />}
-          {page === "guesses" && <Guesses acknowledged={acknowledged} setPage={setPage} setToast={setToast} />}
+          {page === "guesses" && <Guesses acknowledged={acknowledged} setPage={setPage} setToast={setToast} user={user} onSavePrediction={savePrediction} />}
           {page === "ranking" && <RankingPage user={user} />}
           {page === "store" && <StorePage user={user} />}
-          {page === "admin" && <AdminPage setToast={setToast} />}
+          {page === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} />}
         </main>
       </div>
       <MobileNav page={page} setPage={setPage} user={user} />

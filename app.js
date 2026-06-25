@@ -192,6 +192,7 @@ const demoUsers = registeredUsers.reduce((acc, participant, index) => {
     originalRole: participant.originalJob || participant.job,
     accessRole: participant.profile === "Administrador" ? "admin" : participant.profile === "Liderança" ? "leadership" : "seller",
     store: participant.store,
+    cpf: participant.cpf,
     points: 0,
     position: null,
     initials: makeInitials(participant.name)
@@ -844,7 +845,9 @@ function Home({
 function Guesses({
   acknowledged,
   setPage,
-  setToast
+  setToast,
+  user,
+  onSavePrediction
 }) {
   const [scores, setScores] = useState({
     1: ["", ""]
@@ -995,9 +998,12 @@ function Guesses({
     className: "sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5"
   }, /*#__PURE__*/React.createElement("button", {
     disabled: !complete || saved,
-    onClick: () => {
-      setSaved(true);
-      setToast("Palpites salvos! Boa sorte na rodada.");
+    onClick: async () => {
+      const ok = await onSavePrediction(user, scores);
+      if (ok) {
+        setSaved(true);
+        setToast("Palpites salvos e enviados para o admin.");
+      }
     },
     className: `flex w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-extrabold transition ${complete && !saved ? "bg-potiguar-900 text-white hover:bg-potiguar-800" : saved ? "bg-emerald-50 text-potiguar-700" : "cursor-not-allowed bg-slate-100 text-slate-400"}`
   }, /*#__PURE__*/React.createElement(Icon, {
@@ -1194,7 +1200,8 @@ function StorePage({
   })))))))));
 }
 function AdminPage({
-  setToast
+  setToast,
+  predictionEntries
 }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
@@ -1235,7 +1242,7 @@ function AdminPage({
       quantity: "1"
     };
   });
-  const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Produtos", "Cadastrar o produto foco", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
+  const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Produtos", "Cadastrar o produto foco", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
   const moduleContent = {
     announcements: {
       title: "Manutenção de comunicados",
@@ -1408,8 +1415,8 @@ function AdminPage({
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "ball",
     label: "Palpites",
-    value: "0",
-    detail: "Aguardando envio",
+    value: predictionEntries.length,
+    detail: predictionEntries.length ? "Enviados para apuração" : "Aguardando envio",
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "store",
@@ -1534,6 +1541,57 @@ function AdminPage({
     style: {
       width: `${Math.min(store.sold / store.goal * 100, 100)}%`
     }
+  })))))))), module === "predictions" && /*#__PURE__*/React.createElement("section", {
+    className: "soft-card overflow-hidden rounded-2xl"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Palpites enviados"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Escócia x Brasil"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-400"
+  }, "Lista consolidada dos palpites gravados no servidor.")), /*#__PURE__*/React.createElement("span", {
+    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
+  }, predictionEntries.length, " PALPITES")), predictionEntries.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "p-6 text-sm text-slate-400"
+  }, "Nenhum palpite gravado ainda. Os palpites feitos antes desta atualização não foram armazenados no servidor.") : /*#__PURE__*/React.createElement("div", {
+    className: "overflow-x-auto"
+  }, /*#__PURE__*/React.createElement("table", {
+    className: "w-full min-w-[760px] text-left"
+  }, /*#__PURE__*/React.createElement("thead", {
+    className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"
+  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
+    className: "px-5 py-3"
+  }, "Vendedor"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-3"
+  }, "Loja"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-3"
+  }, "Jogo"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-3"
+  }, "Palpite"), /*#__PURE__*/React.createElement("th", {
+    className: "px-5 py-3 text-right"
+  }, "Enviado em"))), /*#__PURE__*/React.createElement("tbody", {
+    className: "divide-y divide-slate-100"
+  }, predictionEntries.map(entry => /*#__PURE__*/React.createElement("tr", {
+    key: `${entry.cpf}-${entry.match_id}-${entry.submitted_at}`
+  }, /*#__PURE__*/React.createElement("td", {
+    className: "px-5 py-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-extrabold text-potiguar-950"
+  }, entry.full_name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-400"
+  }, "CPF ", formatCpf(entry.cpf))), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-4 text-xs font-bold text-potiguar-800"
+  }, entry.store), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-4 text-xs text-slate-500"
+  }, entry.home_team, " x ", entry.away_team), /*#__PURE__*/React.createElement("td", {
+    className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900"
+  }, entry.home_score, " × ", entry.away_score), /*#__PURE__*/React.createElement("td", {
+    className: "px-5 py-4 text-right text-xs text-slate-400"
+  }, new Date(entry.submitted_at).toLocaleString("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short"
   })))))))), module === "dashboard" && /*#__PURE__*/React.createElement("section", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2100,6 +2158,7 @@ function App() {
   const [acknowledged, setAcknowledged] = useState(false);
   const [user, setUser] = useState(null);
   const [toast, setToast] = useState("");
+  const [predictionEntries, setPredictionEntries] = useState([]);
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(""), 3200);
@@ -2109,6 +2168,52 @@ function App() {
     top: 0,
     behavior: "smooth"
   }), [page]);
+  const loadPredictions = async () => {
+    try {
+      const response = await fetch("/api/predictions", {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      setPredictionEntries(data.predictions || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar palpites.", error);
+    }
+  };
+  useEffect(() => {
+    loadPredictions();
+  }, []);
+  const savePrediction = async (currentUser, scores) => {
+    try {
+      const predictions = games.map(game => ({
+        matchId: game.id,
+        homeTeam: game.home,
+        awayTeam: game.away,
+        homeScore: Number(scores[game.id]?.[0]),
+        awayScore: Number(scores[game.id]?.[1])
+      }));
+      const response = await fetch("/api/predictions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          cpf: currentUser.cpf,
+          fullName: currentUser.name,
+          accessRole: currentUser.accessRole,
+          store: currentUser.store,
+          predictions
+        })
+      });
+      if (!response.ok) throw new Error("Falha ao salvar palpite.");
+      await loadPredictions();
+      return true;
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível enviar o palpite para o servidor.");
+      return false;
+    }
+  };
   const login = nextUser => {
     setUser(nextUser);
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
@@ -2147,13 +2252,16 @@ function App() {
   }), page === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
     acknowledged: acknowledged,
     setPage: setPage,
-    setToast: setToast
+    setToast: setToast,
+    user: user,
+    onSavePrediction: savePrediction
   }), page === "ranking" && /*#__PURE__*/React.createElement(RankingPage, {
     user: user
   }), page === "store" && /*#__PURE__*/React.createElement(StorePage, {
     user: user
   }), page === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
-    setToast: setToast
+    setToast: setToast,
+    predictionEntries: predictionEntries
   }))), /*#__PURE__*/React.createElement(MobileNav, {
     page: page,
     setPage: setPage,

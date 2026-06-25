@@ -153,6 +153,23 @@ create table predictions (
   primary key (match_id, user_id)
 );
 
+-- Registro simplificado usado pela API do piloto para listar palpites no admin.
+-- Mantém os dados do palpite mesmo antes da autenticação definitiva via backend.
+create table if not exists prediction_submissions (
+  id bigserial primary key,
+  cpf varchar(11) not null,
+  full_name text not null,
+  access_role text not null,
+  store text not null,
+  match_id integer not null,
+  home_team text not null,
+  away_team text not null,
+  home_score integer not null check (home_score >= 0),
+  away_score integer not null check (away_score >= 0),
+  submitted_at timestamptz not null default now(),
+  unique (cpf, match_id)
+);
+
 create table awards (
   id uuid primary key default gen_random_uuid(),
   name text not null,
