@@ -78,11 +78,13 @@ const normalizeStore = store => ({
 
 const resolveProfile = (job, explicitProfile) => {
   if (explicitProfile === "Administrador") return "Administrador";
+  if (explicitProfile === "Liderança") return "Liderança";
   return /(GERENTE|SUBGERENTE)/.test(textKey(job)) ? "Liderança" : "Vendedor";
 };
 
 const resolveJob = (job, explicitProfile) => {
   if (explicitProfile === "Administrador") return toTitleCase(job);
+  if (explicitProfile === "Liderança") return "Líder de loja";
   return /(GERENTE|SUBGERENTE)/.test(textKey(job)) ? "Líder de loja" : "Vendedor";
 };
 

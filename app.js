@@ -154,10 +154,12 @@ const normalizeStore = store => ({
 })[textKey(store)] || toTitleCase(store);
 const resolveProfile = (job, explicitProfile) => {
   if (explicitProfile === "Administrador") return "Administrador";
+  if (explicitProfile === "Liderança") return "Liderança";
   return /(GERENTE|SUBGERENTE)/.test(textKey(job)) ? "Liderança" : "Vendedor";
 };
 const resolveJob = (job, explicitProfile) => {
   if (explicitProfile === "Administrador") return toTitleCase(job);
+  if (explicitProfile === "Liderança") return "Líder de loja";
   return /(GERENTE|SUBGERENTE)/.test(textKey(job)) ? "Líder de loja" : "Vendedor";
 };
 const makeInitials = name => String(name ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join("");
