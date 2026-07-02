@@ -5,6 +5,8 @@ const port = Number(process.env.PORT || 3000);
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
+const footballDataToken = process.env.FOOTBALL_DATA_API_TOKEN || "";
+const footballDataCompetition = process.env.FOOTBALL_DATA_COMPETITION || "WC";
 
 const sendJson = (response, status, payload) => {
   response.writeHead(status, {
@@ -25,6 +27,51 @@ const readBody = request => new Promise((resolve, reject) => {
   });
   request.on("end", () => resolve(body));
   request.on("error", reject);
+});
+
+const mapFootballDataStatus = status => ({
+  SCHEDULED: "scheduled",
+  TIMED: "scheduled",
+  IN_PLAY: "live",
+  PAUSED: "live",
+  FINISHED: "finished",
+  POSTPONED: "postponed",
+  SUSPENDED: "suspended",
+  CANCELED: "canceled",
+}[String(status || "").toUpperCase()] || "scheduled");
+
+const mapFootballDataStage = stage => ({
+  LAST_32: { id: "fase-32", phase: "16 avos", name: "16 avos" },
+  ROUND_OF_32: { id: "fase-32", phase: "16 avos", name: "16 avos" },
+  LAST_16: { id: "oitavas", phase: "Oitavas", name: "Oitavas de final" },
+  ROUND_OF_16: { id: "oitavas", phase: "Oitavas", name: "Oitavas de final" },
+  QUARTER_FINALS: { id: "quartas", phase: "Quartas", name: "Quartas de final" },
+  SEMI_FINALS: { id: "semifinais", phase: "Semifinais", name: "Semifinais" },
+  THIRD_PLACE: { id: "terceiro-lugar", phase: "Terceiro lugar", name: "Disputa de terceiro lugar" },
+  FINAL: { id: "final", phase: "Final", name: "Final" },
+}[String(stage || "").toUpperCase()] || { id: "copa-2026", phase: String(stage || "Copa"), name: String(stage || "Copa 2026") });
+
+const mapMatchRow = row => ({
+  id: Number(row.external_match_id),
+  externalMatchId: Number(row.external_match_id),
+  competition: row.competition,
+  source: row.source,
+  roundId: row.round_id,
+  roundName: row.round_name,
+  phase: row.phase,
+  stage: row.stage,
+  status: row.status,
+  utcDate: row.utc_date,
+  kickoffAt: row.utc_date,
+  home: row.home_team,
+  away: row.away_team,
+  homeTeam: row.home_team,
+  awayTeam: row.away_team,
+  homeScore: row.home_score === null ? null : Number(row.home_score),
+  awayScore: row.away_score === null ? null : Number(row.away_score),
+  winner: row.winner,
+  venue: row.venue,
+  updatedAt: row.updated_at,
 });
 
 const ensureSchema = async () => {
@@ -62,12 +109,35 @@ const ensureSchema = async () => {
       full_name text not null,
       access_role text not null,
       store text not null,
+      round_id text not null,
+      round_name text not null,
       announcement_id text not null,
       announcement_title text not null,
       watched_seconds integer not null default 0 check (watched_seconds >= 0),
       read_at timestamptz not null default now(),
-      unique (cpf, announcement_id)
+      unique (cpf, round_id)
     );
+
+    alter table announcement_read_entries add column if not exists round_id text;
+    alter table announcement_read_entries add column if not exists round_name text;
+    update announcement_read_entries
+       set round_id = coalesce(round_id, announcement_id, 'legacy'),
+           round_name = coalesce(round_name, announcement_title, 'Rodada anterior')
+     where round_id is null or round_name is null;
+    alter table announcement_read_entries alter column round_id set not null;
+    alter table announcement_read_entries alter column round_name set not null;
+    alter table announcement_read_entries drop constraint if exists announcement_read_entries_cpf_announcement_id_key;
+    do $$
+    begin
+      if not exists (
+        select 1
+          from pg_constraint
+         where conname = 'announcement_read_entries_cpf_round_id_key'
+           and conrelid = 'announcement_read_entries'::regclass
+      ) then
+        alter table announcement_read_entries add constraint announcement_read_entries_cpf_round_id_key unique (cpf, round_id);
+      end if;
+    end $$;
 
     create table if not exists profile_photo_entries (
       cpf varchar(11) primary key,
@@ -80,6 +150,26 @@ const ensureSchema = async () => {
     create table if not exists app_settings (
       key text primary key,
       value jsonb not null,
+      updated_at timestamptz not null default now()
+    );
+
+    create table if not exists world_cup_matches (
+      external_match_id integer primary key,
+      competition text not null default 'WC',
+      source text not null default 'football-data.org',
+      round_id text not null,
+      round_name text not null,
+      phase text not null,
+      stage text,
+      status text not null,
+      utc_date timestamptz not null,
+      home_team text not null,
+      away_team text not null,
+      home_score integer,
+      away_score integer,
+      winner text,
+      venue text,
+      raw jsonb,
       updated_at timestamptz not null default now()
     );
   `);
@@ -114,6 +204,111 @@ const server = http.createServer(async (request, response) => {
       `);
       sendJson(response, 200, {
         settings: Object.fromEntries(result.rows.map(row => [row.key, row.value])),
+      });
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/api/world-cup/matches") {
+      const result = await pool.query(`
+        select external_match_id, competition, source, round_id, round_name, phase, stage, status,
+               utc_date, home_team, away_team, home_score, away_score, winner, venue, updated_at
+          from world_cup_matches
+         order by utc_date asc, external_match_id asc
+      `);
+      sendJson(response, 200, { matches: result.rows.map(mapMatchRow) });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/world-cup/sync") {
+      if (!footballDataToken) {
+        sendJson(response, 400, {
+          error: "FOOTBALL_DATA_API_TOKEN não configurado no servidor.",
+          hint: "Crie uma conta no football-data.org, gere a API key e configure a variável no Docker.",
+        });
+        return;
+      }
+
+      const apiUrl = `https://api.football-data.org/v4/competitions/${encodeURIComponent(footballDataCompetition)}/matches`;
+      const apiResponse = await fetch(apiUrl, {
+        headers: { "X-Auth-Token": footballDataToken },
+      });
+      const apiPayload = await apiResponse.json().catch(() => ({}));
+
+      if (!apiResponse.ok) {
+        sendJson(response, apiResponse.status, {
+          error: "Não foi possível sincronizar com football-data.org.",
+          details: apiPayload?.message || apiPayload?.error || "Erro externo.",
+        });
+        return;
+      }
+
+      const matches = Array.isArray(apiPayload.matches) ? apiPayload.matches : [];
+      const client = await pool.connect();
+      try {
+        await client.query("begin");
+        for (const match of matches) {
+          const stageInfo = mapFootballDataStage(match.stage);
+          const homeTeam = match.homeTeam?.shortName || match.homeTeam?.name || match.homeTeam?.tla || "A definir";
+          const awayTeam = match.awayTeam?.shortName || match.awayTeam?.name || match.awayTeam?.tla || "A definir";
+          const score = match.score?.fullTime || {};
+          const winner = match.score?.winner || null;
+          await client.query(`
+            insert into world_cup_matches
+              (external_match_id, competition, source, round_id, round_name, phase, stage, status,
+               utc_date, home_team, away_team, home_score, away_score, winner, venue, raw, updated_at)
+            values ($1,$2,'football-data.org',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,now())
+            on conflict (external_match_id) do update set
+              competition = excluded.competition,
+              round_id = excluded.round_id,
+              round_name = excluded.round_name,
+              phase = excluded.phase,
+              stage = excluded.stage,
+              status = excluded.status,
+              utc_date = excluded.utc_date,
+              home_team = excluded.home_team,
+              away_team = excluded.away_team,
+              home_score = excluded.home_score,
+              away_score = excluded.away_score,
+              winner = excluded.winner,
+              venue = excluded.venue,
+              raw = excluded.raw,
+              updated_at = now()
+          `, [
+            Number(match.id),
+            footballDataCompetition,
+            stageInfo.id,
+            stageInfo.name,
+            stageInfo.phase,
+            match.stage || "",
+            mapFootballDataStatus(match.status),
+            match.utcDate,
+            homeTeam,
+            awayTeam,
+            Number.isInteger(score.home) ? score.home : null,
+            Number.isInteger(score.away) ? score.away : null,
+            winner,
+            match.venue || "",
+            JSON.stringify(match),
+          ]);
+        }
+        await client.query("commit");
+      } catch (error) {
+        await client.query("rollback");
+        throw error;
+      } finally {
+        client.release();
+      }
+
+      const result = await pool.query(`
+        select external_match_id, competition, source, round_id, round_name, phase, stage, status,
+               utc_date, home_team, away_team, home_score, away_score, winner, venue, updated_at
+          from world_cup_matches
+         order by utc_date asc, external_match_id asc
+      `);
+      sendJson(response, 200, {
+        synced: matches.length,
+        competition: footballDataCompetition,
+        matches: result.rows.map(mapMatchRow),
       });
       return;
     }
@@ -225,7 +420,7 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/api/announcement-reads") {
       const result = await pool.query(`
-        select id, cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at
+        select id, cpf, full_name, access_role, store, round_id, round_name, announcement_id, announcement_title, watched_seconds, read_at
           from announcement_read_entries
          order by read_at desc, id desc
       `);
@@ -236,6 +431,8 @@ const server = http.createServer(async (request, response) => {
           fullName: row.full_name,
           accessRole: row.access_role,
           store: row.store,
+          roundId: row.round_id,
+          roundName: row.round_name,
           announcementId: row.announcement_id,
           announcementTitle: row.announcement_title,
           watchedSeconds: Number(row.watched_seconds),
@@ -251,31 +448,35 @@ const server = http.createServer(async (request, response) => {
       const fullName = String(payload.fullName || "").trim();
       const accessRole = String(payload.accessRole || "").trim();
       const store = String(payload.store || "").trim();
+      const roundId = String(payload.roundId || "").trim();
+      const roundName = String(payload.roundName || "").trim();
       const announcementId = String(payload.announcementId || "").trim();
       const announcementTitle = String(payload.announcementTitle || "").trim();
       const watchedSeconds = Math.max(0, Math.floor(Number(payload.watchedSeconds || 0)));
 
-      if (cpf.length !== 11 || !fullName || !store || !announcementId || !announcementTitle) {
+      if (cpf.length !== 11 || !fullName || !store || !roundId || !roundName || !announcementId || !announcementTitle) {
         sendJson(response, 400, { error: "Dados da leitura incompletos." });
         return;
       }
 
       const result = await pool.query(`
         insert into announcement_read_entries
-          (cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at)
-        values ($1,$2,$3,$4,$5,$6,$7,now())
-        on conflict (cpf, announcement_id) do update set
+          (cpf, full_name, access_role, store, round_id, round_name, announcement_id, announcement_title, watched_seconds, read_at)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,now())
+        on conflict (cpf, round_id) do update set
           full_name = excluded.full_name,
           access_role = excluded.access_role,
           store = excluded.store,
+          round_name = excluded.round_name,
+          announcement_id = excluded.announcement_id,
           announcement_title = excluded.announcement_title,
           watched_seconds = greatest(announcement_read_entries.watched_seconds, excluded.watched_seconds),
           read_at = announcement_read_entries.read_at
-        returning id, cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at
-      `, [cpf, fullName, accessRole, store, announcementId, announcementTitle, watchedSeconds]);
+        returning id, cpf, full_name, access_role, store, round_id, round_name, announcement_id, announcement_title, watched_seconds, read_at
+      `, [cpf, fullName, accessRole, store, roundId, roundName, announcementId, announcementTitle, watchedSeconds]);
 
       const readsResult = await pool.query(`
-        select id, cpf, full_name, access_role, store, announcement_id, announcement_title, watched_seconds, read_at
+        select id, cpf, full_name, access_role, store, round_id, round_name, announcement_id, announcement_title, watched_seconds, read_at
           from announcement_read_entries
          order by read_at desc, id desc
       `);
@@ -287,6 +488,8 @@ const server = http.createServer(async (request, response) => {
           fullName: result.rows[0].full_name,
           accessRole: result.rows[0].access_role,
           store: result.rows[0].store,
+          roundId: result.rows[0].round_id,
+          roundName: result.rows[0].round_name,
           announcementId: result.rows[0].announcement_id,
           announcementTitle: result.rows[0].announcement_title,
           watchedSeconds: Number(result.rows[0].watched_seconds),
@@ -295,12 +498,14 @@ const server = http.createServer(async (request, response) => {
         reads: readsResult.rows.map(row => ({
           id: row.id,
           cpf: row.cpf,
-          fullName: row.full_name,
-          accessRole: row.access_role,
-          store: row.store,
-          announcementId: row.announcement_id,
-          announcementTitle: row.announcement_title,
-          watchedSeconds: Number(row.watched_seconds),
+            fullName: row.full_name,
+            accessRole: row.access_role,
+            store: row.store,
+            roundId: row.round_id,
+            roundName: row.round_name,
+            announcementId: row.announcement_id,
+            announcementTitle: row.announcement_title,
+            watchedSeconds: Number(row.watched_seconds),
           readAt: row.read_at,
         })),
       });

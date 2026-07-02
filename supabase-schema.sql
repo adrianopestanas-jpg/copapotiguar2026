@@ -170,6 +170,26 @@ create table if not exists prediction_submissions (
   unique (cpf, match_id)
 );
 
+create table if not exists world_cup_matches (
+  external_match_id integer primary key,
+  competition text not null default 'WC',
+  source text not null default 'football-data.org',
+  round_id text not null,
+  round_name text not null,
+  phase text not null,
+  stage text,
+  status text not null,
+  utc_date timestamptz not null,
+  home_team text not null,
+  away_team text not null,
+  home_score integer,
+  away_score integer,
+  winner text,
+  venue text,
+  raw jsonb,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists sales_entries (
   id bigserial primary key,
   seller_cpf varchar(11) not null,
@@ -188,11 +208,13 @@ create table if not exists announcement_read_entries (
   full_name text not null,
   access_role text not null,
   store text not null,
+  round_id text not null,
+  round_name text not null,
   announcement_id text not null,
   announcement_title text not null,
   watched_seconds integer not null default 0 check (watched_seconds >= 0),
   read_at timestamptz not null default now(),
-  unique (cpf, announcement_id)
+  unique (cpf, round_id)
 );
 
 create table if not exists profile_photo_entries (

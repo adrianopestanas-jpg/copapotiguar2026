@@ -307,24 +307,70 @@ const games = [{
   away: "Brasil",
   homeFlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
   awayFlag: "🇧🇷",
-  venue: "Miami Stadium"
+  venue: "Miami Stadium",
+  kickoffAt: "2026-07-03T19:00:00-03:00",
+  status: "scheduled"
 }];
-const workBlockRules = ["Segunda a sexta: bloqueado das 08h às 20h", "Sábado: bloqueado das 08h às 18h", "Domingo: bloqueado das 08h às 13h"];
-const isWorkBlockedTime = date => {
-  const day = date.getDay();
-  const minutes = date.getHours() * 60 + date.getMinutes();
-  if (day >= 1 && day <= 5) return minutes >= 8 * 60 && minutes < 20 * 60;
-  if (day === 6) return minutes >= 8 * 60 && minutes < 18 * 60;
-  return minutes >= 8 * 60 && minutes < 13 * 60;
+const teamFlags = {
+  Brasil: "🇧🇷",
+  Brazil: "🇧🇷",
+  Argentina: "🇦🇷",
+  França: "🇫🇷",
+  France: "🇫🇷",
+  Espanha: "🇪🇸",
+  Spain: "🇪🇸",
+  Alemanha: "🇩🇪",
+  Germany: "🇩🇪",
+  Portugal: "🇵🇹",
+  Inglaterra: "🏴",
+  England: "🏴",
+  Itália: "🇮🇹",
+  Italy: "🇮🇹",
+  Holanda: "🇳🇱",
+  Netherlands: "🇳🇱",
+  Japão: "🇯🇵",
+  Japan: "🇯🇵",
+  "Estados Unidos": "🇺🇸",
+  USA: "🇺🇸"
 };
-const nextAllowedTime = date => {
-  const cursor = new Date(date);
-  for (let i = 0; i < 240; i += 1) {
-    if (!isWorkBlockedTime(cursor)) return cursor;
-    cursor.setMinutes(cursor.getMinutes() + 30, 0, 0);
+const formatGameTime = value => new Date(value).toLocaleTimeString("pt-BR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "America/Sao_Paulo"
+});
+const normalizeSyncedMatch = match => ({
+  id: Number(match.id || match.externalMatchId),
+  time: formatGameTime(match.kickoffAt || match.utcDate),
+  group: match.phase || match.roundName || "Copa do Mundo",
+  home: match.home || match.homeTeam || "A definir",
+  away: match.away || match.awayTeam || "A definir",
+  homeFlag: teamFlags[match.home] || teamFlags[match.homeTeam] || "🌐",
+  awayFlag: teamFlags[match.away] || teamFlags[match.awayTeam] || "🌐",
+  venue: match.venue || "A definir",
+  kickoffAt: match.kickoffAt || match.utcDate,
+  roundId: match.roundId,
+  roundName: match.roundName,
+  phase: match.phase,
+  status: match.status || "scheduled",
+  homeScore: match.homeScore,
+  awayScore: match.awayScore
+});
+const getActiveGames = (syncedMatches = [], round = defaultRoundConfig) => {
+  const normalized = syncedMatches.map(normalizeSyncedMatch).filter(match => match.id && match.kickoffAt);
+  if (!normalized.length) return games;
+  const sameRound = normalized.filter(match => match.roundId === round.id || match.phase === round.phase || match.roundName === round.name);
+  return (sameRound.length ? sameRound : normalized).filter(match => ["scheduled", "live", "finished"].includes(match.status)).sort((a, b) => new Date(a.kickoffAt) - new Date(b.kickoffAt));
+};
+const getMatchResultsFromGames = activeGames => activeGames.reduce((acc, match) => {
+  if (Number.isInteger(match.homeScore) && Number.isInteger(match.awayScore)) {
+    acc[match.id] = {
+      homeScore: match.homeScore,
+      awayScore: match.awayScore
+    };
   }
-  return cursor;
-};
+  return acc;
+}, {});
+const predictionRules = ["Palpites liberados em qualquer horário enquanto a rodada estiver aberta", "Encerramento automático 10 minutos antes do jogo", "Abertura sugerida até 2 dias antes de cada rodada"];
 const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
   day: "2-digit",
   month: "2-digit",
@@ -336,91 +382,80 @@ const knockoutRounds = [{
   phase: "16 avos",
   name: "Teste 16 avos",
   official: false,
-  kickoffAt: "2026-07-03T21:00:00",
-  predictionsCloseAt: "2026-07-03T20:30:00"
+  kickoffAt: "2026-07-03T21:00:00"
 }, {
   id: "oitavas-dia-1",
   phase: "Oitavas",
   name: "Oitavas de final • Dia 1",
   official: true,
-  kickoffAt: "2026-07-04T17:00:00",
-  predictionsCloseAt: "2026-07-04T16:30:00"
+  kickoffAt: "2026-07-04T17:00:00"
 }, {
   id: "oitavas-dia-2",
   phase: "Oitavas",
   name: "Oitavas de final • Dia 2",
   official: true,
-  kickoffAt: "2026-07-05T17:00:00",
-  predictionsCloseAt: "2026-07-05T16:30:00"
+  kickoffAt: "2026-07-05T17:00:00"
 }, {
   id: "oitavas-dia-3",
   phase: "Oitavas",
   name: "Oitavas de final • Dia 3",
   official: true,
-  kickoffAt: "2026-07-06T17:00:00",
-  predictionsCloseAt: "2026-07-06T16:30:00"
+  kickoffAt: "2026-07-06T17:00:00"
 }, {
   id: "oitavas-dia-4",
   phase: "Oitavas",
   name: "Oitavas de final • Dia 4",
   official: true,
-  kickoffAt: "2026-07-07T17:00:00",
-  predictionsCloseAt: "2026-07-07T16:30:00"
+  kickoffAt: "2026-07-07T17:00:00"
 }, {
   id: "quartas-dia-1",
   phase: "Quartas",
   name: "Quartas de final • Dia 1",
   official: true,
-  kickoffAt: "2026-07-09T17:00:00",
-  predictionsCloseAt: "2026-07-09T16:30:00"
+  kickoffAt: "2026-07-09T17:00:00"
 }, {
   id: "quartas-dia-2",
   phase: "Quartas",
   name: "Quartas de final • Dia 2",
   official: true,
-  kickoffAt: "2026-07-10T17:00:00",
-  predictionsCloseAt: "2026-07-10T16:30:00"
+  kickoffAt: "2026-07-10T17:00:00"
 }, {
   id: "quartas-dia-3",
   phase: "Quartas",
   name: "Quartas de final • Dia 3",
   official: true,
-  kickoffAt: "2026-07-11T17:00:00",
-  predictionsCloseAt: "2026-07-11T16:30:00"
+  kickoffAt: "2026-07-11T17:00:00"
 }, {
   id: "semi-1",
   phase: "Semifinais",
   name: "Semifinal 1",
   official: true,
-  kickoffAt: "2026-07-14T21:00:00",
-  predictionsCloseAt: "2026-07-14T20:30:00"
+  kickoffAt: "2026-07-14T21:00:00"
 }, {
   id: "semi-2",
   phase: "Semifinais",
   name: "Semifinal 2",
   official: true,
-  kickoffAt: "2026-07-15T21:00:00",
-  predictionsCloseAt: "2026-07-15T20:30:00"
+  kickoffAt: "2026-07-15T21:00:00"
 }, {
   id: "terceiro-lugar",
   phase: "Terceiro lugar",
   name: "Disputa de terceiro lugar",
   official: true,
-  kickoffAt: "2026-07-18T17:00:00",
-  predictionsCloseAt: "2026-07-18T16:30:00"
+  kickoffAt: "2026-07-18T17:00:00"
 }, {
   id: "final",
   phase: "Final",
   name: "Final da Copa",
   official: true,
-  kickoffAt: "2026-07-19T17:00:00",
-  predictionsCloseAt: "2026-07-19T16:30:00"
+  kickoffAt: "2026-07-19T17:00:00"
 }];
 const getPredictionWindow = round => {
-  const closeAt = new Date(round.predictionsCloseAt || round.kickoffAt || defaultRoundConfig.predictionsCloseAt);
+  const kickoffAt = round.kickoffAt ? new Date(round.kickoffAt) : null;
+  const closeAt = kickoffAt ? new Date(kickoffAt.getTime() - 10 * 60 * 1000) : new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
   const rawOpenAt = new Date(closeAt.getTime() - 48 * 60 * 60 * 1000);
   return {
-    openAt: nextAllowedTime(rawOpenAt),
+    openAt: rawOpenAt,
     closeAt
   };
 };
@@ -435,12 +470,6 @@ const getPredictionAccess = (round, now = new Date()) => {
     openAt,
     closeAt
   };
-  if (isWorkBlockedTime(now)) return {
-    open: false,
-    reason: "Palpites bloqueados durante o horário de expediente.",
-    openAt,
-    closeAt
-  };
   if (now < openAt) return {
     open: false,
     reason: `Palpites abrem em ${formatDateTime(openAt)}.`,
@@ -449,7 +478,30 @@ const getPredictionAccess = (round, now = new Date()) => {
   };
   if (now > closeAt) return {
     open: false,
-    reason: "Janela de palpites encerrada.",
+    reason: "Palpites encerrados 10 minutos antes do jogo.",
+    openAt,
+    closeAt
+  };
+  return {
+    open: true,
+    reason: `Aberto até ${formatDateTime(closeAt)}.`,
+    openAt,
+    closeAt
+  };
+};
+const getGamePredictionAccess = (game, now = new Date()) => {
+  const kickoffAt = new Date(game.kickoffAt);
+  const closeAt = new Date(kickoffAt.getTime() - 10 * 60 * 1000);
+  const openAt = new Date(closeAt.getTime() - 48 * 60 * 60 * 1000);
+  if (now < openAt) return {
+    open: false,
+    reason: `Abre em ${formatDateTime(openAt)}.`,
+    openAt,
+    closeAt
+  };
+  if (now > closeAt) return {
+    open: false,
+    reason: "Encerrado 10 minutos antes do jogo.",
     openAt,
     closeAt
   };
@@ -481,7 +533,7 @@ const defaultRoundConfig = {
   official: false,
   status: "open",
   kickoffAt: "2026-07-03T21:00:00",
-  predictionsCloseAt: "2026-07-03T20:30:00"
+  predictionsCloseAt: "2026-07-03T20:50:00"
 };
 const defaultAward = {
   name: "Robô Aspirador Potiguar",
@@ -527,7 +579,7 @@ const getPredictionStats = (entry, matchResults = defaultMatchResults) => {
   };
 };
 const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
-  const activeAnnouncement = settings.announcement || defaultAnnouncement;
+  const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
@@ -551,7 +603,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
   readEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
-    if (!row || entry.announcementId !== activeAnnouncement.id || row.announcementRead) return;
+    if (!row || entry.roundId !== activeRound.id || row.announcementRead) return;
     row.announcementRead = true;
     row.announcementPoints += 1;
     row.points += 1;
@@ -601,6 +653,16 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     });
   }
   return rows.sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+};
+const getRoundClosingSummary = rankingRows => {
+  const eligibleRows = rankingRows.filter(row => row.role !== "Administrador");
+  return {
+    overallWinner: eligibleRows[0] || null,
+    storeWinners: fixedStores.map(store => ({
+      store,
+      winner: eligibleRows.filter(row => row.store === store)[0] || null
+    })).filter(item => item.winner)
+  };
 };
 function Brand({
   compact = false
@@ -1030,7 +1092,7 @@ function Announcement({
     className: "mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block font-extrabold"
-  }, "Como participar hoje"), "Assista ao vídeo → confirme a leitura → envie seu palpite antes das 18h59 → acompanhe as vendas do produto foco."), /*#__PURE__*/React.createElement("div", {
+  }, "Como participar hoje"), "Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe as vendas do produto foco."), /*#__PURE__*/React.createElement("div", {
     className: "mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-potiguar-950 p-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-3 flex items-center justify-between gap-3 px-1"
@@ -1165,13 +1227,17 @@ function Home({
   totalSold,
   profilePhotos,
   settings,
+  activeGames,
   onAcknowledge,
   onSaveProfilePhoto
 }) {
   const leadership = user.accessRole === "leadership";
   const round = settings.round || defaultRoundConfig;
-  const predictionAccess = getPredictionAccess(round);
-  const predictionsClosed = !predictionAccess.open;
+  const now = new Date();
+  const gameAccess = activeGames.map(game => getGamePredictionAccess(game, now));
+  const firstOpenAccess = gameAccess.find(access => access.open);
+  const nextAccess = firstOpenAccess || gameAccess.find(access => now < access.closeAt);
+  const predictionsClosed = !firstOpenAccess;
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
@@ -1189,13 +1255,13 @@ function Home({
     className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-semibold text-slate-400"
-  }, "Quarta-feira, 24 de junho • palpites até 18:59"), /*#__PURE__*/React.createElement("h2", {
+  }, round.name, " • ", firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"), /*#__PURE__*/React.createElement("h2", {
     className: "mt-1 font-display text-3xl font-extrabold text-potiguar-950"
   }, "Boa noite, ", user.firstName, "! ", /*#__PURE__*/React.createElement("span", {
     className: "inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]"
   }, "👋")), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-sm text-slate-500"
-  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "A janela de palpites está aberta até 18:59.")), /*#__PURE__*/React.createElement("div", {
+  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "A janela de palpites está aberta para os jogos disponíveis.")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm"
   }, /*#__PURE__*/React.createElement(Avatar, {
     initials: user.initials,
@@ -1279,7 +1345,7 @@ function Home({
     className: "mt-2 font-display text-xl font-extrabold"
   }, predictionsClosed ? "Acompanhar produto foco" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-white/55"
-  }, predictionsClosed ? predictionAccess.reason : predictionAccess.reason)), /*#__PURE__*/React.createElement("span", {
+  }, nextAccess?.reason || "Aguardando jogos da rodada.")), /*#__PURE__*/React.createElement("span", {
     className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "chevron"
@@ -1294,6 +1360,7 @@ function Guesses({
   setToast,
   user,
   settings,
+  activeGames,
   onSavePrediction
 }) {
   const [scores, setScores] = useState({
@@ -1302,9 +1369,19 @@ function Guesses({
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const round = settings.round || defaultRoundConfig;
-  const predictionAccess = getPredictionAccess(round, now);
-  const predictionsClosed = !predictionAccess.open;
-  const complete = Object.values(scores).every(pair => pair[0] !== "" && pair[1] !== "");
+  const gameAccess = Object.fromEntries(activeGames.map(game => [game.id, getGamePredictionAccess(game, now)]));
+  const openGames = activeGames.filter(game => gameAccess[game.id]?.open);
+  const firstOpenAccess = openGames.length ? gameAccess[openGames[0].id] : null;
+  const nextGameAccess = activeGames.map(game => gameAccess[game.id]).find(access => access && new Date() < access.closeAt);
+  const predictionsClosed = openGames.length === 0;
+  const complete = openGames.length > 0 && openGames.every(game => {
+    const pair = scores[game.id] || ["", ""];
+    return pair[0] !== "" && pair[1] !== "";
+  });
+  useEffect(() => {
+    setScores(current => Object.fromEntries(activeGames.map(game => [game.id, current[game.id] || ["", ""]])));
+    setSaved(false);
+  }, [activeGames.map(game => game.id).join("|")]);
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 15000);
     return () => clearInterval(timer);
@@ -1313,7 +1390,7 @@ function Guesses({
     if (value === "" || /^\d$/.test(value) && Number(value) <= 9) {
       setScores({
         ...scores,
-        [id]: scores[id].map((v, i) => i === side ? value : v)
+        [id]: (scores[id] || ["", ""]).map((v, i) => i === side ? value : v)
       });
       setSaved(false);
     }
@@ -1333,16 +1410,16 @@ function Guesses({
     className: "mt-6 font-display text-3xl font-extrabold"
   }, "Palpites bloqueados"), /*#__PURE__*/React.createElement("p", {
     className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60"
-  }, "Para acessar os jogos, você precisa ler e confirmar o comunicado obrigatório de hoje.")), /*#__PURE__*/React.createElement("div", {
+  }, "Para acessar os jogos, você precisa ler e confirmar a informação de endomarketing desta rodada.")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 sm:p-8"
   }, /*#__PURE__*/React.createElement("div", {
     className: "rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block"
-  }, "Regra da rodada"), predictionAccess.reason), /*#__PURE__*/React.createElement("button", {
+  }, "Regra da rodada"), firstOpenAccess?.reason || nextGameAccess?.reason || "Nenhum jogo aberto para palpite nesta rodada."), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage("home"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
-  }, "Voltar e ler o comunicado"))));
+  }, "Voltar e confirmar a rodada"))));
   if (predictionsClosed) return /*#__PURE__*/React.createElement("div", {
     className: "mx-auto max-w-2xl py-8 sm:py-16"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1358,13 +1435,13 @@ function Guesses({
     className: "mt-6 font-display text-3xl font-extrabold"
   }, "Palpites encerrados"), /*#__PURE__*/React.createElement("p", {
     className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60"
-  }, predictionAccess.reason)), /*#__PURE__*/React.createElement("div", {
+  }, nextGameAccess?.reason || "Não há jogos abertos para palpite nesta rodada.")), /*#__PURE__*/React.createElement("div", {
     className: "p-6 sm:p-8"
   }, /*#__PURE__*/React.createElement("div", {
     className: "rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block"
-  }, "Regra de horário"), workBlockRules.join(" • ")), /*#__PURE__*/React.createElement("button", {
+  }, "Regra de horário"), predictionRules.join(" • ")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage("store"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
   }, "Ver produto foco e loja"))));
@@ -1382,7 +1459,7 @@ function Guesses({
     className: "mt-3 font-display text-3xl font-extrabold"
   }, round.name), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
-  }, "Resultado simulado: Escócia 0 x 3 Brasil. Placar exato vale 4 pontos; vencedor vale 2.")), /*#__PURE__*/React.createElement("div", {
+  }, "Placar exato vale 4 pontos; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.")), /*#__PURE__*/React.createElement("div", {
     className: "glass flex items-center gap-3 rounded-2xl px-4 py-3"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "clock",
@@ -1391,64 +1468,70 @@ function Guesses({
     className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
   }, "Janela de palpites"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-lg font-extrabold"
-  }, "até ", formatDateTime(predictionAccess.closeAt)))))), /*#__PURE__*/React.createElement("div", {
+  }, firstOpenAccess ? `até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto"))))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
-  }, games.map(game => /*#__PURE__*/React.createElement("article", {
-    key: game.id,
-    className: "soft-card rounded-2xl p-4 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-5 flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-potiguar-900/5 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, game.group), /*#__PURE__*/React.createElement("div", {
-    className: "text-right"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "flex items-center justify-end gap-1.5 text-xs font-bold text-slate-500"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "clock",
-    size: 14
-  }), " ", game.time), /*#__PURE__*/React.createElement("span", {
-    className: "mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300"
-  }, game.venue))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center gap-2 sm:flex-row sm:justify-end"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-3xl"
-  }, game.homeFlag), /*#__PURE__*/React.createElement("strong", {
-    className: "text-center text-sm text-potiguar-950 sm:text-base"
-  }, game.home)), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("input", {
-    "aria-label": `Gols ${game.home}`,
-    className: "score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white sm:h-14 sm:w-14",
-    type: "number",
-    min: "0",
-    max: "9",
-    value: scores[game.id][0],
-    onChange: e => updateScore(game.id, 0, e.target.value)
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "font-extrabold text-slate-300"
-  }, "×"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": `Gols ${game.away}`,
-    className: "score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white sm:h-14 sm:w-14",
-    type: "number",
-    min: "0",
-    max: "9",
-    value: scores[game.id][1],
-    onChange: e => updateScore(game.id, 1, e.target.value)
+  }, activeGames.map(game => {
+    const access = gameAccess[game.id];
+    const closed = !access?.open;
+    return /*#__PURE__*/React.createElement("article", {
+      key: game.id,
+      className: "soft-card rounded-2xl p-4 sm:p-6"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "mb-5 flex items-center justify-between"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "rounded-full bg-potiguar-900/5 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+    }, game.group), /*#__PURE__*/React.createElement("div", {
+      className: "text-right"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "flex items-center justify-end gap-1.5 text-xs font-bold text-slate-500"
+    }, /*#__PURE__*/React.createElement(Icon, {
+      name: "clock",
+      size: 14
+    }), " ", game.time), /*#__PURE__*/React.createElement("span", {
+      className: "mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300"
+    }, closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`, " • ", game.venue))), /*#__PURE__*/React.createElement("div", {
+      className: "grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-col items-center gap-2 sm:flex-row sm:justify-end"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-3xl"
+    }, game.homeFlag), /*#__PURE__*/React.createElement("strong", {
+      className: "text-center text-sm text-potiguar-950 sm:text-base"
+    }, game.home)), /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-2"
+    }, /*#__PURE__*/React.createElement("input", {
+      "aria-label": `Gols ${game.home}`,
+      disabled: closed,
+      className: "score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14",
+      type: "number",
+      min: "0",
+      max: "9",
+      value: (scores[game.id] || ["", ""])[0],
+      onChange: e => updateScore(game.id, 0, e.target.value)
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "font-extrabold text-slate-300"
+    }, "×"), /*#__PURE__*/React.createElement("input", {
+      "aria-label": `Gols ${game.away}`,
+      disabled: closed,
+      className: "score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14",
+      type: "number",
+      min: "0",
+      max: "9",
+      value: (scores[game.id] || ["", ""])[1],
+      onChange: e => updateScore(game.id, 1, e.target.value)
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "flex flex-col items-center gap-2 sm:flex-row"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "text-3xl sm:order-2"
+    }, game.awayFlag), /*#__PURE__*/React.createElement("strong", {
+      className: "text-center text-sm text-potiguar-950 sm:text-base"
+    }, game.away))));
   })), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center gap-2 sm:flex-row"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-3xl sm:order-2"
-  }, game.awayFlag), /*#__PURE__*/React.createElement("strong", {
-    className: "text-center text-sm text-potiguar-950 sm:text-base"
-  }, game.away)))))), /*#__PURE__*/React.createElement("div", {
     className: "sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5"
   }, /*#__PURE__*/React.createElement("button", {
     disabled: !complete || saved,
     onClick: async () => {
-      const ok = await onSavePrediction(user, scores);
+      const ok = await onSavePrediction(user, scores, openGames);
       if (ok) {
         setSaved(true);
         setToast("Palpites salvos e enviados para o admin.");
@@ -1673,6 +1756,8 @@ function AdminPage({
   totalSold,
   profilePhotos,
   settings,
+  activeGames,
+  worldCupMatches,
   onSaveSetting,
   onRefreshData
 }) {
@@ -1707,8 +1792,9 @@ function AdminPage({
   const [announcementForm, setAnnouncementForm] = useState(settings.announcement || defaultAnnouncement);
   const [awardForm, setAwardForm] = useState(settings.award || defaultAward);
   const [roundForm, setRoundForm] = useState(settings.round || defaultRoundConfig);
+  const currentAdminGame = activeGames[0] || games[0];
   const [resultForm, setResultForm] = useState(() => {
-    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    const result = (settings.matchResults || defaultMatchResults)[currentAdminGame.id] || defaultMatchResults[1] || {};
     return {
       homeScore: String(result.homeScore),
       awayScore: String(result.awayScore)
@@ -1728,12 +1814,12 @@ function AdminPage({
     setAnnouncementForm(settings.announcement || defaultAnnouncement);
     setAwardForm(settings.award || defaultAward);
     setRoundForm(settings.round || defaultRoundConfig);
-    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    const result = (settings.matchResults || defaultMatchResults)[currentAdminGame.id] || defaultMatchResults[1] || {};
     setResultForm({
       homeScore: String(result.homeScore),
       awayScore: String(result.awayScore)
     });
-  }, [settings]);
+  }, [settings, currentAdminGame.id]);
   const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Produtos", "Cadastrar o produto foco", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
   const formModule = null;
   const visibleUsers = users.filter(user => {
@@ -1758,6 +1844,8 @@ function AdminPage({
   const leaderCount = users.filter(user => user.profile === "Liderança").length;
   const adminCount = users.filter(user => user.profile === "Administrador").length;
   const participantCount = sellerCount + leaderCount;
+  const roundWindow = getPredictionWindow(roundForm || defaultRoundConfig);
+  const roundClosingSummary = getRoundClosingSummary(pilotRanking);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const createUser = event => {
     event.preventDefault();
@@ -1887,7 +1975,11 @@ function AdminPage({
   };
   const saveRound = async event => {
     event.preventDefault();
-    const ok = await onSaveSetting("round", roundForm);
+    const next = {
+      ...roundForm,
+      predictionsCloseAt: roundWindow.closeAt.toISOString()
+    };
+    const ok = await onSaveSetting("round", next);
     if (ok) setToast("Rodada atualizada.");
   };
   const applyCalendarRound = round => {
@@ -1899,7 +1991,7 @@ function AdminPage({
       ...round,
       status: "open",
       openAt: openAt.toISOString(),
-      predictionsCloseAt: round.predictionsCloseAt || closeAt.toISOString()
+      predictionsCloseAt: closeAt.toISOString()
     });
     setToast(`${round.name} carregada. Revise e clique em Salvar rodada.`);
   };
@@ -1907,13 +1999,38 @@ function AdminPage({
     event.preventDefault();
     const next = {
       ...(settings.matchResults || defaultMatchResults),
-      1: {
+      [currentAdminGame.id]: {
         homeScore: Number(resultForm.homeScore),
         awayScore: Number(resultForm.awayScore)
       }
     };
     const ok = await onSaveSetting("matchResults", next);
     if (ok) setToast("Resultado salvo. Ranking recalculado.");
+  };
+  const syncWorldCupMatches = async () => {
+    try {
+      const response = await fetch("/api/world-cup/sync", {
+        method: "POST"
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || data.details || "Falha ao sincronizar.");
+      await onRefreshData();
+      setToast(`${data.synced || 0} jogos sincronizados com football-data.org.`);
+    } catch (error) {
+      console.error(error);
+      setToast(error.message || "Não foi possível sincronizar jogos da Copa.");
+    }
+  };
+  const closeRound = async () => {
+    const next = {
+      ...roundForm,
+      status: "closed",
+      predictionsCloseAt: roundWindow.closeAt.toISOString(),
+      closedAt: new Date().toISOString(),
+      winners: roundClosingSummary
+    };
+    const ok = await onSaveSetting("round", next);
+    if (ok) setToast("Rodada encerrada com ganhador geral e ganhadores por loja.");
   };
   const exportReport = () => {
     const rows = [["posicao", "nome", "cpf", "loja", "perfil", "pontos", "comunicado", "palpite_pts", "acertos", "placar_exato", "venda_pts", "quantidade", "meta_pts"], ...pilotRanking.map((person, index) => [index + 1, person.name, person.cpf, person.store, person.role, person.points, person.announcementPoints, person.predictionPoints, person.predictionHits, person.exactPredictions, person.salesPoints + person.topSellerPoints, person.soldQuantity, person.storeGoalPoints])];
@@ -2009,7 +2126,7 @@ function AdminPage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Comunicado ativo"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, "Ao publicar, a Home passa a mostrar este comunicado e a leitura vale +1 ponto para este ID.")), /*#__PURE__*/React.createElement("form", {
+  }, "Ao publicar, a Home passa a mostrar este comunicado. A confirmação vale +1 ponto uma vez por rodada.")), /*#__PURE__*/React.createElement("form", {
     onSubmit: saveAnnouncement,
     className: "mt-5 grid gap-4"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2142,9 +2259,41 @@ function AdminPage({
     className: "font-display text-lg font-extrabold text-potiguar-950"
   }, "Fases finais da Copa"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-500"
-  }, "16 avos em modo teste; a partir das oitavas, rodadas oficiais. O sistema bloqueia palpites automaticamente no expediente.")), /*#__PURE__*/React.createElement("span", {
+  }, "16 avos em modo teste; a partir das oitavas, rodadas oficiais. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes do jogo.")), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-2 sm:items-end"
+  }, /*#__PURE__*/React.createElement("span", {
     className: "rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, "Janela até 2 dias antes")), /*#__PURE__*/React.createElement("div", {
+  }, "Até 10 min antes"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: syncWorldCupMatches,
+    className: "rounded-xl bg-potiguar-900 px-4 py-2.5 text-[10px] font-extrabold text-white"
+  }, "Sincronizar Copa"))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 rounded-2xl border border-white bg-white/80 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between gap-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "football-data.org"), /*#__PURE__*/React.createElement("h5", {
+    className: "text-sm font-extrabold text-potiguar-950"
+  }, "Jogos sincronizados")), /*#__PURE__*/React.createElement("span", {
+    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
+  }, worldCupMatches.length, " jogos")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3"
+  }, (activeGames || []).slice(0, 6).map(match => {
+    const access = getGamePredictionAccess(match);
+    return /*#__PURE__*/React.createElement("div", {
+      key: match.id,
+      className: "rounded-xl bg-slate-50 p-3"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+    }, match.group), /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 truncate text-xs font-extrabold text-potiguar-950"
+    }, match.home, " x ", match.away), /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 text-[10px] text-slate-400"
+    }, formatDateTime(match.kickoffAt), " • fecha ", formatDateTime(access.closeAt)));
+  }), worldCupMatches.length === 0 && /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Nenhum jogo sincronizado ainda. Configure a API key e clique em Sincronizar Copa."))), /*#__PURE__*/React.createElement("div", {
     className: "mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3"
   }, knockoutRounds.map(round => {
     const access = getPredictionAccess(round);
@@ -2163,16 +2312,16 @@ function AdminPage({
       className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${round.official ? "bg-potiguar-lime/25 text-potiguar-800" : "bg-amber-100 text-amber-700"}`
     }, round.official ? "OFICIAL" : "TESTE")), /*#__PURE__*/React.createElement("p", {
       className: "mt-3 text-[10px] leading-4 text-slate-500"
-    }, "Jogo: ", formatDateTime(round.kickoffAt), " • Palpites até ", formatDateTime(round.predictionsCloseAt)), /*#__PURE__*/React.createElement("p", {
+    }, "Jogo: ", formatDateTime(round.kickoffAt), " • Palpites até ", formatDateTime(access.closeAt)), /*#__PURE__*/React.createElement("p", {
       className: "mt-1 text-[10px] font-bold text-potiguar-700"
     }, "Abertura sugerida: ", formatDateTime(access.openAt)));
   })), /*#__PURE__*/React.createElement("div", {
     className: "mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "text-potiguar-950"
-  }, "Regra de bloqueio:"), " ", workBlockRules.join(" • "))), /*#__PURE__*/React.createElement("form", {
+  }, "Regra dos palpites:"), " ", predictionRules.join(" • "))), /*#__PURE__*/React.createElement("form", {
     onSubmit: saveRound,
-    className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_auto] md:items-end"
+    className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_.8fr_auto] md:items-end"
   }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Nome da rodada"), /*#__PURE__*/React.createElement("input", {
@@ -2201,14 +2350,21 @@ function AdminPage({
     value: "closed"
   }, "Rodada encerrada"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Limite dos palpites"), /*#__PURE__*/React.createElement("input", {
+  }, "Horário do jogo"), /*#__PURE__*/React.createElement("input", {
     type: "datetime-local",
-    value: (roundForm.predictionsCloseAt || "").slice(0, 16),
+    value: (roundForm.kickoffAt || "").slice(0, 16),
     onChange: e => setRoundForm({
       ...roundForm,
-      predictionsCloseAt: e.target.value
+      kickoffAt: e.target.value
     }),
     className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Fecha automaticamente"), /*#__PURE__*/React.createElement("input", {
+    type: "text",
+    readOnly: true,
+    value: formatDateTime(roundWindow.closeAt),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-potiguar-800 outline-none"
   })), /*#__PURE__*/React.createElement("button", {
     type: "submit",
     className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
@@ -2219,9 +2375,9 @@ function AdminPage({
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
   }, "Resultado do jogo"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-sm font-extrabold"
-  }, games[0].home, " x ", games[0].away)), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+  }, currentAdminGame.home, " x ", currentAdminGame.away)), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-white/70"
-  }, games[0].home), /*#__PURE__*/React.createElement("input", {
+  }, currentAdminGame.home), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "0",
     value: resultForm.homeScore,
@@ -2232,7 +2388,7 @@ function AdminPage({
     className: "w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"
   })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-white/70"
-  }, games[0].away), /*#__PURE__*/React.createElement("input", {
+  }, currentAdminGame.away), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "0",
     value: resultForm.awayScore,
@@ -2244,7 +2400,59 @@ function AdminPage({
   })), /*#__PURE__*/React.createElement("button", {
     type: "submit",
     className: "rounded-xl bg-potiguar-lime px-5 py-3 text-xs font-extrabold text-potiguar-950"
-  }, "Salvar resultado"))), module === "rankings" && /*#__PURE__*/React.createElement("section", {
+  }, "Salvar resultado")), /*#__PURE__*/React.createElement("section", {
+    className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-700"
+  }, "Fechamento da rodada"), /*#__PURE__*/React.createElement("h4", {
+    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
+  }, "Ganhadores da ", roundForm.phase || "rodada"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs leading-5 text-slate-500"
+  }, "Ao encerrar, o sistema grava o ganhador geral e o melhor colocado de cada loja nesta rodada. Regra válida para oitavas, quartas, semifinais, final e disputa de terceiro.")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: closeRound,
+    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
+  }, "Encerrar e registrar ganhadores")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 grid gap-3 lg:grid-cols-[.9fr_1.1fr]"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rounded-xl bg-white p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "Ganhador geral"), roundClosingSummary.overallWinner ? /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement(Avatar, {
+    initials: makeInitials(roundClosingSummary.overallWinner.name),
+    photoUrl: roundClosingSummary.overallWinner.photoUrl
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "min-w-0 flex-1"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-sm font-extrabold text-potiguar-950"
+  }, roundClosingSummary.overallWinner.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-400"
+  }, roundClosingSummary.overallWinner.store, " • ", roundClosingSummary.overallWinner.role)), /*#__PURE__*/React.createElement("strong", {
+    className: "font-display text-xl text-potiguar-900"
+  }, roundClosingSummary.overallWinner.points)) : /*#__PURE__*/React.createElement("p", {
+    className: "mt-3 text-xs text-slate-400"
+  }, "Sem pontuação registrada ainda.")), /*#__PURE__*/React.createElement("div", {
+    className: "rounded-xl bg-white p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "Ganhador por loja"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 grid gap-2 sm:grid-cols-2"
+  }, roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => /*#__PURE__*/React.createElement("div", {
+    key: item.store,
+    className: "rounded-xl bg-slate-50 p-3"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold text-potiguar-800"
+  }, item.store), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 truncate text-xs font-extrabold text-potiguar-950"
+  }, item.winner.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-400"
+  }, item.winner.points, " pts • ", item.winner.role))) : /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Sem lojas com pontuação registrada ainda.")))))), module === "rankings" && /*#__PURE__*/React.createElement("section", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
@@ -2349,7 +2557,7 @@ function AdminPage({
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
   }, "Palpites enviados"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Escócia x Brasil"), /*#__PURE__*/React.createElement("p", {
+  }, "Jogos da rodada"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
   }, "Lista consolidada dos palpites gravados no servidor.")), /*#__PURE__*/React.createElement("span", {
     className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
@@ -2982,7 +3190,7 @@ function App() {
     }
   })();
   const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
-  const [acknowledged, setAcknowledged] = useState(false);
+  const [acknowledgedRoundId, setAcknowledgedRoundId] = useState("");
   const [user, setUser] = useState(restoredUser);
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
@@ -2990,6 +3198,7 @@ function App() {
   const [readEntries, setReadEntries] = useState([]);
   const [profilePhotos, setProfilePhotos] = useState({});
   const [appSettings, setAppSettings] = useState(defaultAppSettings);
+  const [worldCupMatches, setWorldCupMatches] = useState([]);
   useEffect(() => {
     if (!toast) return;
     const timer = setTimeout(() => setToast(""), 3200);
@@ -3063,20 +3272,42 @@ function App() {
       console.warn("Não foi possível carregar configurações da rodada.", error);
     }
   };
+  const loadWorldCupMatches = async () => {
+    try {
+      const response = await fetch("/api/world-cup/matches", {
+        cache: "no-store"
+      });
+      if (!response.ok) return;
+      const data = await response.json();
+      setWorldCupMatches(data.matches || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar jogos da Copa.", error);
+    }
+  };
   const refreshData = async () => {
-    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos(), loadSettings()]);
+    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos(), loadSettings(), loadWorldCupMatches()]);
   };
   useEffect(() => {
     refreshData();
     const timer = setInterval(refreshData, 15000);
     return () => clearInterval(timer);
   }, []);
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, appSettings);
+  const activeRound = appSettings.round || defaultRoundConfig;
+  const activeGames = getActiveGames(worldCupMatches, activeRound);
+  const syncedMatchResults = getMatchResultsFromGames(activeGames);
+  const scoringSettings = {
+    ...appSettings,
+    matchResults: {
+      ...(appSettings.matchResults || defaultMatchResults),
+      ...syncedMatchResults
+    }
+  };
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, scoringSettings);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
-  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === activeAnnouncement.id) : false;
-  const announcementAcknowledged = acknowledged || currentUserRead;
+  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
+  const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
   useEffect(() => {
     if (!effectiveUser) return;
@@ -3087,9 +3318,9 @@ function App() {
       setPage("home");
     }
   }, [effectiveUser?.accessRole, page]);
-  const savePrediction = async (currentUser, scores) => {
+  const savePrediction = async (currentUser, scores, gamesToSave = activeGames) => {
     try {
-      const predictions = games.map(game => ({
+      const predictions = gamesToSave.map(game => ({
         matchId: game.id,
         homeTeam: game.home,
         awayTeam: game.away,
@@ -3130,6 +3361,8 @@ function App() {
           fullName: currentUser.name,
           accessRole: currentUser.accessRole,
           store: currentUser.store,
+          roundId: activeRound.id,
+          roundName: activeRound.name,
           announcementId: activeAnnouncement.id,
           announcementTitle: activeAnnouncement.title,
           watchedSeconds
@@ -3138,7 +3371,7 @@ function App() {
       if (!response.ok) throw new Error("Falha ao registrar comunicado.");
       const data = await response.json();
       setReadEntries(data.reads || []);
-      setAcknowledged(true);
+      setAcknowledgedRoundId(activeRound.id);
       return true;
     } catch (error) {
       console.error(error);
@@ -3209,7 +3442,7 @@ function App() {
     }
     setUser(nextUser);
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
-    setAcknowledged(false);
+    setAcknowledgedRoundId("");
   };
   const logout = () => {
     try {
@@ -3222,7 +3455,7 @@ function App() {
     }
     setUser(null);
     setPage("home");
-    setAcknowledged(false);
+    setAcknowledgedRoundId("");
     setToast("");
   };
   if (!effectiveUser) return /*#__PURE__*/React.createElement(LoginScreen, {
@@ -3254,6 +3487,7 @@ function App() {
     totalSold: totalSold,
     profilePhotos: profilePhotos,
     settings: appSettings,
+    activeGames: activeGames,
     onAcknowledge: saveAnnouncementRead,
     onSaveProfilePhoto: saveProfilePhoto
   }), activePage === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
@@ -3262,6 +3496,7 @@ function App() {
     setToast: setToast,
     user: effectiveUser,
     settings: appSettings,
+    activeGames: activeGames,
     onSavePrediction: savePrediction
   }), activePage === "ranking" && /*#__PURE__*/React.createElement(RankingPage, {
     user: effectiveUser,
@@ -3279,7 +3514,9 @@ function App() {
     pilotRanking: pilotRanking,
     totalSold: totalSold,
     profilePhotos: profilePhotos,
-    settings: appSettings,
+    settings: scoringSettings,
+    activeGames: activeGames,
+    worldCupMatches: worldCupMatches,
     onSaveSetting: saveSetting,
     onRefreshData: refreshData
   }))), /*#__PURE__*/React.createElement(MobileNav, {

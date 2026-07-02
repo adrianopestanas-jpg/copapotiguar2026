@@ -212,31 +212,77 @@ const getStoreRanking = (storeName, limit = 10) => rankedSellers
   .slice(0, limit);
 
 const games = [
-  { id: 1, time: "19:00", group: "Grupo C", home: "Escócia", away: "Brasil", homeFlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", awayFlag: "🇧🇷", venue: "Miami Stadium" },
+  { id: 1, time: "19:00", group: "Grupo C", home: "Escócia", away: "Brasil", homeFlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", awayFlag: "🇧🇷", venue: "Miami Stadium", kickoffAt: "2026-07-03T19:00:00-03:00", status: "scheduled" },
 ];
 
-const workBlockRules = [
-  "Segunda a sexta: bloqueado das 08h às 20h",
-  "Sábado: bloqueado das 08h às 18h",
-  "Domingo: bloqueado das 08h às 13h",
-];
-
-const isWorkBlockedTime = date => {
-  const day = date.getDay();
-  const minutes = date.getHours() * 60 + date.getMinutes();
-  if (day >= 1 && day <= 5) return minutes >= 8 * 60 && minutes < 20 * 60;
-  if (day === 6) return minutes >= 8 * 60 && minutes < 18 * 60;
-  return minutes >= 8 * 60 && minutes < 13 * 60;
+const teamFlags = {
+  Brasil: "🇧🇷",
+  Brazil: "🇧🇷",
+  Argentina: "🇦🇷",
+  França: "🇫🇷",
+  France: "🇫🇷",
+  Espanha: "🇪🇸",
+  Spain: "🇪🇸",
+  Alemanha: "🇩🇪",
+  Germany: "🇩🇪",
+  Portugal: "🇵🇹",
+  Inglaterra: "🏴",
+  England: "🏴",
+  Itália: "🇮🇹",
+  Italy: "🇮🇹",
+  Holanda: "🇳🇱",
+  Netherlands: "🇳🇱",
+  Japão: "🇯🇵",
+  Japan: "🇯🇵",
+  "Estados Unidos": "🇺🇸",
+  USA: "🇺🇸",
 };
 
-const nextAllowedTime = date => {
-  const cursor = new Date(date);
-  for (let i = 0; i < 240; i += 1) {
-    if (!isWorkBlockedTime(cursor)) return cursor;
-    cursor.setMinutes(cursor.getMinutes() + 30, 0, 0);
+const formatGameTime = value => new Date(value).toLocaleTimeString("pt-BR", {
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "America/Sao_Paulo",
+});
+
+const normalizeSyncedMatch = match => ({
+  id: Number(match.id || match.externalMatchId),
+  time: formatGameTime(match.kickoffAt || match.utcDate),
+  group: match.phase || match.roundName || "Copa do Mundo",
+  home: match.home || match.homeTeam || "A definir",
+  away: match.away || match.awayTeam || "A definir",
+  homeFlag: teamFlags[match.home] || teamFlags[match.homeTeam] || "🌐",
+  awayFlag: teamFlags[match.away] || teamFlags[match.awayTeam] || "🌐",
+  venue: match.venue || "A definir",
+  kickoffAt: match.kickoffAt || match.utcDate,
+  roundId: match.roundId,
+  roundName: match.roundName,
+  phase: match.phase,
+  status: match.status || "scheduled",
+  homeScore: match.homeScore,
+  awayScore: match.awayScore,
+});
+
+const getActiveGames = (syncedMatches = [], round = defaultRoundConfig) => {
+  const normalized = syncedMatches.map(normalizeSyncedMatch).filter(match => match.id && match.kickoffAt);
+  if (!normalized.length) return games;
+  const sameRound = normalized.filter(match => match.roundId === round.id || match.phase === round.phase || match.roundName === round.name);
+  return (sameRound.length ? sameRound : normalized)
+    .filter(match => ["scheduled", "live", "finished"].includes(match.status))
+    .sort((a, b) => new Date(a.kickoffAt) - new Date(b.kickoffAt));
+};
+
+const getMatchResultsFromGames = activeGames => activeGames.reduce((acc, match) => {
+  if (Number.isInteger(match.homeScore) && Number.isInteger(match.awayScore)) {
+    acc[match.id] = { homeScore: match.homeScore, awayScore: match.awayScore };
   }
-  return cursor;
-};
+  return acc;
+}, {});
+
+const predictionRules = [
+  "Palpites liberados em qualquer horário enquanto a rodada estiver aberta",
+  "Encerramento automático 10 minutos antes do jogo",
+  "Abertura sugerida até 2 dias antes de cada rodada",
+];
 
 const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
   day: "2-digit",
@@ -246,32 +292,43 @@ const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
 });
 
 const knockoutRounds = [
-  { id: "teste-16avos", phase: "16 avos", name: "Teste 16 avos", official: false, kickoffAt: "2026-07-03T21:00:00", predictionsCloseAt: "2026-07-03T20:30:00" },
-  { id: "oitavas-dia-1", phase: "Oitavas", name: "Oitavas de final • Dia 1", official: true, kickoffAt: "2026-07-04T17:00:00", predictionsCloseAt: "2026-07-04T16:30:00" },
-  { id: "oitavas-dia-2", phase: "Oitavas", name: "Oitavas de final • Dia 2", official: true, kickoffAt: "2026-07-05T17:00:00", predictionsCloseAt: "2026-07-05T16:30:00" },
-  { id: "oitavas-dia-3", phase: "Oitavas", name: "Oitavas de final • Dia 3", official: true, kickoffAt: "2026-07-06T17:00:00", predictionsCloseAt: "2026-07-06T16:30:00" },
-  { id: "oitavas-dia-4", phase: "Oitavas", name: "Oitavas de final • Dia 4", official: true, kickoffAt: "2026-07-07T17:00:00", predictionsCloseAt: "2026-07-07T16:30:00" },
-  { id: "quartas-dia-1", phase: "Quartas", name: "Quartas de final • Dia 1", official: true, kickoffAt: "2026-07-09T17:00:00", predictionsCloseAt: "2026-07-09T16:30:00" },
-  { id: "quartas-dia-2", phase: "Quartas", name: "Quartas de final • Dia 2", official: true, kickoffAt: "2026-07-10T17:00:00", predictionsCloseAt: "2026-07-10T16:30:00" },
-  { id: "quartas-dia-3", phase: "Quartas", name: "Quartas de final • Dia 3", official: true, kickoffAt: "2026-07-11T17:00:00", predictionsCloseAt: "2026-07-11T16:30:00" },
-  { id: "semi-1", phase: "Semifinais", name: "Semifinal 1", official: true, kickoffAt: "2026-07-14T21:00:00", predictionsCloseAt: "2026-07-14T20:30:00" },
-  { id: "semi-2", phase: "Semifinais", name: "Semifinal 2", official: true, kickoffAt: "2026-07-15T21:00:00", predictionsCloseAt: "2026-07-15T20:30:00" },
-  { id: "terceiro-lugar", phase: "Terceiro lugar", name: "Disputa de terceiro lugar", official: true, kickoffAt: "2026-07-18T17:00:00", predictionsCloseAt: "2026-07-18T16:30:00" },
-  { id: "final", phase: "Final", name: "Final da Copa", official: true, kickoffAt: "2026-07-19T17:00:00", predictionsCloseAt: "2026-07-19T16:30:00" },
+  { id: "teste-16avos", phase: "16 avos", name: "Teste 16 avos", official: false, kickoffAt: "2026-07-03T21:00:00" },
+  { id: "oitavas-dia-1", phase: "Oitavas", name: "Oitavas de final • Dia 1", official: true, kickoffAt: "2026-07-04T17:00:00" },
+  { id: "oitavas-dia-2", phase: "Oitavas", name: "Oitavas de final • Dia 2", official: true, kickoffAt: "2026-07-05T17:00:00" },
+  { id: "oitavas-dia-3", phase: "Oitavas", name: "Oitavas de final • Dia 3", official: true, kickoffAt: "2026-07-06T17:00:00" },
+  { id: "oitavas-dia-4", phase: "Oitavas", name: "Oitavas de final • Dia 4", official: true, kickoffAt: "2026-07-07T17:00:00" },
+  { id: "quartas-dia-1", phase: "Quartas", name: "Quartas de final • Dia 1", official: true, kickoffAt: "2026-07-09T17:00:00" },
+  { id: "quartas-dia-2", phase: "Quartas", name: "Quartas de final • Dia 2", official: true, kickoffAt: "2026-07-10T17:00:00" },
+  { id: "quartas-dia-3", phase: "Quartas", name: "Quartas de final • Dia 3", official: true, kickoffAt: "2026-07-11T17:00:00" },
+  { id: "semi-1", phase: "Semifinais", name: "Semifinal 1", official: true, kickoffAt: "2026-07-14T21:00:00" },
+  { id: "semi-2", phase: "Semifinais", name: "Semifinal 2", official: true, kickoffAt: "2026-07-15T21:00:00" },
+  { id: "terceiro-lugar", phase: "Terceiro lugar", name: "Disputa de terceiro lugar", official: true, kickoffAt: "2026-07-18T17:00:00" },
+  { id: "final", phase: "Final", name: "Final da Copa", official: true, kickoffAt: "2026-07-19T17:00:00" },
 ];
 
 const getPredictionWindow = round => {
-  const closeAt = new Date(round.predictionsCloseAt || round.kickoffAt || defaultRoundConfig.predictionsCloseAt);
+  const kickoffAt = round.kickoffAt ? new Date(round.kickoffAt) : null;
+  const closeAt = kickoffAt
+    ? new Date(kickoffAt.getTime() - 10 * 60 * 1000)
+    : new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
   const rawOpenAt = new Date(closeAt.getTime() - 48 * 60 * 60 * 1000);
-  return { openAt: nextAllowedTime(rawOpenAt), closeAt };
+  return { openAt: rawOpenAt, closeAt };
 };
 
 const getPredictionAccess = (round, now = new Date()) => {
   const { openAt, closeAt } = getPredictionWindow(round || defaultRoundConfig);
   if ((round?.status || "open") !== "open") return { open: false, reason: "Rodada não está aberta para palpites.", openAt, closeAt };
-  if (isWorkBlockedTime(now)) return { open: false, reason: "Palpites bloqueados durante o horário de expediente.", openAt, closeAt };
   if (now < openAt) return { open: false, reason: `Palpites abrem em ${formatDateTime(openAt)}.`, openAt, closeAt };
-  if (now > closeAt) return { open: false, reason: "Janela de palpites encerrada.", openAt, closeAt };
+  if (now > closeAt) return { open: false, reason: "Palpites encerrados 10 minutos antes do jogo.", openAt, closeAt };
+  return { open: true, reason: `Aberto até ${formatDateTime(closeAt)}.`, openAt, closeAt };
+};
+
+const getGamePredictionAccess = (game, now = new Date()) => {
+  const kickoffAt = new Date(game.kickoffAt);
+  const closeAt = new Date(kickoffAt.getTime() - 10 * 60 * 1000);
+  const openAt = new Date(closeAt.getTime() - 48 * 60 * 60 * 1000);
+  if (now < openAt) return { open: false, reason: `Abre em ${formatDateTime(openAt)}.`, openAt, closeAt };
+  if (now > closeAt) return { open: false, reason: "Encerrado 10 minutos antes do jogo.", openAt, closeAt };
   return { open: true, reason: `Aberto até ${formatDateTime(closeAt)}.`, openAt, closeAt };
 };
 const defaultAnnouncement = {
@@ -292,7 +349,7 @@ const defaultRoundConfig = {
   official: false,
   status: "open",
   kickoffAt: "2026-07-03T21:00:00",
-  predictionsCloseAt: "2026-07-03T20:30:00",
+  predictionsCloseAt: "2026-07-03T20:50:00",
 };
 const defaultAward = {
   name: "Robô Aspirador Potiguar",
@@ -334,7 +391,7 @@ const getPredictionStats = (entry, matchResults = defaultMatchResults) => {
 };
 
 const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
-  const activeAnnouncement = settings.announcement || defaultAnnouncement;
+  const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
@@ -359,7 +416,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
 
   readEntries.forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
-    if (!row || entry.announcementId !== activeAnnouncement.id || row.announcementRead) return;
+    if (!row || entry.roundId !== activeRound.id || row.announcementRead) return;
     row.announcementRead = true;
     row.announcementPoints += 1;
     row.points += 1;
@@ -414,6 +471,19 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   }
 
   return rows.sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+};
+
+const getRoundClosingSummary = rankingRows => {
+  const eligibleRows = rankingRows.filter(row => row.role !== "Administrador");
+  return {
+    overallWinner: eligibleRows[0] || null,
+    storeWinners: fixedStores
+      .map(store => ({
+        store,
+        winner: eligibleRows.filter(row => row.store === store)[0] || null,
+      }))
+      .filter(item => item.winner),
+  };
 };
 
 function Brand({ compact = false }) {
@@ -742,7 +812,7 @@ function Announcement({ acknowledged, setToast, user, onAcknowledge, announcemen
           <p className="mt-3 text-sm leading-6 text-slate-500">{activeAnnouncement.body}</p>
           <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
             <strong className="block font-extrabold">Como participar hoje</strong>
-            Assista ao vídeo → confirme a leitura → envie seu palpite antes das 18h59 → acompanhe as vendas do produto foco.
+            Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe as vendas do produto foco.
           </div>
           <div className="mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-potiguar-950 p-3">
             <div className="mb-3 flex items-center justify-between gap-3 px-1">
@@ -858,11 +928,14 @@ function StoreMiniRanking({ user, pilotRanking }) {
   );
 }
 
-function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, profilePhotos, settings, onAcknowledge, onSaveProfilePhoto }) {
+function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, profilePhotos, settings, activeGames, onAcknowledge, onSaveProfilePhoto }) {
   const leadership = user.accessRole === "leadership";
   const round = settings.round || defaultRoundConfig;
-  const predictionAccess = getPredictionAccess(round);
-  const predictionsClosed = !predictionAccess.open;
+  const now = new Date();
+  const gameAccess = activeGames.map(game => getGamePredictionAccess(game, now));
+  const firstOpenAccess = gameAccess.find(access => access.open);
+  const nextAccess = firstOpenAccess || gameAccess.find(access => now < access.closeAt);
+  const predictionsClosed = !firstOpenAccess;
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
@@ -878,9 +951,9 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
     <div className="space-y-6">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-slate-400">Quarta-feira, 24 de junho • palpites até 18:59</p>
+          <p className="text-sm font-semibold text-slate-400">{round.name} • {firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"}</p>
           <h2 className="mt-1 font-display text-3xl font-extrabold text-potiguar-950">Boa noite, {user.firstName}! <span className="inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]">👋</span></h2>
-          <p className="mt-1 text-sm text-slate-500">{leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "A janela de palpites está aberta até 18:59."}</p>
+          <p className="mt-1 text-sm text-slate-500">{leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "A janela de palpites está aberta para os jogos disponíveis."}</p>
         </div>
         <div className="flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm">
           <Avatar initials={user.initials} size="large" rank={user.position} photoUrl={userPhotoUrl} />
@@ -920,7 +993,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
             <div>
               <div className="flex items-center gap-2 text-xs font-bold text-potiguar-lime"><Icon name={predictionsClosed ? "lock" : acknowledged ? "ball" : "lock"} size={16} /> {predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"}</div>
               <h3 className="mt-2 font-display text-xl font-extrabold">{predictionsClosed ? "Acompanhar produto foco" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"}</h3>
-              <p className="mt-1 text-xs text-white/55">{predictionsClosed ? predictionAccess.reason : predictionAccess.reason}</p>
+              <p className="mt-1 text-xs text-white/55">{nextAccess?.reason || "Aguardando jogos da rodada."}</p>
             </div>
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"><Icon name="chevron" /></span>
           </div>
@@ -931,14 +1004,25 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
   );
 }
 
-function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePrediction }) {
+function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames, onSavePrediction }) {
   const [scores, setScores] = useState({ 1: ["", ""] });
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const round = settings.round || defaultRoundConfig;
-  const predictionAccess = getPredictionAccess(round, now);
-  const predictionsClosed = !predictionAccess.open;
-  const complete = Object.values(scores).every(pair => pair[0] !== "" && pair[1] !== "");
+  const gameAccess = Object.fromEntries(activeGames.map(game => [game.id, getGamePredictionAccess(game, now)]));
+  const openGames = activeGames.filter(game => gameAccess[game.id]?.open);
+  const firstOpenAccess = openGames.length ? gameAccess[openGames[0].id] : null;
+  const nextGameAccess = activeGames.map(game => gameAccess[game.id]).find(access => access && new Date() < access.closeAt);
+  const predictionsClosed = openGames.length === 0;
+  const complete = openGames.length > 0 && openGames.every(game => {
+    const pair = scores[game.id] || ["", ""];
+    return pair[0] !== "" && pair[1] !== "";
+  });
+
+  useEffect(() => {
+    setScores(current => Object.fromEntries(activeGames.map(game => [game.id, current[game.id] || ["", ""]])));
+    setSaved(false);
+  }, [activeGames.map(game => game.id).join("|")]);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 15000);
@@ -947,7 +1031,7 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
 
   const updateScore = (id, side, value) => {
     if (value === "" || (/^\d$/.test(value) && Number(value) <= 9)) {
-      setScores({ ...scores, [id]: scores[id].map((v, i) => i === side ? value : v) });
+      setScores({ ...scores, [id]: (scores[id] || ["", ""]).map((v, i) => i === side ? value : v) });
       setSaved(false);
     }
   };
@@ -958,14 +1042,14 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
         <div className="hero-pattern pitch-lines px-6 py-12 text-white">
           <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime"><Icon name="lock" size={38} /></div>
           <h2 className="mt-6 font-display text-3xl font-extrabold">Palpites bloqueados</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">Para acessar os jogos, você precisa ler e confirmar o comunicado obrigatório de hoje.</p>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">Para acessar os jogos, você precisa ler e confirmar a informação de endomarketing desta rodada.</p>
         </div>
         <div className="p-6 sm:p-8">
           <div className="rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800">
             <strong className="block">Regra da rodada</strong>
-            {predictionAccess.reason}
+            {firstOpenAccess?.reason || nextGameAccess?.reason || "Nenhum jogo aberto para palpite nesta rodada."}
           </div>
-          <button onClick={() => setPage("home")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Voltar e ler o comunicado</button>
+          <button onClick={() => setPage("home")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Voltar e confirmar a rodada</button>
         </div>
       </div>
     </div>
@@ -977,12 +1061,12 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
         <div className="hero-pattern pitch-lines px-6 py-12 text-white">
           <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime"><Icon name="lock" size={38} /></div>
           <h2 className="mt-6 font-display text-3xl font-extrabold">Palpites encerrados</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">{predictionAccess.reason}</p>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">{nextGameAccess?.reason || "Não há jogos abertos para palpite nesta rodada."}</p>
         </div>
         <div className="p-6 sm:p-8">
           <div className="rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900">
             <strong className="block">Regra de horário</strong>
-            {workBlockRules.join(" • ")}
+            {predictionRules.join(" • ")}
           </div>
           <button onClick={() => setPage("store")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Ver produto foco e loja</button>
         </div>
@@ -997,26 +1081,29 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> {round.official ? "Rodada oficial" : "Rodada teste"} • {round.phase}</div>
             <h2 className="mt-3 font-display text-3xl font-extrabold">{round.name}</h2>
-            <p className="mt-2 text-sm text-white/60">Resultado simulado: Escócia 0 x 3 Brasil. Placar exato vale 4 pontos; vencedor vale 2.</p>
+            <p className="mt-2 text-sm text-white/60">Placar exato vale 4 pontos; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.</p>
           </div>
           <div className="glass flex items-center gap-3 rounded-2xl px-4 py-3">
             <Icon name="clock" className="text-potiguar-lime" />
             <div>
               <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Janela de palpites</p>
-              <p className="font-display text-lg font-extrabold">até {formatDateTime(predictionAccess.closeAt)}</p>
+              <p className="font-display text-lg font-extrabold">{firstOpenAccess ? `até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto"}</p>
             </div>
           </div>
         </div>
       </section>
 
       <div className="space-y-4">
-        {games.map(game => (
+        {activeGames.map(game => {
+          const access = gameAccess[game.id];
+          const closed = !access?.open;
+          return (
           <article key={game.id} className="soft-card rounded-2xl p-4 sm:p-6">
             <div className="mb-5 flex items-center justify-between">
               <span className="rounded-full bg-potiguar-900/5 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">{game.group}</span>
               <div className="text-right">
                 <span className="flex items-center justify-end gap-1.5 text-xs font-bold text-slate-500"><Icon name="clock" size={14} /> {game.time}</span>
-                <span className="mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300">{game.venue}</span>
+                <span className="mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300">{closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`} • {game.venue}</span>
               </div>
             </div>
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
@@ -1025,9 +1112,9 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
                 <strong className="text-center text-sm text-potiguar-950 sm:text-base">{game.home}</strong>
               </div>
               <div className="flex items-center gap-2">
-                <input aria-label={`Gols ${game.home}`} className="score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white sm:h-14 sm:w-14" type="number" min="0" max="9" value={scores[game.id][0]} onChange={e => updateScore(game.id, 0, e.target.value)} />
+                <input aria-label={`Gols ${game.home}`} disabled={closed} className="score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14" type="number" min="0" max="9" value={(scores[game.id] || ["", ""])[0]} onChange={e => updateScore(game.id, 0, e.target.value)} />
                 <span className="font-extrabold text-slate-300">×</span>
-                <input aria-label={`Gols ${game.away}`} className="score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white sm:h-14 sm:w-14" type="number" min="0" max="9" value={scores[game.id][1]} onChange={e => updateScore(game.id, 1, e.target.value)} />
+                <input aria-label={`Gols ${game.away}`} disabled={closed} className="score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14" type="number" min="0" max="9" value={(scores[game.id] || ["", ""])[1]} onChange={e => updateScore(game.id, 1, e.target.value)} />
               </div>
               <div className="flex flex-col items-center gap-2 sm:flex-row">
                 <span className="text-3xl sm:order-2">{game.awayFlag}</span>
@@ -1035,11 +1122,12 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
               </div>
             </div>
           </article>
-        ))}
+          );
+        })}
       </div>
       <div className="sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5">
         <button disabled={!complete || saved} onClick={async () => {
-          const ok = await onSavePrediction(user, scores);
+          const ok = await onSavePrediction(user, scores, openGames);
           if (ok) {
             setSaved(true);
             setToast("Palpites salvos e enviados para o admin.");
@@ -1180,7 +1268,7 @@ function StorePage({ user, pilotRanking, totalSold }) {
   );
 }
 
-function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, onSaveSetting, onRefreshData }) {
+function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, activeGames, worldCupMatches, onSaveSetting, onRefreshData }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
@@ -1194,8 +1282,9 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
   const [announcementForm, setAnnouncementForm] = useState(settings.announcement || defaultAnnouncement);
   const [awardForm, setAwardForm] = useState(settings.award || defaultAward);
   const [roundForm, setRoundForm] = useState(settings.round || defaultRoundConfig);
+  const currentAdminGame = activeGames[0] || games[0];
   const [resultForm, setResultForm] = useState(() => {
-    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    const result = (settings.matchResults || defaultMatchResults)[currentAdminGame.id] || defaultMatchResults[1] || {};
     return { homeScore: String(result.homeScore), awayScore: String(result.awayScore) };
   });
   const [newSale, setNewSale] = useState(() => {
@@ -1208,9 +1297,9 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
     setAnnouncementForm(settings.announcement || defaultAnnouncement);
     setAwardForm(settings.award || defaultAward);
     setRoundForm(settings.round || defaultRoundConfig);
-    const result = (settings.matchResults || defaultMatchResults)[1] || defaultMatchResults[1];
+    const result = (settings.matchResults || defaultMatchResults)[currentAdminGame.id] || defaultMatchResults[1] || {};
     setResultForm({ homeScore: String(result.homeScore), awayScore: String(result.awayScore) });
-  }, [settings]);
+  }, [settings, currentAdminGame.id]);
   const actions = [
     ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"],
     ["fire", "Produtos", "Cadastrar o produto foco", "products"],
@@ -1243,6 +1332,8 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
   const leaderCount = users.filter(user => user.profile === "Liderança").length;
   const adminCount = users.filter(user => user.profile === "Administrador").length;
   const participantCount = sellerCount + leaderCount;
+  const roundWindow = getPredictionWindow(roundForm || defaultRoundConfig);
+  const roundClosingSummary = getRoundClosingSummary(pilotRanking);
 
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11)
     .replace(/^(\d{3})(\d)/, "$1.$2")
@@ -1358,7 +1449,11 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
 
   const saveRound = async event => {
     event.preventDefault();
-    const ok = await onSaveSetting("round", roundForm);
+    const next = {
+      ...roundForm,
+      predictionsCloseAt: roundWindow.closeAt.toISOString(),
+    };
+    const ok = await onSaveSetting("round", next);
     if (ok) setToast("Rodada atualizada.");
   };
 
@@ -1368,7 +1463,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
       ...round,
       status: "open",
       openAt: openAt.toISOString(),
-      predictionsCloseAt: round.predictionsCloseAt || closeAt.toISOString(),
+      predictionsCloseAt: closeAt.toISOString(),
     });
     setToast(`${round.name} carregada. Revise e clique em Salvar rodada.`);
   };
@@ -1377,10 +1472,35 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
     event.preventDefault();
     const next = {
       ...(settings.matchResults || defaultMatchResults),
-      1: { homeScore: Number(resultForm.homeScore), awayScore: Number(resultForm.awayScore) },
+      [currentAdminGame.id]: { homeScore: Number(resultForm.homeScore), awayScore: Number(resultForm.awayScore) },
     };
     const ok = await onSaveSetting("matchResults", next);
     if (ok) setToast("Resultado salvo. Ranking recalculado.");
+  };
+
+  const syncWorldCupMatches = async () => {
+    try {
+      const response = await fetch("/api/world-cup/sync", { method: "POST" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || data.details || "Falha ao sincronizar.");
+      await onRefreshData();
+      setToast(`${data.synced || 0} jogos sincronizados com football-data.org.`);
+    } catch (error) {
+      console.error(error);
+      setToast(error.message || "Não foi possível sincronizar jogos da Copa.");
+    }
+  };
+
+  const closeRound = async () => {
+    const next = {
+      ...roundForm,
+      status: "closed",
+      predictionsCloseAt: roundWindow.closeAt.toISOString(),
+      closedAt: new Date().toISOString(),
+      winners: roundClosingSummary,
+    };
+    const ok = await onSaveSetting("round", next);
+    if (ok) setToast("Rodada encerrada com ganhador geral e ganhadores por loja.");
   };
 
   const exportReport = () => {
@@ -1436,7 +1556,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
       </section>
       {module === "announcements" && (
         <section className="soft-card rounded-2xl p-5 sm:p-6">
-          <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Endomarketing</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Comunicado ativo</h3><p className="mt-1 text-xs text-slate-400">Ao publicar, a Home passa a mostrar este comunicado e a leitura vale +1 ponto para este ID.</p></div>
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Endomarketing</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Comunicado ativo</h3><p className="mt-1 text-xs text-slate-400">Ao publicar, a Home passa a mostrar este comunicado. A confirmação vale +1 ponto uma vez por rodada.</p></div>
           <form onSubmit={saveAnnouncement} className="mt-5 grid gap-4">
             <div className="grid gap-4 md:grid-cols-[1fr_.7fr_.5fr]">
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Título</span><input value={announcementForm.title || ""} onChange={e=>setAnnouncementForm({...announcementForm,title:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
@@ -1473,9 +1593,34 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
               <div>
                 <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Calendário automático</p>
                 <h4 className="font-display text-lg font-extrabold text-potiguar-950">Fases finais da Copa</h4>
-                <p className="mt-1 text-xs text-slate-500">16 avos em modo teste; a partir das oitavas, rodadas oficiais. O sistema bloqueia palpites automaticamente no expediente.</p>
+                <p className="mt-1 text-xs text-slate-500">16 avos em modo teste; a partir das oitavas, rodadas oficiais. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes do jogo.</p>
               </div>
-              <span className="rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800">Janela até 2 dias antes</span>
+              <div className="flex flex-col gap-2 sm:items-end">
+                <span className="rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800">Até 10 min antes</span>
+                <button type="button" onClick={syncWorldCupMatches} className="rounded-xl bg-potiguar-900 px-4 py-2.5 text-[10px] font-extrabold text-white">Sincronizar Copa</button>
+              </div>
+            </div>
+            <div className="mt-4 rounded-2xl border border-white bg-white/80 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">football-data.org</p>
+                  <h5 className="text-sm font-extrabold text-potiguar-950">Jogos sincronizados</h5>
+                </div>
+                <span className="rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800">{worldCupMatches.length} jogos</span>
+              </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+                {(activeGames || []).slice(0, 6).map(match => {
+                  const access = getGamePredictionAccess(match);
+                  return (
+                    <div key={match.id} className="rounded-xl bg-slate-50 p-3">
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">{match.group}</p>
+                      <p className="mt-1 truncate text-xs font-extrabold text-potiguar-950">{match.home} x {match.away}</p>
+                      <p className="mt-1 text-[10px] text-slate-400">{formatDateTime(match.kickoffAt)} • fecha {formatDateTime(access.closeAt)}</p>
+                    </div>
+                  );
+                })}
+                {worldCupMatches.length === 0 && <p className="text-xs text-slate-400">Nenhum jogo sincronizado ainda. Configure a API key e clique em Sincronizar Copa.</p>}
+              </div>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {knockoutRounds.map(round => {
@@ -1489,28 +1634,66 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
                       </div>
                       <span className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${round.official ? "bg-potiguar-lime/25 text-potiguar-800" : "bg-amber-100 text-amber-700"}`}>{round.official ? "OFICIAL" : "TESTE"}</span>
                     </div>
-                    <p className="mt-3 text-[10px] leading-4 text-slate-500">Jogo: {formatDateTime(round.kickoffAt)} • Palpites até {formatDateTime(round.predictionsCloseAt)}</p>
+                    <p className="mt-3 text-[10px] leading-4 text-slate-500">Jogo: {formatDateTime(round.kickoffAt)} • Palpites até {formatDateTime(access.closeAt)}</p>
                     <p className="mt-1 text-[10px] font-bold text-potiguar-700">Abertura sugerida: {formatDateTime(access.openAt)}</p>
                   </button>
                 );
               })}
             </div>
             <div className="mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500">
-              <strong className="text-potiguar-950">Regra de bloqueio:</strong> {workBlockRules.join(" • ")}
+              <strong className="text-potiguar-950">Regra dos palpites:</strong> {predictionRules.join(" • ")}
             </div>
           </div>
-          <form onSubmit={saveRound} className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_auto] md:items-end">
+          <form onSubmit={saveRound} className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_.8fr_auto] md:items-end">
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Nome da rodada</span><input value={roundForm.name || ""} onChange={e=>setRoundForm({...roundForm,name:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status</span><select value={roundForm.status || "open"} onChange={e=>setRoundForm({...roundForm,status:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="open">Aberta</option><option value="predictions_closed">Palpites encerrados</option><option value="results">Resultado lançado</option><option value="closed">Rodada encerrada</option></select></label>
-            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Limite dos palpites</span><input type="datetime-local" value={(roundForm.predictionsCloseAt || "").slice(0,16)} onChange={e=>setRoundForm({...roundForm,predictionsCloseAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Horário do jogo</span><input type="datetime-local" value={(roundForm.kickoffAt || "").slice(0,16)} onChange={e=>setRoundForm({...roundForm,kickoffAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Fecha automaticamente</span><input type="text" readOnly value={formatDateTime(roundWindow.closeAt)} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-potiguar-800 outline-none"/></label>
             <button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Salvar rodada</button>
           </form>
           <form onSubmit={saveResult} className="mt-5 grid gap-4 rounded-2xl bg-potiguar-950 p-4 text-white md:grid-cols-[1fr_.4fr_.4fr_auto] md:items-end">
-            <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime">Resultado do jogo</p><p className="mt-1 text-sm font-extrabold">{games[0].home} x {games[0].away}</p></div>
-            <label><span className="mb-2 block text-xs font-extrabold text-white/70">{games[0].home}</span><input type="number" min="0" value={resultForm.homeScore} onChange={e=>setResultForm({...resultForm,homeScore:e.target.value})} className="w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"/></label>
-            <label><span className="mb-2 block text-xs font-extrabold text-white/70">{games[0].away}</span><input type="number" min="0" value={resultForm.awayScore} onChange={e=>setResultForm({...resultForm,awayScore:e.target.value})} className="w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"/></label>
+            <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime">Resultado do jogo</p><p className="mt-1 text-sm font-extrabold">{currentAdminGame.home} x {currentAdminGame.away}</p></div>
+            <label><span className="mb-2 block text-xs font-extrabold text-white/70">{currentAdminGame.home}</span><input type="number" min="0" value={resultForm.homeScore} onChange={e=>setResultForm({...resultForm,homeScore:e.target.value})} className="w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"/></label>
+            <label><span className="mb-2 block text-xs font-extrabold text-white/70">{currentAdminGame.away}</span><input type="number" min="0" value={resultForm.awayScore} onChange={e=>setResultForm({...resultForm,awayScore:e.target.value})} className="w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"/></label>
             <button type="submit" className="rounded-xl bg-potiguar-lime px-5 py-3 text-xs font-extrabold text-potiguar-950">Salvar resultado</button>
           </form>
+          <section className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-700">Fechamento da rodada</p>
+                <h4 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Ganhadores da {roundForm.phase || "rodada"}</h4>
+                <p className="mt-1 text-xs leading-5 text-slate-500">Ao encerrar, o sistema grava o ganhador geral e o melhor colocado de cada loja nesta rodada. Regra válida para oitavas, quartas, semifinais, final e disputa de terceiro.</p>
+              </div>
+              <button type="button" onClick={closeRound} className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Encerrar e registrar ganhadores</button>
+            </div>
+            <div className="mt-4 grid gap-3 lg:grid-cols-[.9fr_1.1fr]">
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Ganhador geral</p>
+                {roundClosingSummary.overallWinner ? (
+                  <div className="mt-3 flex items-center gap-3">
+                    <Avatar initials={makeInitials(roundClosingSummary.overallWinner.name)} photoUrl={roundClosingSummary.overallWinner.photoUrl} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-extrabold text-potiguar-950">{roundClosingSummary.overallWinner.name}</p>
+                      <p className="text-[10px] text-slate-400">{roundClosingSummary.overallWinner.store} • {roundClosingSummary.overallWinner.role}</p>
+                    </div>
+                    <strong className="font-display text-xl text-potiguar-900">{roundClosingSummary.overallWinner.points}</strong>
+                  </div>
+                ) : <p className="mt-3 text-xs text-slate-400">Sem pontuação registrada ainda.</p>}
+              </div>
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Ganhador por loja</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                  {roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => (
+                    <div key={item.store} className="rounded-xl bg-slate-50 p-3">
+                      <p className="text-[10px] font-extrabold text-potiguar-800">{item.store}</p>
+                      <p className="mt-1 truncate text-xs font-extrabold text-potiguar-950">{item.winner.name}</p>
+                      <p className="text-[10px] text-slate-400">{item.winner.points} pts • {item.winner.role}</p>
+                    </div>
+                  )) : <p className="text-xs text-slate-400">Sem lojas com pontuação registrada ainda.</p>}
+                </div>
+              </div>
+            </div>
+          </section>
         </section>
       )}
       {module === "rankings" && (
@@ -1579,7 +1762,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
           <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Palpites enviados</p>
-              <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Escócia x Brasil</h3>
+              <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Jogos da rodada</h3>
               <p className="mt-1 text-xs text-slate-400">Lista consolidada dos palpites gravados no servidor.</p>
             </div>
             <span className="rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800">{predictionEntries.length} PALPITES</span>
@@ -1807,7 +1990,7 @@ function App() {
     }
   })();
   const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
-  const [acknowledged, setAcknowledged] = useState(false);
+  const [acknowledgedRoundId, setAcknowledgedRoundId] = useState("");
   const [user, setUser] = useState(restoredUser);
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
@@ -1815,6 +1998,7 @@ function App() {
   const [readEntries, setReadEntries] = useState([]);
   const [profilePhotos, setProfilePhotos] = useState({});
   const [appSettings, setAppSettings] = useState(defaultAppSettings);
+  const [worldCupMatches, setWorldCupMatches] = useState([]);
 
   useEffect(() => {
     if (!toast) return;
@@ -1880,8 +2064,19 @@ function App() {
     }
   };
 
+  const loadWorldCupMatches = async () => {
+    try {
+      const response = await fetch("/api/world-cup/matches", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json();
+      setWorldCupMatches(data.matches || []);
+    } catch (error) {
+      console.warn("Não foi possível carregar jogos da Copa.", error);
+    }
+  };
+
   const refreshData = async () => {
-    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos(), loadSettings()]);
+    await Promise.all([loadPredictions(), loadSales(), loadAnnouncementReads(), loadProfilePhotos(), loadSettings(), loadWorldCupMatches()]);
   };
 
   useEffect(() => {
@@ -1890,12 +2085,19 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, appSettings);
+  const activeRound = appSettings.round || defaultRoundConfig;
+  const activeGames = getActiveGames(worldCupMatches, activeRound);
+  const syncedMatchResults = getMatchResultsFromGames(activeGames);
+  const scoringSettings = {
+    ...appSettings,
+    matchResults: { ...(appSettings.matchResults || defaultMatchResults), ...syncedMatchResults },
+  };
+  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, scoringSettings);
   const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
-  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.announcementId === activeAnnouncement.id) : false;
-  const announcementAcknowledged = acknowledged || currentUserRead;
+  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
+  const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
 
   useEffect(() => {
@@ -1908,9 +2110,9 @@ function App() {
     }
   }, [effectiveUser?.accessRole, page]);
 
-  const savePrediction = async (currentUser, scores) => {
+  const savePrediction = async (currentUser, scores, gamesToSave = activeGames) => {
     try {
-      const predictions = games.map(game => ({
+      const predictions = gamesToSave.map(game => ({
         matchId: game.id,
         homeTeam: game.home,
         awayTeam: game.away,
@@ -1948,6 +2150,8 @@ function App() {
           fullName: currentUser.name,
           accessRole: currentUser.accessRole,
           store: currentUser.store,
+          roundId: activeRound.id,
+          roundName: activeRound.name,
           announcementId: activeAnnouncement.id,
           announcementTitle: activeAnnouncement.title,
           watchedSeconds,
@@ -1956,7 +2160,7 @@ function App() {
       if (!response.ok) throw new Error("Falha ao registrar comunicado.");
       const data = await response.json();
       setReadEntries(data.reads || []);
-      setAcknowledged(true);
+      setAcknowledgedRoundId(activeRound.id);
       return true;
     } catch (error) {
       console.error(error);
@@ -2017,7 +2221,7 @@ function App() {
     }
     setUser(nextUser);
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
-    setAcknowledged(false);
+    setAcknowledgedRoundId("");
   };
 
   const logout = () => {
@@ -2031,7 +2235,7 @@ function App() {
     }
     setUser(null);
     setPage("home");
-    setAcknowledged(false);
+    setAcknowledgedRoundId("");
     setToast("");
   };
 
@@ -2043,11 +2247,11 @@ function App() {
       <div className="main-column">
         <Topbar page={activePage} user={effectiveUser} onLogout={logout} profilePhotos={profilePhotos} />
         <main className="mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10">
-          {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={appSettings} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
-          {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} onSavePrediction={savePrediction} />}
+          {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={appSettings} activeGames={activeGames} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
+          {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} activeGames={activeGames} onSavePrediction={savePrediction} />}
           {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
           {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} />}
-          {activePage === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={appSettings} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
+          {activePage === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
         </main>
       </div>
       <MobileNav page={activePage} setPage={setPage} user={effectiveUser} />
