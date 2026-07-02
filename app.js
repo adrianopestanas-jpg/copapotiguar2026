@@ -138,7 +138,7 @@ const formatCpfValue = value => {
 };
 const toTitleCase = value => String(value ?? "").toLowerCase().replace(/(^|\s)(\S)/g, (_, space, char) => `${space}${char.toUpperCase()}`).replace(/\bDe\b/g, "de").replace(/\bDa\b/g, "da").replace(/\bDas\b/g, "das").replace(/\bDo\b/g, "do").replace(/\bDos\b/g, "dos");
 const textKey = value => String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f']/g, "").trim().toUpperCase();
-const fixedStores = ["Imperatriz"];
+const fixedStores = ["Centro", "Cohama", "Forquilha", "Cohafuma", "Africanos", "Olho Dagua", "Maiobão", "Santa Inês", "Bacabal", "Imperatriz"];
 const normalizeStore = store => ({
   CENTRO: "Centro",
   COHAMA: "Cohama",
@@ -176,7 +176,7 @@ const registeredUsers = participantRows.map(([name, cpf, job, store, explicitPro
     store: normalizeStore(store),
     status: "Ativo"
   };
-}).filter(user => user.store === PILOT_STORE || user.profile === "Administrador");
+});
 const rankedSellers = registeredUsers.filter(user => user.profile === "Vendedor");
 const ranking = rankedSellers.slice(0, 10).map((user, index) => ({
   name: user.name,
@@ -258,12 +258,12 @@ const initialProductAssignments = [{
   goal: 200
 }];
 const initialSalesEntries = [];
-const stores = [{
-  name: "Imperatriz",
+const stores = fixedStores.map(name => ({
+  name,
   score: 0,
   sold: 0,
   goal: 200
-}];
+}));
 const getStoreStats = storeName => {
   const stats = stores.find(store => store.name === storeName) || stores.find(store => store.name === PILOT_STORE) || stores[0];
   const sorted = [...stores].sort((a, b) => b.sold / b.goal - a.sold / a.goal);
@@ -288,6 +288,10 @@ const getStoreFocus = storeName => {
     remaining,
     percent: Math.round(sold / goal * 100)
   };
+};
+const isProductFocusEnabled = settings => {
+  const round = settings?.round || defaultRoundConfig;
+  return round.official !== false && !/16\s*avos/i.test(String(round.phase || round.name || ""));
 };
 const sellerPoints = () => 0;
 const getStoreRanking = (storeName, limit = 10) => rankedSellers.filter(user => user.store === storeName).map(user => {
@@ -515,7 +519,7 @@ const getGamePredictionAccess = (game, now = new Date()) => {
 const defaultAnnouncement = {
   id: "copa-potiguar-video-2026-06-25",
   title: "Copa Potiguar 2026: começou o jogo",
-  body: "Hoje começa o piloto da Copa Potiguar 2026 em Imperatriz. Leia o comunicado, assista ao vídeo e participe da rodada: o jogo vale palpite, o produto foco vale venda e o desempenho da loja vale reconhecimento para o time.",
+  body: "Começamos a fase teste da Copa Potiguar 2026 com todos os vendedores e líderes participantes. Assista ao vídeo, confirme a leitura da rodada e faça seus palpites. Nesta etapa vamos medir engajamento; produto foco entra a partir das oitavas.",
   videoUrl: "https://youtu.be/7EzZjpmw6FQ",
   minimumSeconds: 30,
   publishedAt: "25 JUN • ativo"
@@ -581,6 +585,7 @@ const getPredictionStats = (entry, matchResults = defaultMatchResults) => {
 const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
   const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
+  const productFocusEnabled = isProductFocusEnabled(settings);
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
     name: user.name,
@@ -621,12 +626,12 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     row.exactPredictions += exact ? 1 : 0;
     row.points += points;
   });
-  const salesByCpf = salesEntries.reduce((acc, entry) => {
+  const salesByCpf = productFocusEnabled ? salesEntries.reduce((acc, entry) => {
     const cpf = onlyDigits(entry.sellerCpf || "");
     if (!cpf) return acc;
     acc[cpf] = (acc[cpf] || 0) + Number(entry.quantity || 0);
     return acc;
-  }, {});
+  }, {}) : {};
   Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
     const row = byCpf[cpf];
     if (!row || quantity <= 0) return;
@@ -656,11 +661,15 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
 };
 const getRoundClosingSummary = rankingRows => {
   const eligibleRows = rankingRows.filter(row => row.role !== "Administrador");
+  const sellers = eligibleRows.filter(row => row.role === "Vendedor");
+  const leaders = eligibleRows.filter(row => row.role === "Liderança");
   return {
     overallWinner: eligibleRows[0] || null,
+    topOverall: eligibleRows.slice(0, 3),
+    topLeaders: leaders.slice(0, 3),
     storeWinners: fixedStores.map(store => ({
       store,
-      winner: eligibleRows.filter(row => row.store === store)[0] || null
+      winner: sellers.filter(row => row.store === store)[0] || null
     })).filter(item => item.winner)
   };
 };
@@ -1233,6 +1242,7 @@ function Home({
 }) {
   const leadership = user.accessRole === "leadership";
   const round = settings.round || defaultRoundConfig;
+  const productFocusEnabled = isProductFocusEnabled(settings);
   const now = new Date();
   const gameAccess = activeGames.map(game => getGamePredictionAccess(game, now));
   const firstOpenAccess = gameAccess.find(access => access.open);
@@ -1261,7 +1271,7 @@ function Home({
     className: "inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]"
   }, "👋")), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-sm text-slate-500"
-  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "A janela de palpites está aberta para os jogos disponíveis.")), /*#__PURE__*/React.createElement("div", {
+  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? productFocusEnabled ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "Palpites encerrados. Acompanhe o ranking da rodada." : "A janela de palpites está aberta para os jogos disponíveis.")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm"
   }, /*#__PURE__*/React.createElement(Avatar, {
     initials: user.initials,
@@ -1285,7 +1295,7 @@ function Home({
     icon: "bolt",
     label: leadership ? "Pontos da liderança" : "Seus pontos",
     value: userRanking?.points || 0,
-    detail: leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`,
+    detail: productFocusEnabled ? leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0}`,
     accent: "green"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "ranking",
@@ -1295,23 +1305,34 @@ function Home({
     accent: "lime"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "target",
-    label: leadership ? "Vendedores com venda" : "Palpites certos",
-    value: leadership ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0,
-    detail: leadership ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`,
+    label: leadership && productFocusEnabled ? "Vendedores com venda" : "Palpites certos",
+    value: leadership && productFocusEnabled ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0,
+    detail: leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`,
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "fire",
-    label: leadership ? "Meta da loja" : "Meta da loja",
-    value: `${storePercent}%`,
-    detail: `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}`,
+    icon: productFocusEnabled ? "fire" : "ball",
+    label: productFocusEnabled ? "Meta da loja" : "Fase teste",
+    value: productFocusEnabled ? `${storePercent}%` : "16 avos",
+    detail: productFocusEnabled ? `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}` : "Somente palpites nesta etapa",
     accent: "white"
   })), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
-  }, /*#__PURE__*/React.createElement(ProductCard, {
+  }, productFocusEnabled ? /*#__PURE__*/React.createElement(ProductCard, {
     user: user,
     totalSold: totalSold,
     pilotRanking: pilotRanking
-  }), /*#__PURE__*/React.createElement("div", {
+  }) : /*#__PURE__*/React.createElement("section", {
+    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "ball",
+    size: 16
+  }), " Fase teste"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-3 font-display text-3xl font-extrabold"
+  }, "16 avos sem produto foco"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 text-sm leading-6 text-white/65"
+  }, "Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Produto foco e metas comerciais entram a partir das oitavas.")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement(MiniRanking, {
     pilotRanking: pilotRanking
@@ -1332,7 +1353,7 @@ function Home({
     onAcknowledge: onAcknowledge,
     announcement: settings.announcement
   }), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setPage(predictionsClosed ? "store" : "guesses"),
+    onClick: () => setPage(predictionsClosed && productFocusEnabled ? "store" : "guesses"),
     className: "group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex h-full items-center justify-between gap-5"
@@ -1343,7 +1364,7 @@ function Home({
     size: 16
   }), " ", predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-2 font-display text-xl font-extrabold"
-  }, predictionsClosed ? "Acompanhar produto foco" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
+  }, predictionsClosed ? productFocusEnabled ? "Acompanhar produto foco" : "Ver jogos da rodada" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-white/55"
   }, nextAccess?.reason || "Aguardando jogos da rodada.")), /*#__PURE__*/React.createElement("span", {
     className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"
@@ -1630,7 +1651,7 @@ function RankingPage({
       className: "ml-1 text-[9px] text-potiguar-700"
     }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
       className: "truncate text-[10px] text-slate-400"
-    }, person.role, " • ", person.store || user.store, " • Comunicado ", person.announcementPoints, " • Palpite ", person.predictionPoints, " pts • Venda ", person.salesPoints + person.topSellerPoints, " pts", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), person.trend && /*#__PURE__*/React.createElement("span", {
+    }, person.role, " • ", person.store || user.store, " • Comunicado ", person.announcementPoints, " • Palpite ", person.predictionPoints, " pts", person.salesPoints + person.topSellerPoints || person.storeGoalPoints ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : "")), person.trend && /*#__PURE__*/React.createElement("span", {
       className: `hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`
     }, person.trend), /*#__PURE__*/React.createElement("div", {
       className: "text-right"
@@ -1644,8 +1665,10 @@ function RankingPage({
 function StorePage({
   user,
   pilotRanking,
-  totalSold
+  totalSold,
+  settings
 }) {
+  const productFocusEnabled = isProductFocusEnabled(settings);
   const storeFocus = getStoreFocus(user.store);
   const storeUnit = storeFocus.product.unit || "unidades";
   const storeGoal = storeFocus.goal || 1;
@@ -1661,6 +1684,50 @@ function StorePage({
     goal: storeGoal
   }).sort((a, b) => b.sold / b.goal - a.sold / a.goal);
   const dayChampion = networkRanking[0];
+  if (!productFocusEnabled) return /*#__PURE__*/React.createElement("div", {
+    className: "space-y-6"
+  }, /*#__PURE__*/React.createElement("section", {
+    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "store",
+    size: 16
+  }), " Loja ", user.store), /*#__PURE__*/React.createElement("h2", {
+    className: "mt-3 font-display text-3xl font-extrabold"
+  }, "Fase teste: foco nos palpites"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 text-sm leading-6 text-white/65"
+  }, "Nesta etapa não teremos produto foco nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.")), /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Nosso time"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Ranking ", user.store)), /*#__PURE__*/React.createElement("span", {
+    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
+  }, localRanking.length, " PARTICIPANTES")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 space-y-3"
+  }, localRanking.map((p, i) => /*#__PURE__*/React.createElement("div", {
+    key: p.name,
+    className: `flex items-center gap-3 rounded-xl p-3 ${p.name === user.name ? "bg-potiguar-lime/15" : "bg-slate-50"}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-5 text-center text-xs font-extrabold text-slate-400"
+  }, i === 0 ? "🥇" : i + 1), /*#__PURE__*/React.createElement(Avatar, {
+    initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+    photoUrl: p.photoUrl
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "min-w-0 flex-1"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-sm font-extrabold text-potiguar-950"
+  }, p.name, p.name === user.name && /*#__PURE__*/React.createElement("span", {
+    className: "ml-1 text-[9px] text-potiguar-700"
+  }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-[10px] text-slate-400"
+  }, p.role, " • ", p.predictionHits, " acerto(s)")), /*#__PURE__*/React.createElement("strong", {
+    className: "font-display text-lg text-potiguar-900"
+  }, p.points))))));
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -1867,6 +1934,7 @@ function AdminPage({
   const participantCount = sellerCount + leaderCount;
   const roundWindow = getPredictionWindow(roundForm || defaultRoundConfig);
   const roundClosingSummary = getRoundClosingSummary(pilotRanking);
+  const productFocusEnabled = isProductFocusEnabled(settings);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const createUser = event => {
     event.preventDefault();
@@ -2051,7 +2119,7 @@ function AdminPage({
       winners: roundClosingSummary
     };
     const ok = await onSaveSetting("round", next);
-    if (ok) setToast("Rodada encerrada com ganhador geral e ganhadores por loja.");
+    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com ganhador geral e ganhadores por loja." : "Fase teste encerrada com top 3 geral, top 3 líderes e vendedores por loja.");
   };
   const exportReport = () => {
     const rows = [["posicao", "nome", "cpf", "loja", "perfil", "pontos", "comunicado", "palpite_pts", "acertos", "placar_exato", "venda_pts", "quantidade", "meta_pts"], ...pilotRanking.map((person, index) => [index + 1, person.name, person.cpf, person.store, person.role, person.points, person.announcementPoints, person.predictionPoints, person.predictionHits, person.exactPredictions, person.salesPoints + person.topSellerPoints, person.soldQuantity, person.storeGoalPoints])];
@@ -2431,36 +2499,59 @@ function AdminPage({
     className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
   }, "Ganhadores da ", roundForm.phase || "rodada"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs leading-5 text-slate-500"
-  }, "Ao encerrar, o sistema grava o ganhador geral e o melhor colocado de cada loja nesta rodada. Regra válida para oitavas, quartas, semifinais, final e disputa de terceiro.")), /*#__PURE__*/React.createElement("button", {
+  }, productFocusEnabled ? "Ao encerrar, o sistema grava o ganhador geral e o melhor colocado de cada loja nesta rodada." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites. Fechamento: vendedor ganhador por loja, top 3 líderes geral e top 3 geral.")), /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: closeRound,
     className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
   }, "Encerrar e registrar ganhadores")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-3 lg:grid-cols-[.9fr_1.1fr]"
+    className: "mt-4 grid gap-3 lg:grid-cols-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl bg-white p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Ganhador geral"), roundClosingSummary.overallWinner ? /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: makeInitials(roundClosingSummary.overallWinner.name),
-    photoUrl: roundClosingSummary.overallWinner.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
+  }, "Top 3 geral"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 space-y-2"
+  }, roundClosingSummary.topOverall.length ? roundClosingSummary.topOverall.map((person, index) => /*#__PURE__*/React.createElement("div", {
+    key: person.cpf,
+    className: "flex items-center gap-2 rounded-xl bg-slate-50 p-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-6 text-center text-xs"
+  }, ["🥇", "🥈", "🥉"][index]), /*#__PURE__*/React.createElement("div", {
     className: "min-w-0 flex-1"
   }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-sm font-extrabold text-potiguar-950"
-  }, roundClosingSummary.overallWinner.name), /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-xs font-extrabold text-potiguar-950"
+  }, person.name), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-slate-400"
-  }, roundClosingSummary.overallWinner.store, " • ", roundClosingSummary.overallWinner.role)), /*#__PURE__*/React.createElement("strong", {
-    className: "font-display text-xl text-potiguar-900"
-  }, roundClosingSummary.overallWinner.points)) : /*#__PURE__*/React.createElement("p", {
-    className: "mt-3 text-xs text-slate-400"
-  }, "Sem pontuação registrada ainda.")), /*#__PURE__*/React.createElement("div", {
+  }, person.store, " • ", person.role)), /*#__PURE__*/React.createElement("strong", {
+    className: "text-xs text-potiguar-900"
+  }, person.points))) : /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Sem pontuação registrada ainda."))), /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl bg-white p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Ganhador por loja"), /*#__PURE__*/React.createElement("div", {
+  }, "Top 3 líderes"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 space-y-2"
+  }, roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
+    key: person.cpf,
+    className: "flex items-center gap-2 rounded-xl bg-slate-50 p-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-6 text-center text-xs"
+  }, ["🥇", "🥈", "🥉"][index]), /*#__PURE__*/React.createElement("div", {
+    className: "min-w-0 flex-1"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-xs font-extrabold text-potiguar-950"
+  }, person.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-400"
+  }, person.store)), /*#__PURE__*/React.createElement("strong", {
+    className: "text-xs text-potiguar-900"
+  }, person.points))) : /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Sem líderes pontuados ainda."))), /*#__PURE__*/React.createElement("div", {
+    className: "rounded-xl bg-white p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "Vendedor por loja"), /*#__PURE__*/React.createElement("div", {
     className: "mt-3 grid gap-2 sm:grid-cols-2"
   }, roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => /*#__PURE__*/React.createElement("div", {
     key: item.store,
@@ -2517,7 +2608,7 @@ function AdminPage({
     className: "truncate text-xs font-extrabold text-potiguar-950"
   }, person.name), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-slate-400"
-  }, person.store, " • ", person.role, " • Comunicado ", person.announcementPoints, " pt • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s) • Venda ", person.salesPoints + person.topSellerPoints, " pts/", person.soldQuantity, " m²", person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : "")), /*#__PURE__*/React.createElement("strong", {
+  }, person.store, " • ", person.role, " • Comunicado ", person.announcementPoints, " pt • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s)", person.salesPoints + person.topSellerPoints || person.storeGoalPoints ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts/${person.soldQuantity} m²${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : "")), /*#__PURE__*/React.createElement("strong", {
     className: "font-display text-lg text-potiguar-900"
   }, person.points, " pts"))))), /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
@@ -2857,7 +2948,9 @@ function AdminPage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Quantidade vendida por vendedor"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, "O lançamento identifica loja, vendedor, produto foco e quantidade.")), /*#__PURE__*/React.createElement("form", {
+  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, produto foco e quantidade." : "Produto foco desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas.")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800"
+  }, "Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de produto foco agora."), productFocusEnabled && /*#__PURE__*/React.createElement("form", {
     onSubmit: addSale,
     className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.2fr_1.6fr_.7fr_auto] md:items-end"
   }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
@@ -3525,7 +3618,8 @@ function App() {
   }), activePage === "store" && /*#__PURE__*/React.createElement(StorePage, {
     user: effectiveUser,
     pilotRanking: pilotRanking,
-    totalSold: totalSold
+    totalSold: totalSold,
+    settings: appSettings
   }), activePage === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     setToast: setToast,
     predictionEntries: predictionEntries,

@@ -59,6 +59,15 @@ const textKey = value => String(value ?? "")
   .toUpperCase();
 
 const fixedStores = [
+  "Centro",
+  "Cohama",
+  "Forquilha",
+  "Cohafuma",
+  "Africanos",
+  "Olho Dagua",
+  "Maiobão",
+  "Santa Inês",
+  "Bacabal",
   "Imperatriz",
 ];
 
@@ -111,8 +120,7 @@ const registeredUsers = participantRows
       store: normalizeStore(store),
       status: "Ativo",
     };
-  })
-  .filter(user => user.store === PILOT_STORE || user.profile === "Administrador");
+  });
 
 const rankedSellers = registeredUsers.filter(user => user.profile === "Vendedor");
 const ranking = rankedSellers.slice(0, 10).map((user, index) => ({
@@ -164,9 +172,7 @@ const initialProductAssignments = [
 
 const initialSalesEntries = [];
 
-const stores = [
-  { name: "Imperatriz", score: 0, sold: 0, goal: 200 },
-];
+const stores = fixedStores.map(name => ({ name, score: 0, sold: 0, goal: 200 }));
 
 const getStoreStats = storeName => {
   const stats = stores.find(store => store.name === storeName) || stores.find(store => store.name === PILOT_STORE) || stores[0];
@@ -193,6 +199,11 @@ const getStoreFocus = storeName => {
     remaining,
     percent: Math.round((sold / goal) * 100),
   };
+};
+
+const isProductFocusEnabled = settings => {
+  const round = settings?.round || defaultRoundConfig;
+  return round.official !== false && !/16\s*avos/i.test(String(round.phase || round.name || ""));
 };
 
 const sellerPoints = () => 0;
@@ -334,7 +345,7 @@ const getGamePredictionAccess = (game, now = new Date()) => {
 const defaultAnnouncement = {
   id: "copa-potiguar-video-2026-06-25",
   title: "Copa Potiguar 2026: começou o jogo",
-  body: "Hoje começa o piloto da Copa Potiguar 2026 em Imperatriz. Leia o comunicado, assista ao vídeo e participe da rodada: o jogo vale palpite, o produto foco vale venda e o desempenho da loja vale reconhecimento para o time.",
+  body: "Começamos a fase teste da Copa Potiguar 2026 com todos os vendedores e líderes participantes. Assista ao vídeo, confirme a leitura da rodada e faça seus palpites. Nesta etapa vamos medir engajamento; produto foco entra a partir das oitavas.",
   videoUrl: "https://youtu.be/7EzZjpmw6FQ",
   minimumSeconds: 30,
   publishedAt: "25 JUN • ativo",
@@ -393,6 +404,7 @@ const getPredictionStats = (entry, matchResults = defaultMatchResults) => {
 const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
   const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
+  const productFocusEnabled = isProductFocusEnabled(settings);
   const participants = users.filter(user => user.profile !== "Administrador");
   const rows = participants.map(user => ({
     name: user.name,
@@ -432,12 +444,12 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     row.points += points;
   });
 
-  const salesByCpf = salesEntries.reduce((acc, entry) => {
+  const salesByCpf = productFocusEnabled ? salesEntries.reduce((acc, entry) => {
     const cpf = onlyDigits(entry.sellerCpf || "");
     if (!cpf) return acc;
     acc[cpf] = (acc[cpf] || 0) + Number(entry.quantity || 0);
     return acc;
-  }, {});
+  }, {}) : {};
 
   Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
     const row = byCpf[cpf];
@@ -475,12 +487,16 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
 
 const getRoundClosingSummary = rankingRows => {
   const eligibleRows = rankingRows.filter(row => row.role !== "Administrador");
+  const sellers = eligibleRows.filter(row => row.role === "Vendedor");
+  const leaders = eligibleRows.filter(row => row.role === "Liderança");
   return {
     overallWinner: eligibleRows[0] || null,
+    topOverall: eligibleRows.slice(0, 3),
+    topLeaders: leaders.slice(0, 3),
     storeWinners: fixedStores
       .map(store => ({
         store,
-        winner: eligibleRows.filter(row => row.store === store)[0] || null,
+        winner: sellers.filter(row => row.store === store)[0] || null,
       }))
       .filter(item => item.winner),
   };
@@ -931,6 +947,7 @@ function StoreMiniRanking({ user, pilotRanking }) {
 function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, profilePhotos, settings, activeGames, onAcknowledge, onSaveProfilePhoto }) {
   const leadership = user.accessRole === "leadership";
   const round = settings.round || defaultRoundConfig;
+  const productFocusEnabled = isProductFocusEnabled(settings);
   const now = new Date();
   const gameAccess = activeGames.map(game => getGamePredictionAccess(game, now));
   const firstOpenAccess = gameAccess.find(access => access.open);
@@ -953,7 +970,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
         <div>
           <p className="text-sm font-semibold text-slate-400">{round.name} • {firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"}</p>
           <h2 className="mt-1 font-display text-3xl font-extrabold text-potiguar-950">Boa noite, {user.firstName}! <span className="inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]">👋</span></h2>
-          <p className="mt-1 text-sm text-slate-500">{leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "A janela de palpites está aberta para os jogos disponíveis."}</p>
+          <p className="mt-1 text-sm text-slate-500">{leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? productFocusEnabled ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "Palpites encerrados. Acompanhe o ranking da rodada." : "A janela de palpites está aberta para os jogos disponíveis."}</p>
         </div>
         <div className="flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm">
           <Avatar initials={user.initials} size="large" rank={user.position} photoUrl={userPhotoUrl} />
@@ -968,14 +985,20 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
       </section>
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard icon="bolt" label={leadership ? "Pontos da liderança" : "Seus pontos"} value={userRanking?.points || 0} detail={leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}`} accent="green" />
+        <StatCard icon="bolt" label={leadership ? "Pontos da liderança" : "Seus pontos"} value={userRanking?.points || 0} detail={productFocusEnabled ? leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0}`} accent="green" />
         <StatCard icon="ranking" label="Posição geral" value={`${userPosition || "—"}º`} detail={userRanking?.isTopSeller ? "Destaque do produto foco" : "Ranking atualizado automaticamente"} accent="lime" />
-        <StatCard icon="target" label={leadership ? "Vendedores com venda" : "Palpites certos"} value={leadership ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0} detail={leadership ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`} accent="white" />
-        <StatCard icon="fire" label={leadership ? "Meta da loja" : "Meta da loja"} value={`${storePercent}%`} detail={`${totalSold} de ${storeFocus.goal} ${storeFocusUnit}`} accent="white" />
+        <StatCard icon="target" label={leadership && productFocusEnabled ? "Vendedores com venda" : "Palpites certos"} value={leadership && productFocusEnabled ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0} detail={leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`} accent="white" />
+        <StatCard icon={productFocusEnabled ? "fire" : "ball"} label={productFocusEnabled ? "Meta da loja" : "Fase teste"} value={productFocusEnabled ? `${storePercent}%` : "16 avos"} detail={productFocusEnabled ? `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}` : "Somente palpites nesta etapa"} accent="white" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
-        <ProductCard user={user} totalSold={totalSold} pilotRanking={pilotRanking} />
+        {productFocusEnabled ? <ProductCard user={user} totalSold={totalSold} pilotRanking={pilotRanking} /> : (
+          <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8">
+            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-lime"><Icon name="ball" size={16} /> Fase teste</div>
+            <h3 className="mt-3 font-display text-3xl font-extrabold">16 avos sem produto foco</h3>
+            <p className="mt-2 text-sm leading-6 text-white/65">Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Produto foco e metas comerciais entram a partir das oitavas.</p>
+          </section>
+        )}
         <div className="space-y-6">
           <MiniRanking pilotRanking={pilotRanking} />
           <section className="soft-card rounded-2xl p-5 sm:p-6">
@@ -988,11 +1011,11 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
         <Announcement acknowledged={acknowledged} setToast={setToast} user={user} onAcknowledge={onAcknowledge} announcement={settings.announcement} />
-        <button onClick={() => setPage(predictionsClosed ? "store" : "guesses")} className="group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6">
+        <button onClick={() => setPage(predictionsClosed && productFocusEnabled ? "store" : "guesses")} className="group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6">
           <div className="flex h-full items-center justify-between gap-5">
             <div>
               <div className="flex items-center gap-2 text-xs font-bold text-potiguar-lime"><Icon name={predictionsClosed ? "lock" : acknowledged ? "ball" : "lock"} size={16} /> {predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"}</div>
-              <h3 className="mt-2 font-display text-xl font-extrabold">{predictionsClosed ? "Acompanhar produto foco" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"}</h3>
+              <h3 className="mt-2 font-display text-xl font-extrabold">{predictionsClosed ? productFocusEnabled ? "Acompanhar produto foco" : "Ver jogos da rodada" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"}</h3>
               <p className="mt-1 text-xs text-white/55">{nextAccess?.reason || "Aguardando jogos da rodada."}</p>
             </div>
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"><Icon name="chevron" /></span>
@@ -1213,7 +1236,7 @@ function RankingPage({ user, pilotRanking }) {
                 <Avatar initials={person.name.split(" ").map(x=>x[0]).slice(0,2).join("")} photoUrl={person.photoUrl} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-extrabold text-potiguar-950">{person.name} {isMe && <span className="ml-1 text-[9px] text-potiguar-700">(VOCÊ)</span>}</p>
-                  <p className="truncate text-[10px] text-slate-400">{person.role} • {person.store || user.store} • Comunicado {person.announcementPoints} • Palpite {person.predictionPoints} pts • Venda {person.salesPoints + person.topSellerPoints} pts{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p>
+                  <p className="truncate text-[10px] text-slate-400">{person.role} • {person.store || user.store} • Comunicado {person.announcementPoints} • Palpite {person.predictionPoints} pts{(person.salesPoints + person.topSellerPoints || person.storeGoalPoints) ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : ""}</p>
                 </div>
                 {person.trend && <span className={`hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`}>{person.trend}</span>}
                 <div className="text-right">
@@ -1229,7 +1252,8 @@ function RankingPage({ user, pilotRanking }) {
   );
 }
 
-function StorePage({ user, pilotRanking, totalSold }) {
+function StorePage({ user, pilotRanking, totalSold, settings }) {
+  const productFocusEnabled = isProductFocusEnabled(settings);
   const storeFocus = getStoreFocus(user.store);
   const storeUnit = storeFocus.product.unit || "unidades";
   const storeGoal = storeFocus.goal || 1;
@@ -1237,6 +1261,31 @@ function StorePage({ user, pilotRanking, totalSold }) {
   const localRanking = pilotRanking.filter(person => person.store === user.store);
   const networkRanking = stores.map(store => store.name === user.store ? { ...store, sold: totalSold, goal: storeGoal } : { ...store, sold: 0, goal: storeGoal }).sort((a, b) => (b.sold / b.goal) - (a.sold / a.goal));
   const dayChampion = networkRanking[0];
+  if (!productFocusEnabled) return (
+    <div className="space-y-6">
+      <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
+        <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"><Icon name="store" size={16}/> Loja {user.store}</div>
+        <h2 className="mt-3 font-display text-3xl font-extrabold">Fase teste: foco nos palpites</h2>
+        <p className="mt-2 text-sm leading-6 text-white/65">Nesta etapa não teremos produto foco nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.</p>
+      </section>
+      <section className="soft-card rounded-2xl p-5 sm:p-6">
+        <div className="flex items-center justify-between">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Nosso time</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking {user.store}</h3></div>
+          <span className="rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800">{localRanking.length} PARTICIPANTES</span>
+        </div>
+        <div className="mt-5 space-y-3">
+          {localRanking.map((p, i) => (
+            <div key={p.name} className={`flex items-center gap-3 rounded-xl p-3 ${p.name === user.name ? "bg-potiguar-lime/15" : "bg-slate-50"}`}>
+              <span className="w-5 text-center text-xs font-extrabold text-slate-400">{i === 0 ? "🥇" : i + 1}</span>
+              <Avatar initials={p.name.split(" ").map(x=>x[0]).slice(0,2).join("")} photoUrl={p.photoUrl} />
+              <div className="min-w-0 flex-1"><p className="truncate text-sm font-extrabold text-potiguar-950">{p.name}{p.name === user.name && <span className="ml-1 text-[9px] text-potiguar-700">(VOCÊ)</span>}</p><p className="truncate text-[10px] text-slate-400">{p.role} • {p.predictionHits} acerto(s)</p></div>
+              <strong className="font-display text-lg text-potiguar-900">{p.points}</strong>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
   return (
     <div className="space-y-6">
       <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
@@ -1365,6 +1414,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
   const participantCount = sellerCount + leaderCount;
   const roundWindow = getPredictionWindow(roundForm || defaultRoundConfig);
   const roundClosingSummary = getRoundClosingSummary(pilotRanking);
+  const productFocusEnabled = isProductFocusEnabled(settings);
 
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11)
     .replace(/^(\d{3})(\d)/, "$1.$2")
@@ -1531,7 +1581,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
       winners: roundClosingSummary,
     };
     const ok = await onSaveSetting("round", next);
-    if (ok) setToast("Rodada encerrada com ganhador geral e ganhadores por loja.");
+    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com ganhador geral e ganhadores por loja." : "Fase teste encerrada com top 3 geral, top 3 líderes e vendedores por loja.");
   };
 
   const exportReport = () => {
@@ -1693,26 +1743,37 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
               <div>
                 <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-700">Fechamento da rodada</p>
                 <h4 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Ganhadores da {roundForm.phase || "rodada"}</h4>
-                <p className="mt-1 text-xs leading-5 text-slate-500">Ao encerrar, o sistema grava o ganhador geral e o melhor colocado de cada loja nesta rodada. Regra válida para oitavas, quartas, semifinais, final e disputa de terceiro.</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">{productFocusEnabled ? "Ao encerrar, o sistema grava o ganhador geral e o melhor colocado de cada loja nesta rodada." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites. Fechamento: vendedor ganhador por loja, top 3 líderes geral e top 3 geral."}</p>
               </div>
               <button type="button" onClick={closeRound} className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Encerrar e registrar ganhadores</button>
             </div>
-            <div className="mt-4 grid gap-3 lg:grid-cols-[.9fr_1.1fr]">
+            <div className="mt-4 grid gap-3 lg:grid-cols-3">
               <div className="rounded-xl bg-white p-4">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Ganhador geral</p>
-                {roundClosingSummary.overallWinner ? (
-                  <div className="mt-3 flex items-center gap-3">
-                    <Avatar initials={makeInitials(roundClosingSummary.overallWinner.name)} photoUrl={roundClosingSummary.overallWinner.photoUrl} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-extrabold text-potiguar-950">{roundClosingSummary.overallWinner.name}</p>
-                      <p className="text-[10px] text-slate-400">{roundClosingSummary.overallWinner.store} • {roundClosingSummary.overallWinner.role}</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Top 3 geral</p>
+                <div className="mt-3 space-y-2">
+                  {roundClosingSummary.topOverall.length ? roundClosingSummary.topOverall.map((person, index) => (
+                    <div key={person.cpf} className="flex items-center gap-2 rounded-xl bg-slate-50 p-2">
+                      <span className="w-6 text-center text-xs">{["🥇","🥈","🥉"][index]}</span>
+                      <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • {person.role}</p></div>
+                      <strong className="text-xs text-potiguar-900">{person.points}</strong>
                     </div>
-                    <strong className="font-display text-xl text-potiguar-900">{roundClosingSummary.overallWinner.points}</strong>
-                  </div>
-                ) : <p className="mt-3 text-xs text-slate-400">Sem pontuação registrada ainda.</p>}
+                  )) : <p className="text-xs text-slate-400">Sem pontuação registrada ainda.</p>}
+                </div>
               </div>
               <div className="rounded-xl bg-white p-4">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Ganhador por loja</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Top 3 líderes</p>
+                <div className="mt-3 space-y-2">
+                  {roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => (
+                    <div key={person.cpf} className="flex items-center gap-2 rounded-xl bg-slate-50 p-2">
+                      <span className="w-6 text-center text-xs">{["🥇","🥈","🥉"][index]}</span>
+                      <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store}</p></div>
+                      <strong className="text-xs text-potiguar-900">{person.points}</strong>
+                    </div>
+                  )) : <p className="text-xs text-slate-400">Sem líderes pontuados ainda.</p>}
+                </div>
+              </div>
+              <div className="rounded-xl bg-white p-4">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Vendedor por loja</p>
                 <div className="mt-3 grid gap-2 sm:grid-cols-2">
                   {roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => (
                     <div key={item.store} className="rounded-xl bg-slate-50 p-3">
@@ -1753,7 +1814,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
 	                  <div key={person.name} className="flex items-center gap-3 px-5 py-3">
 	                    <span className={`grid h-8 w-8 place-items-center rounded-lg text-xs font-extrabold ${index < 3 ? "bg-potiguar-lime/20 text-potiguar-800" : "text-slate-400"}`}>{index < 3 ? ["🥇","🥈","🥉"][index] : index + 1}</span>
 	                    <Avatar initials={person.name.split(" ").map(part => part[0]).slice(0,2).join("")} photoUrl={person.photoUrl}/>
-	                    <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • {person.role} • Comunicado {person.announcementPoints} pt • Palpite {person.predictionPoints} pts/{person.predictionHits} acerto(s) • Venda {person.salesPoints + person.topSellerPoints} pts/{person.soldQuantity} m²{person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}</p></div>
+	                    <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • {person.role} • Comunicado {person.announcementPoints} pt • Palpite {person.predictionPoints} pts/{person.predictionHits} acerto(s){(person.salesPoints + person.topSellerPoints || person.storeGoalPoints) ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts/${person.soldQuantity} m²${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : ""}</p></div>
 	                    <strong className="font-display text-lg text-potiguar-900">{person.points} pts</strong>
 	                  </div>
 	                ))}
@@ -1895,15 +1956,20 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
           <div>
             <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Apuração do produto foco</p>
             <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Quantidade vendida por vendedor</h3>
-            <p className="mt-1 text-xs text-slate-400">O lançamento identifica loja, vendedor, produto foco e quantidade.</p>
+            <p className="mt-1 text-xs text-slate-400">{productFocusEnabled ? "O lançamento identifica loja, vendedor, produto foco e quantidade." : "Produto foco desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas."}</p>
           </div>
-          <form onSubmit={addSale} className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.2fr_1.6fr_.7fr_auto] md:items-end">
+          {!productFocusEnabled && (
+            <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+              Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de produto foco agora.
+            </div>
+          )}
+          {productFocusEnabled && <form onSubmit={addSale} className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.2fr_1.6fr_.7fr_auto] md:items-end">
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Loja</span><select aria-label="Loja da venda" value={newSale.store} onChange={e=>{const store=e.target.value; const sellers=users.filter(user=>user.profile==="Vendedor"&&user.store===store); const products=assignments.filter(item=>item.store===store); setNewSale({...newSale,store,seller:sellers[0]?.name||"",productId:products[0]?.productId||""});}} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs">{fixedStores.map(store=><option key={store}>{store}</option>)}</select></label>
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Vendedor</span><select aria-label="Vendedor da venda" value={newSale.seller} onChange={e=>setNewSale({...newSale,seller:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="">Selecione</option>{sellersForSale.map(user=><option key={user.cpf}>{user.name}</option>)}</select></label>
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Produto foco</span><select aria-label="Produto vendido" value={newSale.productId} onChange={e=>setNewSale({...newSale,productId:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="">Selecione</option>{productsForSale.map(item=>{const product=productCatalog.find(product=>product.id===item.productId);return <option key={item.productId} value={item.productId}>{product?.sku} • {product?.name}</option>;})}</select></label>
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Quantidade</span><input aria-label="Quantidade vendida" type="number" min="0.01" step="0.01" value={newSale.quantity} onChange={e=>setNewSale({...newSale,quantity:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"/></label>
             <button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Registrar venda</button>
-          </form>
+          </form>}
           <div className="mt-5 overflow-x-auto">
             <table className="w-full min-w-[650px] text-left">
               <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"><tr><th className="px-4 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Produto</th><th className="px-4 py-3 text-right">Quantidade</th></tr></thead>
@@ -2281,7 +2347,7 @@ function App() {
           {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={appSettings} activeGames={activeGames} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
           {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} activeGames={activeGames} onSavePrediction={savePrediction} />}
           {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
-          {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} />}
+          {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} settings={appSettings} />}
           {activePage === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
         </main>
       </div>
