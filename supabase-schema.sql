@@ -225,6 +225,13 @@ create table if not exists profile_photo_entries (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists user_credentials (
+  cpf varchar(11) primary key check (cpf ~ '^[0-9]{11}$'),
+  password_hash text not null,
+  must_change_password boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists app_settings (
   key text primary key,
   value jsonb not null,

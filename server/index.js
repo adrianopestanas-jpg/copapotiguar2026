@@ -1,4 +1,5 @@
 import http from "node:http";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { Pool } from "pg";
 
 const port = Number(process.env.PORT || 3000);
@@ -14,6 +15,38 @@ const sendJson = (response, status, payload) => {
     "Cache-Control": "no-store",
   });
   response.end(JSON.stringify(payload));
+};
+
+const onlyDigits = value => String(value || "").replace(/\D/g, "");
+
+const hashPassword = (password, salt = randomBytes(16).toString("hex")) => {
+  const hash = scryptSync(String(password || ""), salt, 64).toString("hex");
+  return `scrypt$${salt}$${hash}`;
+};
+
+const verifyPassword = (password, storedHash) => {
+  const [algorithm, salt, hash] = String(storedHash || "").split("$");
+  if (algorithm !== "scrypt" || !salt || !hash) return false;
+  const expected = Buffer.from(hash, "hex");
+  const candidate = scryptSync(String(password || ""), salt, 64);
+  return expected.length === candidate.length && timingSafeEqual(expected, candidate);
+};
+
+const getOrCreateCredential = async (cpf) => {
+  const existing = await pool.query(`
+    select cpf, password_hash, must_change_password, updated_at
+      from user_credentials
+     where cpf = $1
+  `, [cpf]);
+  if (existing.rows[0]) return existing.rows[0];
+
+  const created = await pool.query(`
+    insert into user_credentials (cpf, password_hash, must_change_password, updated_at)
+    values ($1,$2,true,now())
+    on conflict (cpf) do update set cpf = excluded.cpf
+    returning cpf, password_hash, must_change_password, updated_at
+  `, [cpf, hashPassword(cpf)]);
+  return created.rows[0];
 };
 
 const readBody = request => new Promise((resolve, reject) => {
@@ -147,6 +180,14 @@ const ensureSchema = async () => {
       updated_at timestamptz not null default now()
     );
 
+    create table if not exists user_credentials (
+      cpf varchar(11) primary key,
+      password_hash text not null,
+      must_change_password boolean not null default true,
+      updated_at timestamptz not null default now(),
+      check (cpf ~ '^[0-9]{11}$')
+    );
+
     create table if not exists app_settings (
       key text primary key,
       value jsonb not null,
@@ -277,6 +318,87 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/health") {
       sendJson(response, 200, { ok: true });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/auth/login") {
+      const payload = JSON.parse(await readBody(request) || "{}");
+      const cpf = onlyDigits(payload.cpf);
+      const password = String(payload.password || "");
+
+      if (cpf.length !== 11 || !password) {
+        sendJson(response, 400, { error: "CPF e senha são obrigatórios." });
+        return;
+      }
+
+      const credential = await getOrCreateCredential(cpf);
+      if (!verifyPassword(password, credential.password_hash)) {
+        sendJson(response, 401, { error: "CPF ou senha inválidos." });
+        return;
+      }
+
+      sendJson(response, 200, {
+        ok: true,
+        cpf,
+        mustChangePassword: credential.must_change_password,
+      });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/auth/change-password") {
+      const payload = JSON.parse(await readBody(request) || "{}");
+      const cpf = onlyDigits(payload.cpf);
+      const currentPassword = String(payload.currentPassword || "");
+      const newPassword = String(payload.newPassword || "");
+
+      if (cpf.length !== 11 || !currentPassword || newPassword.length < 6) {
+        sendJson(response, 400, { error: "Informe a senha atual e uma nova senha com pelo menos 6 caracteres." });
+        return;
+      }
+
+      const credential = await getOrCreateCredential(cpf);
+      if (!verifyPassword(currentPassword, credential.password_hash)) {
+        sendJson(response, 401, { error: "Senha atual inválida." });
+        return;
+      }
+
+      await pool.query(`
+        update user_credentials
+           set password_hash = $2,
+               must_change_password = false,
+               updated_at = now()
+         where cpf = $1
+      `, [cpf, hashPassword(newPassword)]);
+
+      sendJson(response, 200, { ok: true, cpf, mustChangePassword: false });
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/admin/reset-password") {
+      const payload = JSON.parse(await readBody(request) || "{}");
+      const targetCpf = onlyDigits(payload.targetCpf);
+      const temporaryPassword = String(payload.temporaryPassword || targetCpf);
+
+      if (targetCpf.length !== 11 || temporaryPassword.length < 6) {
+        sendJson(response, 400, { error: "CPF do usuário inválido." });
+        return;
+      }
+
+      await pool.query(`
+        insert into user_credentials (cpf, password_hash, must_change_password, updated_at)
+        values ($1,$2,true,now())
+        on conflict (cpf) do update set
+          password_hash = excluded.password_hash,
+          must_change_password = true,
+          updated_at = now()
+      `, [targetCpf, hashPassword(temporaryPassword)]);
+
+      sendJson(response, 200, {
+        ok: true,
+        targetCpf,
+        mustChangePassword: true,
+        temporaryPasswordHint: "Senha redefinida para o CPF do usuário.",
+      });
       return;
     }
 
