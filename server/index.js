@@ -177,6 +177,100 @@ const ensureSchema = async () => {
 
 await ensureSchema();
 
+const listWorldCupMatches = async () => {
+  const result = await pool.query(`
+    select external_match_id, competition, source, round_id, round_name, phase, stage, status,
+           utc_date, home_team, away_team, home_score, away_score, winner, venue, updated_at
+      from world_cup_matches
+     order by utc_date asc, external_match_id asc
+  `);
+  return result.rows.map(mapMatchRow);
+};
+
+const syncFootballDataMatches = async () => {
+  if (!footballDataToken) {
+    const error = new Error("FOOTBALL_DATA_API_TOKEN não configurado no servidor.");
+    error.statusCode = 400;
+    error.hint = "Crie uma conta no football-data.org, gere a API key e configure a variável no Docker.";
+    throw error;
+  }
+
+  const apiUrl = `https://api.football-data.org/v4/competitions/${encodeURIComponent(footballDataCompetition)}/matches`;
+  const apiResponse = await fetch(apiUrl, {
+    headers: { "X-Auth-Token": footballDataToken },
+  });
+  const apiPayload = await apiResponse.json().catch(() => ({}));
+
+  if (!apiResponse.ok) {
+    const error = new Error(apiPayload?.message || apiPayload?.error || "Erro externo.");
+    error.statusCode = apiResponse.status;
+    throw error;
+  }
+
+  const matches = Array.isArray(apiPayload.matches) ? apiPayload.matches : [];
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    for (const match of matches) {
+      const stageInfo = mapFootballDataStage(match.stage);
+      const homeTeam = match.homeTeam?.shortName || match.homeTeam?.name || match.homeTeam?.tla || "A definir";
+      const awayTeam = match.awayTeam?.shortName || match.awayTeam?.name || match.awayTeam?.tla || "A definir";
+      const score = match.score?.fullTime || {};
+      const winner = match.score?.winner || null;
+      await client.query(`
+        insert into world_cup_matches
+          (external_match_id, competition, source, round_id, round_name, phase, stage, status,
+           utc_date, home_team, away_team, home_score, away_score, winner, venue, raw, updated_at)
+        values ($1,$2,'football-data.org',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,now())
+        on conflict (external_match_id) do update set
+          competition = excluded.competition,
+          round_id = excluded.round_id,
+          round_name = excluded.round_name,
+          phase = excluded.phase,
+          stage = excluded.stage,
+          status = excluded.status,
+          utc_date = excluded.utc_date,
+          home_team = excluded.home_team,
+          away_team = excluded.away_team,
+          home_score = excluded.home_score,
+          away_score = excluded.away_score,
+          winner = excluded.winner,
+          venue = excluded.venue,
+          raw = excluded.raw,
+          updated_at = now()
+      `, [
+        Number(match.id),
+        footballDataCompetition,
+        stageInfo.id,
+        stageInfo.name,
+        stageInfo.phase,
+        match.stage || "",
+        mapFootballDataStatus(match.status),
+        match.utcDate,
+        homeTeam,
+        awayTeam,
+        Number.isInteger(score.home) ? score.home : null,
+        Number.isInteger(score.away) ? score.away : null,
+        winner,
+        match.venue || "",
+        JSON.stringify(match),
+      ]);
+    }
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
+  }
+
+  return {
+    synced: matches.length,
+    competition: footballDataCompetition,
+    matches: await listWorldCupMatches(),
+  };
+};
+
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url, "http://localhost");
@@ -209,107 +303,20 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.method === "GET" && url.pathname === "/api/world-cup/matches") {
-      const result = await pool.query(`
-        select external_match_id, competition, source, round_id, round_name, phase, stage, status,
-               utc_date, home_team, away_team, home_score, away_score, winner, venue, updated_at
-          from world_cup_matches
-         order by utc_date asc, external_match_id asc
-      `);
-      sendJson(response, 200, { matches: result.rows.map(mapMatchRow) });
+      sendJson(response, 200, { matches: await listWorldCupMatches() });
       return;
     }
 
     if (request.method === "POST" && url.pathname === "/api/world-cup/sync") {
-      if (!footballDataToken) {
-        sendJson(response, 400, {
-          error: "FOOTBALL_DATA_API_TOKEN não configurado no servidor.",
-          hint: "Crie uma conta no football-data.org, gere a API key e configure a variável no Docker.",
-        });
-        return;
-      }
-
-      const apiUrl = `https://api.football-data.org/v4/competitions/${encodeURIComponent(footballDataCompetition)}/matches`;
-      const apiResponse = await fetch(apiUrl, {
-        headers: { "X-Auth-Token": footballDataToken },
-      });
-      const apiPayload = await apiResponse.json().catch(() => ({}));
-
-      if (!apiResponse.ok) {
-        sendJson(response, apiResponse.status, {
-          error: "Não foi possível sincronizar com football-data.org.",
-          details: apiPayload?.message || apiPayload?.error || "Erro externo.",
-        });
-        return;
-      }
-
-      const matches = Array.isArray(apiPayload.matches) ? apiPayload.matches : [];
-      const client = await pool.connect();
       try {
-        await client.query("begin");
-        for (const match of matches) {
-          const stageInfo = mapFootballDataStage(match.stage);
-          const homeTeam = match.homeTeam?.shortName || match.homeTeam?.name || match.homeTeam?.tla || "A definir";
-          const awayTeam = match.awayTeam?.shortName || match.awayTeam?.name || match.awayTeam?.tla || "A definir";
-          const score = match.score?.fullTime || {};
-          const winner = match.score?.winner || null;
-          await client.query(`
-            insert into world_cup_matches
-              (external_match_id, competition, source, round_id, round_name, phase, stage, status,
-               utc_date, home_team, away_team, home_score, away_score, winner, venue, raw, updated_at)
-            values ($1,$2,'football-data.org',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,now())
-            on conflict (external_match_id) do update set
-              competition = excluded.competition,
-              round_id = excluded.round_id,
-              round_name = excluded.round_name,
-              phase = excluded.phase,
-              stage = excluded.stage,
-              status = excluded.status,
-              utc_date = excluded.utc_date,
-              home_team = excluded.home_team,
-              away_team = excluded.away_team,
-              home_score = excluded.home_score,
-              away_score = excluded.away_score,
-              winner = excluded.winner,
-              venue = excluded.venue,
-              raw = excluded.raw,
-              updated_at = now()
-          `, [
-            Number(match.id),
-            footballDataCompetition,
-            stageInfo.id,
-            stageInfo.name,
-            stageInfo.phase,
-            match.stage || "",
-            mapFootballDataStatus(match.status),
-            match.utcDate,
-            homeTeam,
-            awayTeam,
-            Number.isInteger(score.home) ? score.home : null,
-            Number.isInteger(score.away) ? score.away : null,
-            winner,
-            match.venue || "",
-            JSON.stringify(match),
-          ]);
-        }
-        await client.query("commit");
+        sendJson(response, 200, await syncFootballDataMatches());
       } catch (error) {
-        await client.query("rollback");
-        throw error;
-      } finally {
-        client.release();
+        sendJson(response, error.statusCode || 500, {
+          error: "Não foi possível sincronizar com football-data.org.",
+          details: error.message,
+          hint: error.hint,
+        });
       }
-
-      const result = await pool.query(`
-        select external_match_id, competition, source, round_id, round_name, phase, stage, status,
-               utc_date, home_team, away_team, home_score, away_score, winner, venue, updated_at
-          from world_cup_matches
-         order by utc_date asc, external_match_id asc
-      `);
-      sendJson(response, 200, {
-        synced: matches.length,
-        competition: footballDataCompetition,
-        matches: result.rows.map(mapMatchRow),
-      });
       return;
     }
 
@@ -625,3 +632,19 @@ const server = http.createServer(async (request, response) => {
 server.listen(port, "0.0.0.0", () => {
   console.log(`Copa Potiguar API ouvindo na porta ${port}`);
 });
+
+if (footballDataToken) {
+  const syncIntervalMs = Number(process.env.FOOTBALL_DATA_SYNC_INTERVAL_MS || 5 * 60 * 1000);
+  const runAutomaticSync = async () => {
+    try {
+      const result = await syncFootballDataMatches();
+      console.log(`football-data.org sincronizado: ${result.synced} jogos.`);
+    } catch (error) {
+      console.warn(`Falha na sincronização automática football-data.org: ${error.message}`);
+    }
+  };
+  setTimeout(runAutomaticSync, 10 * 1000);
+  setInterval(runAutomaticSync, syncIntervalMs);
+} else {
+  console.warn("FOOTBALL_DATA_API_TOKEN não configurado. Sincronização automática da Copa desativada.");
+}

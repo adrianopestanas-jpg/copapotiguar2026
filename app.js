@@ -936,7 +936,7 @@ function Topbar({
     className: "hidden items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-potiguar-800 shadow-sm sm:flex"
   }, /*#__PURE__*/React.createElement("span", {
     className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
-  }), "20:00 simulado"), /*#__PURE__*/React.createElement("button", {
+  }), "Dados ao vivo"), /*#__PURE__*/React.createElement("button", {
     onClick: onLogout,
     className: "grid h-10 w-10 place-items-center rounded-full bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 lg:hidden",
     "aria-label": "Sair"
@@ -1368,9 +1368,13 @@ function Guesses({
   });
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const [filter, setFilter] = useState("open");
   const round = settings.round || defaultRoundConfig;
   const gameAccess = Object.fromEntries(activeGames.map(game => [game.id, getGamePredictionAccess(game, now)]));
   const openGames = activeGames.filter(game => gameAccess[game.id]?.open);
+  const upcomingGames = activeGames.filter(game => !gameAccess[game.id]?.open && now < gameAccess[game.id]?.openAt);
+  const closedGames = activeGames.filter(game => !gameAccess[game.id]?.open && now >= gameAccess[game.id]?.closeAt);
+  const filteredGames = filter === "open" ? openGames : filter === "upcoming" ? upcomingGames : closedGames;
   const firstOpenAccess = openGames.length ? gameAccess[openGames[0].id] : null;
   const nextGameAccess = activeGames.map(game => gameAccess[game.id]).find(access => access && new Date() < access.closeAt);
   const predictionsClosed = openGames.length === 0;
@@ -1386,6 +1390,9 @@ function Guesses({
     const timer = setInterval(() => setNow(new Date()), 15000);
     return () => clearInterval(timer);
   }, []);
+  useEffect(() => {
+    if (openGames.length) setFilter("open");else if (upcomingGames.length) setFilter("upcoming");else setFilter("closed");
+  }, [openGames.length, upcomingGames.length]);
   const updateScore = (id, side, value) => {
     if (value === "" || /^\d$/.test(value) && Number(value) <= 9) {
       setScores({
@@ -1420,7 +1427,7 @@ function Guesses({
     onClick: () => setPage("home"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
   }, "Voltar e confirmar a rodada"))));
-  if (predictionsClosed) return /*#__PURE__*/React.createElement("div", {
+  if (predictionsClosed && !upcomingGames.length) return /*#__PURE__*/React.createElement("div", {
     className: "mx-auto max-w-2xl py-8 sm:py-16"
   }, /*#__PURE__*/React.createElement("div", {
     className: "soft-card overflow-hidden rounded-[28px] text-center"
@@ -1468,11 +1475,25 @@ function Guesses({
     className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
   }, "Janela de palpites"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-lg font-extrabold"
-  }, firstOpenAccess ? `até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto"))))), /*#__PURE__*/React.createElement("div", {
+  }, firstOpenAccess ? `até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto"))))), /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-3 sm:p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-3 gap-2"
+  }, [["open", "Para palpitar", openGames.length], ["upcoming", "Próximos", upcomingGames.length], ["closed", "Realizados", closedGames.length]].map(([value, label, count]) => /*#__PURE__*/React.createElement("button", {
+    key: value,
+    type: "button",
+    onClick: () => setFilter(value),
+    className: `rounded-xl px-2 py-3 text-center text-[11px] font-extrabold transition ${filter === value ? "bg-potiguar-900 text-white" : "bg-slate-50 text-slate-400"}`
+  }, label, /*#__PURE__*/React.createElement("span", {
+    className: `ml-1 rounded-full px-1.5 py-0.5 text-[9px] ${filter === value ? "bg-white/15 text-white" : "bg-white text-slate-400"}`
+  }, count))))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
-  }, activeGames.map(game => {
+  }, filteredGames.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "soft-card rounded-2xl p-6 text-center text-sm font-semibold text-slate-400"
+  }, "Nenhum jogo nesta aba agora."), filteredGames.map(game => {
     const access = gameAccess[game.id];
     const closed = !access?.open;
+    const finished = game.status === "finished" || Number.isInteger(game.homeScore) && Number.isInteger(game.awayScore);
     return /*#__PURE__*/React.createElement("article", {
       key: game.id,
       className: "soft-card rounded-2xl p-4 sm:p-6"
@@ -1489,7 +1510,7 @@ function Guesses({
       size: 14
     }), " ", game.time), /*#__PURE__*/React.createElement("span", {
       className: "mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300"
-    }, closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`, " • ", game.venue))), /*#__PURE__*/React.createElement("div", {
+    }, finished ? `FINAL ${game.homeScore} × ${game.awayScore}` : closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`, " • ", game.venue))), /*#__PURE__*/React.createElement("div", {
       className: "grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex flex-col items-center gap-2 sm:flex-row sm:justify-end"
@@ -2470,7 +2491,7 @@ function AdminPage({
     className: "text-[10px] font-bold uppercase text-white/45"
   }, "Atualização"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-lg font-extrabold"
-  }, "Hoje • 20:00")))), /*#__PURE__*/React.createElement("div", {
+  }, "Automática")))), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-2"
   }, /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"

@@ -695,7 +695,7 @@ function Topbar({ page, user, onLogout, profilePhotos }) {
       <div className="flex items-center gap-3">
         <div className="hidden items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-potiguar-800 shadow-sm sm:flex">
           <span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span>
-          20:00 simulado
+          Dados ao vivo
         </div>
         <button onClick={onLogout} className="grid h-10 w-10 place-items-center rounded-full bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 lg:hidden" aria-label="Sair">
           <Icon name="logout" size={19} />
@@ -1008,9 +1008,13 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
   const [scores, setScores] = useState({ 1: ["", ""] });
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
+  const [filter, setFilter] = useState("open");
   const round = settings.round || defaultRoundConfig;
   const gameAccess = Object.fromEntries(activeGames.map(game => [game.id, getGamePredictionAccess(game, now)]));
   const openGames = activeGames.filter(game => gameAccess[game.id]?.open);
+  const upcomingGames = activeGames.filter(game => !gameAccess[game.id]?.open && now < gameAccess[game.id]?.openAt);
+  const closedGames = activeGames.filter(game => !gameAccess[game.id]?.open && now >= gameAccess[game.id]?.closeAt);
+  const filteredGames = filter === "open" ? openGames : filter === "upcoming" ? upcomingGames : closedGames;
   const firstOpenAccess = openGames.length ? gameAccess[openGames[0].id] : null;
   const nextGameAccess = activeGames.map(game => gameAccess[game.id]).find(access => access && new Date() < access.closeAt);
   const predictionsClosed = openGames.length === 0;
@@ -1028,6 +1032,12 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
     const timer = setInterval(() => setNow(new Date()), 15000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (openGames.length) setFilter("open");
+    else if (upcomingGames.length) setFilter("upcoming");
+    else setFilter("closed");
+  }, [openGames.length, upcomingGames.length]);
 
   const updateScore = (id, side, value) => {
     if (value === "" || (/^\d$/.test(value) && Number(value) <= 9)) {
@@ -1055,7 +1065,7 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
     </div>
   );
 
-  if (predictionsClosed) return (
+  if (predictionsClosed && !upcomingGames.length) return (
     <div className="mx-auto max-w-2xl py-8 sm:py-16">
       <div className="soft-card overflow-hidden rounded-[28px] text-center">
         <div className="hero-pattern pitch-lines px-6 py-12 text-white">
@@ -1093,17 +1103,38 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
         </div>
       </section>
 
+      <section className="soft-card rounded-2xl p-3 sm:p-4">
+        <div className="grid grid-cols-3 gap-2">
+          {[
+            ["open", "Para palpitar", openGames.length],
+            ["upcoming", "Próximos", upcomingGames.length],
+            ["closed", "Realizados", closedGames.length],
+          ].map(([value, label, count]) => (
+            <button key={value} type="button" onClick={() => setFilter(value)} className={`rounded-xl px-2 py-3 text-center text-[11px] font-extrabold transition ${filter === value ? "bg-potiguar-900 text-white" : "bg-slate-50 text-slate-400"}`}>
+              {label}
+              <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[9px] ${filter === value ? "bg-white/15 text-white" : "bg-white text-slate-400"}`}>{count}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
       <div className="space-y-4">
-        {activeGames.map(game => {
+        {filteredGames.length === 0 && (
+          <div className="soft-card rounded-2xl p-6 text-center text-sm font-semibold text-slate-400">
+            Nenhum jogo nesta aba agora.
+          </div>
+        )}
+        {filteredGames.map(game => {
           const access = gameAccess[game.id];
           const closed = !access?.open;
+          const finished = game.status === "finished" || (Number.isInteger(game.homeScore) && Number.isInteger(game.awayScore));
           return (
           <article key={game.id} className="soft-card rounded-2xl p-4 sm:p-6">
             <div className="mb-5 flex items-center justify-between">
               <span className="rounded-full bg-potiguar-900/5 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">{game.group}</span>
               <div className="text-right">
                 <span className="flex items-center justify-end gap-1.5 text-xs font-bold text-slate-500"><Icon name="clock" size={14} /> {game.time}</span>
-                <span className="mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300">{closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`} • {game.venue}</span>
+                <span className="mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300">{finished ? `FINAL ${game.homeScore} × ${game.awayScore}` : closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`} • {game.venue}</span>
               </div>
             </div>
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6">
@@ -1707,7 +1738,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
               </div>
               <div className="glass rounded-2xl px-5 py-3">
                 <p className="text-[10px] font-bold uppercase text-white/45">Atualização</p>
-                <p className="font-display text-lg font-extrabold">Hoje • 20:00</p>
+                <p className="font-display text-lg font-extrabold">Automática</p>
               </div>
             </div>
           </div>
