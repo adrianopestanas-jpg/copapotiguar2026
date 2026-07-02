@@ -309,8 +309,157 @@ const games = [{
   awayFlag: "🇧🇷",
   venue: "Miami Stadium"
 }];
-const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
-const getPredictionClosed = () => new Date() > predictionClosesAt;
+const workBlockRules = ["Segunda a sexta: bloqueado das 08h às 20h", "Sábado: bloqueado das 08h às 18h", "Domingo: bloqueado das 08h às 13h"];
+const isWorkBlockedTime = date => {
+  const day = date.getDay();
+  const minutes = date.getHours() * 60 + date.getMinutes();
+  if (day >= 1 && day <= 5) return minutes >= 8 * 60 && minutes < 20 * 60;
+  if (day === 6) return minutes >= 8 * 60 && minutes < 18 * 60;
+  return minutes >= 8 * 60 && minutes < 13 * 60;
+};
+const nextAllowedTime = date => {
+  const cursor = new Date(date);
+  for (let i = 0; i < 240; i += 1) {
+    if (!isWorkBlockedTime(cursor)) return cursor;
+    cursor.setMinutes(cursor.getMinutes() + 30, 0, 0);
+  }
+  return cursor;
+};
+const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit"
+});
+const knockoutRounds = [{
+  id: "teste-16avos",
+  phase: "16 avos",
+  name: "Teste 16 avos",
+  official: false,
+  kickoffAt: "2026-07-03T21:00:00",
+  predictionsCloseAt: "2026-07-03T20:30:00"
+}, {
+  id: "oitavas-dia-1",
+  phase: "Oitavas",
+  name: "Oitavas de final • Dia 1",
+  official: true,
+  kickoffAt: "2026-07-04T17:00:00",
+  predictionsCloseAt: "2026-07-04T16:30:00"
+}, {
+  id: "oitavas-dia-2",
+  phase: "Oitavas",
+  name: "Oitavas de final • Dia 2",
+  official: true,
+  kickoffAt: "2026-07-05T17:00:00",
+  predictionsCloseAt: "2026-07-05T16:30:00"
+}, {
+  id: "oitavas-dia-3",
+  phase: "Oitavas",
+  name: "Oitavas de final • Dia 3",
+  official: true,
+  kickoffAt: "2026-07-06T17:00:00",
+  predictionsCloseAt: "2026-07-06T16:30:00"
+}, {
+  id: "oitavas-dia-4",
+  phase: "Oitavas",
+  name: "Oitavas de final • Dia 4",
+  official: true,
+  kickoffAt: "2026-07-07T17:00:00",
+  predictionsCloseAt: "2026-07-07T16:30:00"
+}, {
+  id: "quartas-dia-1",
+  phase: "Quartas",
+  name: "Quartas de final • Dia 1",
+  official: true,
+  kickoffAt: "2026-07-09T17:00:00",
+  predictionsCloseAt: "2026-07-09T16:30:00"
+}, {
+  id: "quartas-dia-2",
+  phase: "Quartas",
+  name: "Quartas de final • Dia 2",
+  official: true,
+  kickoffAt: "2026-07-10T17:00:00",
+  predictionsCloseAt: "2026-07-10T16:30:00"
+}, {
+  id: "quartas-dia-3",
+  phase: "Quartas",
+  name: "Quartas de final • Dia 3",
+  official: true,
+  kickoffAt: "2026-07-11T17:00:00",
+  predictionsCloseAt: "2026-07-11T16:30:00"
+}, {
+  id: "semi-1",
+  phase: "Semifinais",
+  name: "Semifinal 1",
+  official: true,
+  kickoffAt: "2026-07-14T21:00:00",
+  predictionsCloseAt: "2026-07-14T20:30:00"
+}, {
+  id: "semi-2",
+  phase: "Semifinais",
+  name: "Semifinal 2",
+  official: true,
+  kickoffAt: "2026-07-15T21:00:00",
+  predictionsCloseAt: "2026-07-15T20:30:00"
+}, {
+  id: "terceiro-lugar",
+  phase: "Terceiro lugar",
+  name: "Disputa de terceiro lugar",
+  official: true,
+  kickoffAt: "2026-07-18T17:00:00",
+  predictionsCloseAt: "2026-07-18T16:30:00"
+}, {
+  id: "final",
+  phase: "Final",
+  name: "Final da Copa",
+  official: true,
+  kickoffAt: "2026-07-19T17:00:00",
+  predictionsCloseAt: "2026-07-19T16:30:00"
+}];
+const getPredictionWindow = round => {
+  const closeAt = new Date(round.predictionsCloseAt || round.kickoffAt || defaultRoundConfig.predictionsCloseAt);
+  const rawOpenAt = new Date(closeAt.getTime() - 48 * 60 * 60 * 1000);
+  return {
+    openAt: nextAllowedTime(rawOpenAt),
+    closeAt
+  };
+};
+const getPredictionAccess = (round, now = new Date()) => {
+  const {
+    openAt,
+    closeAt
+  } = getPredictionWindow(round || defaultRoundConfig);
+  if ((round?.status || "open") !== "open") return {
+    open: false,
+    reason: "Rodada não está aberta para palpites.",
+    openAt,
+    closeAt
+  };
+  if (isWorkBlockedTime(now)) return {
+    open: false,
+    reason: "Palpites bloqueados durante o horário de expediente.",
+    openAt,
+    closeAt
+  };
+  if (now < openAt) return {
+    open: false,
+    reason: `Palpites abrem em ${formatDateTime(openAt)}.`,
+    openAt,
+    closeAt
+  };
+  if (now > closeAt) return {
+    open: false,
+    reason: "Janela de palpites encerrada.",
+    openAt,
+    closeAt
+  };
+  return {
+    open: true,
+    reason: `Aberto até ${formatDateTime(closeAt)}.`,
+    openAt,
+    closeAt
+  };
+};
 const defaultAnnouncement = {
   id: "copa-potiguar-video-2026-06-25",
   title: "Copa Potiguar 2026: começou o jogo",
@@ -326,10 +475,13 @@ const defaultMatchResults = {
   }
 };
 const defaultRoundConfig = {
-  id: "rodada-piloto-imperatriz",
-  name: "Rodada Piloto Imperatriz",
+  id: "teste-16avos",
+  phase: "16 avos",
+  name: "Teste 16 avos",
+  official: false,
   status: "open",
-  predictionsCloseAt: "2026-06-25T23:59:59-03:00"
+  kickoffAt: "2026-07-03T21:00:00",
+  predictionsCloseAt: "2026-07-03T20:30:00"
 };
 const defaultAward = {
   name: "Robô Aspirador Potiguar",
@@ -1018,7 +1170,8 @@ function Home({
 }) {
   const leadership = user.accessRole === "leadership";
   const round = settings.round || defaultRoundConfig;
-  const predictionsClosed = round.status !== "open" || new Date() > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
+  const predictionAccess = getPredictionAccess(round);
+  const predictionsClosed = !predictionAccess.open;
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
@@ -1126,7 +1279,7 @@ function Home({
     className: "mt-2 font-display text-xl font-extrabold"
   }, predictionsClosed ? "Acompanhar produto foco" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-white/55"
-  }, predictionsClosed ? "Agora a operação segue pelas vendas" : "Aberto agora • encerra às 18h59")), /*#__PURE__*/React.createElement("span", {
+  }, predictionsClosed ? predictionAccess.reason : predictionAccess.reason)), /*#__PURE__*/React.createElement("span", {
     className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "chevron"
@@ -1149,7 +1302,8 @@ function Guesses({
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const round = settings.round || defaultRoundConfig;
-  const predictionsClosed = round.status !== "open" || now > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
+  const predictionAccess = getPredictionAccess(round, now);
+  const predictionsClosed = !predictionAccess.open;
   const complete = Object.values(scores).every(pair => pair[0] !== "" && pair[1] !== "");
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 15000);
@@ -1185,7 +1339,7 @@ function Guesses({
     className: "rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block"
-  }, "Regra da rodada"), "Janela reaberta para teste hoje até 23h59."), /*#__PURE__*/React.createElement("button", {
+  }, "Regra da rodada"), predictionAccess.reason), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage("home"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
   }, "Voltar e ler o comunicado"))));
@@ -1204,13 +1358,13 @@ function Guesses({
     className: "mt-6 font-display text-3xl font-extrabold"
   }, "Palpites encerrados"), /*#__PURE__*/React.createElement("p", {
     className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60"
-  }, "A janela de teste de palpites foi encerrada.")), /*#__PURE__*/React.createElement("div", {
+  }, predictionAccess.reason)), /*#__PURE__*/React.createElement("div", {
     className: "p-6 sm:p-8"
   }, /*#__PURE__*/React.createElement("div", {
     className: "rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block"
-  }, "Próxima etapa"), "A partir de agora, acompanhe somente as vendas do produto foco de Imperatriz."), /*#__PURE__*/React.createElement("button", {
+  }, "Regra de horário"), workBlockRules.join(" • ")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage("store"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
   }, "Ver produto foco e loja"))));
@@ -1224,9 +1378,9 @@ function Guesses({
     className: "flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"
   }, /*#__PURE__*/React.createElement("span", {
     className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
-  }), " Teste aberto até 23:59"), /*#__PURE__*/React.createElement("h2", {
+  }), " ", round.official ? "Rodada oficial" : "Rodada teste", " • ", round.phase), /*#__PURE__*/React.createElement("h2", {
     className: "mt-3 font-display text-3xl font-extrabold"
-  }, "Teste de palpite: Brasil"), /*#__PURE__*/React.createElement("p", {
+  }, round.name), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
   }, "Resultado simulado: Escócia 0 x 3 Brasil. Placar exato vale 4 pontos; vencedor vale 2.")), /*#__PURE__*/React.createElement("div", {
     className: "glass flex items-center gap-3 rounded-2xl px-4 py-3"
@@ -1235,9 +1389,9 @@ function Guesses({
     className: "text-potiguar-lime"
   }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
-  }, "Fechamento do teste"), /*#__PURE__*/React.createElement("p", {
+  }, "Janela de palpites"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-lg font-extrabold"
-  }, "23h59"))))), /*#__PURE__*/React.createElement("div", {
+  }, "até ", formatDateTime(predictionAccess.closeAt)))))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-4"
   }, games.map(game => /*#__PURE__*/React.createElement("article", {
     key: game.id,
@@ -1736,6 +1890,19 @@ function AdminPage({
     const ok = await onSaveSetting("round", roundForm);
     if (ok) setToast("Rodada atualizada.");
   };
+  const applyCalendarRound = round => {
+    const {
+      openAt,
+      closeAt
+    } = getPredictionWindow(round);
+    setRoundForm({
+      ...round,
+      status: "open",
+      openAt: openAt.toISOString(),
+      predictionsCloseAt: round.predictionsCloseAt || closeAt.toISOString()
+    });
+    setToast(`${round.name} carregada. Revise e clique em Salvar rodada.`);
+  };
   const saveResult = async event => {
     event.preventDefault();
     const next = {
@@ -1965,7 +2132,45 @@ function AdminPage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Controle da rodada e resultado"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, "Use o status para comunicar o momento da rodada. O resultado recalcula os pontos de palpite.")), /*#__PURE__*/React.createElement("form", {
+  }, "Use o status para comunicar o momento da rodada. O resultado recalcula os pontos de palpite.")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 rounded-2xl border border-potiguar-500/15 bg-potiguar-lime/5 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Calendário automático"), /*#__PURE__*/React.createElement("h4", {
+    className: "font-display text-lg font-extrabold text-potiguar-950"
+  }, "Fases finais da Copa"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-500"
+  }, "16 avos em modo teste; a partir das oitavas, rodadas oficiais. O sistema bloqueia palpites automaticamente no expediente.")), /*#__PURE__*/React.createElement("span", {
+    className: "rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
+  }, "Janela até 2 dias antes")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3"
+  }, knockoutRounds.map(round => {
+    const access = getPredictionAccess(round);
+    return /*#__PURE__*/React.createElement("button", {
+      key: round.id,
+      type: "button",
+      onClick: () => applyCalendarRound(round),
+      className: `rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md ${round.official ? "border-potiguar-500/20 bg-white" : "border-amber-200 bg-amber-50"}`
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-start justify-between gap-3"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+      className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+    }, round.phase), /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 text-sm font-extrabold text-potiguar-950"
+    }, round.name)), /*#__PURE__*/React.createElement("span", {
+      className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${round.official ? "bg-potiguar-lime/25 text-potiguar-800" : "bg-amber-100 text-amber-700"}`
+    }, round.official ? "OFICIAL" : "TESTE")), /*#__PURE__*/React.createElement("p", {
+      className: "mt-3 text-[10px] leading-4 text-slate-500"
+    }, "Jogo: ", formatDateTime(round.kickoffAt), " • Palpites até ", formatDateTime(round.predictionsCloseAt)), /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 text-[10px] font-bold text-potiguar-700"
+    }, "Abertura sugerida: ", formatDateTime(access.openAt)));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500"
+  }, /*#__PURE__*/React.createElement("strong", {
+    className: "text-potiguar-950"
+  }, "Regra de bloqueio:"), " ", workBlockRules.join(" • "))), /*#__PURE__*/React.createElement("form", {
     onSubmit: saveRound,
     className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_auto] md:items-end"
   }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {

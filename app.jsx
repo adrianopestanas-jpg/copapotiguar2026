@@ -215,8 +215,65 @@ const games = [
   { id: 1, time: "19:00", group: "Grupo C", home: "Escócia", away: "Brasil", homeFlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", awayFlag: "🇧🇷", venue: "Miami Stadium" },
 ];
 
-const predictionClosesAt = new Date("2026-06-25T23:59:59-03:00");
-const getPredictionClosed = () => new Date() > predictionClosesAt;
+const workBlockRules = [
+  "Segunda a sexta: bloqueado das 08h às 20h",
+  "Sábado: bloqueado das 08h às 18h",
+  "Domingo: bloqueado das 08h às 13h",
+];
+
+const isWorkBlockedTime = date => {
+  const day = date.getDay();
+  const minutes = date.getHours() * 60 + date.getMinutes();
+  if (day >= 1 && day <= 5) return minutes >= 8 * 60 && minutes < 20 * 60;
+  if (day === 6) return minutes >= 8 * 60 && minutes < 18 * 60;
+  return minutes >= 8 * 60 && minutes < 13 * 60;
+};
+
+const nextAllowedTime = date => {
+  const cursor = new Date(date);
+  for (let i = 0; i < 240; i += 1) {
+    if (!isWorkBlockedTime(cursor)) return cursor;
+    cursor.setMinutes(cursor.getMinutes() + 30, 0, 0);
+  }
+  return cursor;
+};
+
+const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const knockoutRounds = [
+  { id: "teste-16avos", phase: "16 avos", name: "Teste 16 avos", official: false, kickoffAt: "2026-07-03T21:00:00", predictionsCloseAt: "2026-07-03T20:30:00" },
+  { id: "oitavas-dia-1", phase: "Oitavas", name: "Oitavas de final • Dia 1", official: true, kickoffAt: "2026-07-04T17:00:00", predictionsCloseAt: "2026-07-04T16:30:00" },
+  { id: "oitavas-dia-2", phase: "Oitavas", name: "Oitavas de final • Dia 2", official: true, kickoffAt: "2026-07-05T17:00:00", predictionsCloseAt: "2026-07-05T16:30:00" },
+  { id: "oitavas-dia-3", phase: "Oitavas", name: "Oitavas de final • Dia 3", official: true, kickoffAt: "2026-07-06T17:00:00", predictionsCloseAt: "2026-07-06T16:30:00" },
+  { id: "oitavas-dia-4", phase: "Oitavas", name: "Oitavas de final • Dia 4", official: true, kickoffAt: "2026-07-07T17:00:00", predictionsCloseAt: "2026-07-07T16:30:00" },
+  { id: "quartas-dia-1", phase: "Quartas", name: "Quartas de final • Dia 1", official: true, kickoffAt: "2026-07-09T17:00:00", predictionsCloseAt: "2026-07-09T16:30:00" },
+  { id: "quartas-dia-2", phase: "Quartas", name: "Quartas de final • Dia 2", official: true, kickoffAt: "2026-07-10T17:00:00", predictionsCloseAt: "2026-07-10T16:30:00" },
+  { id: "quartas-dia-3", phase: "Quartas", name: "Quartas de final • Dia 3", official: true, kickoffAt: "2026-07-11T17:00:00", predictionsCloseAt: "2026-07-11T16:30:00" },
+  { id: "semi-1", phase: "Semifinais", name: "Semifinal 1", official: true, kickoffAt: "2026-07-14T21:00:00", predictionsCloseAt: "2026-07-14T20:30:00" },
+  { id: "semi-2", phase: "Semifinais", name: "Semifinal 2", official: true, kickoffAt: "2026-07-15T21:00:00", predictionsCloseAt: "2026-07-15T20:30:00" },
+  { id: "terceiro-lugar", phase: "Terceiro lugar", name: "Disputa de terceiro lugar", official: true, kickoffAt: "2026-07-18T17:00:00", predictionsCloseAt: "2026-07-18T16:30:00" },
+  { id: "final", phase: "Final", name: "Final da Copa", official: true, kickoffAt: "2026-07-19T17:00:00", predictionsCloseAt: "2026-07-19T16:30:00" },
+];
+
+const getPredictionWindow = round => {
+  const closeAt = new Date(round.predictionsCloseAt || round.kickoffAt || defaultRoundConfig.predictionsCloseAt);
+  const rawOpenAt = new Date(closeAt.getTime() - 48 * 60 * 60 * 1000);
+  return { openAt: nextAllowedTime(rawOpenAt), closeAt };
+};
+
+const getPredictionAccess = (round, now = new Date()) => {
+  const { openAt, closeAt } = getPredictionWindow(round || defaultRoundConfig);
+  if ((round?.status || "open") !== "open") return { open: false, reason: "Rodada não está aberta para palpites.", openAt, closeAt };
+  if (isWorkBlockedTime(now)) return { open: false, reason: "Palpites bloqueados durante o horário de expediente.", openAt, closeAt };
+  if (now < openAt) return { open: false, reason: `Palpites abrem em ${formatDateTime(openAt)}.`, openAt, closeAt };
+  if (now > closeAt) return { open: false, reason: "Janela de palpites encerrada.", openAt, closeAt };
+  return { open: true, reason: `Aberto até ${formatDateTime(closeAt)}.`, openAt, closeAt };
+};
 const defaultAnnouncement = {
   id: "copa-potiguar-video-2026-06-25",
   title: "Copa Potiguar 2026: começou o jogo",
@@ -229,10 +286,13 @@ const defaultMatchResults = {
   1: { homeScore: 0, awayScore: 3 },
 };
 const defaultRoundConfig = {
-  id: "rodada-piloto-imperatriz",
-  name: "Rodada Piloto Imperatriz",
+  id: "teste-16avos",
+  phase: "16 avos",
+  name: "Teste 16 avos",
+  official: false,
   status: "open",
-  predictionsCloseAt: "2026-06-25T23:59:59-03:00",
+  kickoffAt: "2026-07-03T21:00:00",
+  predictionsCloseAt: "2026-07-03T20:30:00",
 };
 const defaultAward = {
   name: "Robô Aspirador Potiguar",
@@ -801,7 +861,8 @@ function StoreMiniRanking({ user, pilotRanking }) {
 function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, profilePhotos, settings, onAcknowledge, onSaveProfilePhoto }) {
   const leadership = user.accessRole === "leadership";
   const round = settings.round || defaultRoundConfig;
-  const predictionsClosed = round.status !== "open" || new Date() > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
+  const predictionAccess = getPredictionAccess(round);
+  const predictionsClosed = !predictionAccess.open;
   const storeFocus = getStoreFocus(user.store);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
@@ -859,7 +920,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
             <div>
               <div className="flex items-center gap-2 text-xs font-bold text-potiguar-lime"><Icon name={predictionsClosed ? "lock" : acknowledged ? "ball" : "lock"} size={16} /> {predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"}</div>
               <h3 className="mt-2 font-display text-xl font-extrabold">{predictionsClosed ? "Acompanhar produto foco" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"}</h3>
-              <p className="mt-1 text-xs text-white/55">{predictionsClosed ? "Agora a operação segue pelas vendas" : "Aberto agora • encerra às 18h59"}</p>
+              <p className="mt-1 text-xs text-white/55">{predictionsClosed ? predictionAccess.reason : predictionAccess.reason}</p>
             </div>
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"><Icon name="chevron" /></span>
           </div>
@@ -875,7 +936,8 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
   const [saved, setSaved] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const round = settings.round || defaultRoundConfig;
-  const predictionsClosed = round.status !== "open" || now > new Date(round.predictionsCloseAt || defaultRoundConfig.predictionsCloseAt);
+  const predictionAccess = getPredictionAccess(round, now);
+  const predictionsClosed = !predictionAccess.open;
   const complete = Object.values(scores).every(pair => pair[0] !== "" && pair[1] !== "");
 
   useEffect(() => {
@@ -901,7 +963,7 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
         <div className="p-6 sm:p-8">
           <div className="rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800">
             <strong className="block">Regra da rodada</strong>
-            Janela reaberta para teste hoje até 23h59.
+            {predictionAccess.reason}
           </div>
           <button onClick={() => setPage("home")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Voltar e ler o comunicado</button>
         </div>
@@ -915,12 +977,12 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
         <div className="hero-pattern pitch-lines px-6 py-12 text-white">
           <div className="mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime"><Icon name="lock" size={38} /></div>
           <h2 className="mt-6 font-display text-3xl font-extrabold">Palpites encerrados</h2>
-          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">A janela de teste de palpites foi encerrada.</p>
+          <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-white/60">{predictionAccess.reason}</p>
         </div>
         <div className="p-6 sm:p-8">
           <div className="rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900">
-            <strong className="block">Próxima etapa</strong>
-            A partir de agora, acompanhe somente as vendas do produto foco de Imperatriz.
+            <strong className="block">Regra de horário</strong>
+            {workBlockRules.join(" • ")}
           </div>
           <button onClick={() => setPage("store")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Ver produto foco e loja</button>
         </div>
@@ -933,15 +995,15 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, onSavePredic
       <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> Teste aberto até 23:59</div>
-            <h2 className="mt-3 font-display text-3xl font-extrabold">Teste de palpite: Brasil</h2>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> {round.official ? "Rodada oficial" : "Rodada teste"} • {round.phase}</div>
+            <h2 className="mt-3 font-display text-3xl font-extrabold">{round.name}</h2>
             <p className="mt-2 text-sm text-white/60">Resultado simulado: Escócia 0 x 3 Brasil. Placar exato vale 4 pontos; vencedor vale 2.</p>
           </div>
           <div className="glass flex items-center gap-3 rounded-2xl px-4 py-3">
             <Icon name="clock" className="text-potiguar-lime" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Fechamento do teste</p>
-              <p className="font-display text-lg font-extrabold">23h59</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Janela de palpites</p>
+              <p className="font-display text-lg font-extrabold">até {formatDateTime(predictionAccess.closeAt)}</p>
             </div>
           </div>
         </div>
@@ -1300,6 +1362,17 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
     if (ok) setToast("Rodada atualizada.");
   };
 
+  const applyCalendarRound = round => {
+    const { openAt, closeAt } = getPredictionWindow(round);
+    setRoundForm({
+      ...round,
+      status: "open",
+      openAt: openAt.toISOString(),
+      predictionsCloseAt: round.predictionsCloseAt || closeAt.toISOString(),
+    });
+    setToast(`${round.name} carregada. Revise e clique em Salvar rodada.`);
+  };
+
   const saveResult = async event => {
     event.preventDefault();
     const next = {
@@ -1395,6 +1468,37 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
       {module === "rounds" && (
         <section className="soft-card rounded-2xl p-5 sm:p-6">
           <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Rodada</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Controle da rodada e resultado</h3><p className="mt-1 text-xs text-slate-400">Use o status para comunicar o momento da rodada. O resultado recalcula os pontos de palpite.</p></div>
+          <div className="mt-5 rounded-2xl border border-potiguar-500/15 bg-potiguar-lime/5 p-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Calendário automático</p>
+                <h4 className="font-display text-lg font-extrabold text-potiguar-950">Fases finais da Copa</h4>
+                <p className="mt-1 text-xs text-slate-500">16 avos em modo teste; a partir das oitavas, rodadas oficiais. O sistema bloqueia palpites automaticamente no expediente.</p>
+              </div>
+              <span className="rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800">Janela até 2 dias antes</span>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {knockoutRounds.map(round => {
+                const access = getPredictionAccess(round);
+                return (
+                  <button key={round.id} type="button" onClick={() => applyCalendarRound(round)} className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md ${round.official ? "border-potiguar-500/20 bg-white" : "border-amber-200 bg-amber-50"}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">{round.phase}</p>
+                        <p className="mt-1 text-sm font-extrabold text-potiguar-950">{round.name}</p>
+                      </div>
+                      <span className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${round.official ? "bg-potiguar-lime/25 text-potiguar-800" : "bg-amber-100 text-amber-700"}`}>{round.official ? "OFICIAL" : "TESTE"}</span>
+                    </div>
+                    <p className="mt-3 text-[10px] leading-4 text-slate-500">Jogo: {formatDateTime(round.kickoffAt)} • Palpites até {formatDateTime(round.predictionsCloseAt)}</p>
+                    <p className="mt-1 text-[10px] font-bold text-potiguar-700">Abertura sugerida: {formatDateTime(access.openAt)}</p>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500">
+              <strong className="text-potiguar-950">Regra de bloqueio:</strong> {workBlockRules.join(" • ")}
+            </div>
+          </div>
           <form onSubmit={saveRound} className="mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_auto] md:items-end">
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Nome da rodada</span><input value={roundForm.name || ""} onChange={e=>setRoundForm({...roundForm,name:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
             <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status</span><select value={roundForm.status || "open"} onChange={e=>setRoundForm({...roundForm,status:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="open">Aberta</option><option value="predictions_closed">Palpites encerrados</option><option value="results">Resultado lançado</option><option value="closed">Rodada encerrada</option></select></label>
