@@ -290,9 +290,10 @@ const getMatchResultsFromGames = activeGames => activeGames.reduce((acc, match) 
 }, {});
 
 const predictionRules = [
-  "Palpites liberados em qualquer horário enquanto a rodada estiver aberta",
-  "Encerramento automático 10 minutos antes do jogo",
-  "Abertura sugerida até 2 dias antes de cada rodada",
+  "Acertou vencedor ou empate: +2 pts",
+  "Placar exato: +6 pts no total",
+  "Em pênaltis, vale o placar antes das cobranças",
+  "Palpites fecham 10 minutos antes do jogo",
 ];
 
 const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
@@ -396,7 +397,7 @@ const getPredictionPoints = (entry, matchResults = defaultMatchResults) => {
   const predictedHome = Number(entry.home_score);
   const predictedAway = Number(entry.away_score);
   const exact = predictedHome === result.homeScore && predictedAway === result.awayScore;
-  if (exact) return 4;
+  if (exact) return 6;
   const predictedOutcome = Math.sign(predictedHome - predictedAway);
   const resultOutcome = Math.sign(result.homeScore - result.awayScore);
   return predictedOutcome === resultOutcome ? 2 : 0;
