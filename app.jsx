@@ -350,6 +350,7 @@ const defaultAnnouncement = {
   minimumSeconds: 30,
   publishedAt: "25 JUN • ativo",
 };
+const defaultScoringStartAt = "2026-07-02T19:55:00-03:00";
 const defaultMatchResults = {
   1: { homeScore: 0, awayScore: 3 },
 };
@@ -371,7 +372,15 @@ const defaultAppSettings = {
   announcement: defaultAnnouncement,
   round: defaultRoundConfig,
   award: defaultAward,
+  scoringStartAt: defaultScoringStartAt,
   matchResults: defaultMatchResults,
+};
+
+const getEntryDate = entry => new Date(entry.submitted_at || entry.submittedAt || entry.readAt || entry.createdAt || entry.created_at || 0);
+
+const isAfterScoringStart = (entry, settings = defaultAppSettings) => {
+  const startAt = new Date(settings.scoringStartAt || defaultScoringStartAt);
+  return getEntryDate(entry) >= startAt;
 };
 
 const youtubeEmbedUrl = url => {
@@ -426,7 +435,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   }));
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
 
-  readEntries.forEach(entry => {
+  readEntries.filter(entry => isAfterScoringStart(entry, settings)).forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row || entry.roundId !== activeRound.id || row.announcementRead) return;
     row.announcementRead = true;
@@ -434,7 +443,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     row.points += 1;
   });
 
-  predictionEntries.forEach(entry => {
+  predictionEntries.filter(entry => isAfterScoringStart(entry, settings)).forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row) return;
     const { points, hit, exact } = getPredictionStats(entry, activeMatchResults);
@@ -444,7 +453,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     row.points += points;
   });
 
-  const salesByCpf = productFocusEnabled ? salesEntries.reduce((acc, entry) => {
+  const salesByCpf = productFocusEnabled ? salesEntries.filter(entry => isAfterScoringStart(entry, settings)).reduce((acc, entry) => {
     const cpf = onlyDigits(entry.sellerCpf || "");
     if (!cpf) return acc;
     acc[cpf] = (acc[cpf] || 0) + Number(entry.quantity || 0);
@@ -502,6 +511,31 @@ const getRoundClosingSummary = rankingRows => {
   };
 };
 
+const getStoreSummaries = (rankingRows, predictionEntries = [], readEntries = []) => fixedStores
+  .map(store => {
+    const people = rankingRows.filter(person => person.store === store);
+    const sellers = people.filter(person => person.role === "Vendedor");
+    const leaders = people.filter(person => person.role === "Liderança");
+    const points = people.reduce((sum, person) => sum + person.points, 0);
+    const predictionCount = predictionEntries.filter(entry => entry.store === store).length;
+    const readCount = readEntries.filter(entry => entry.store === store).length;
+    const topSeller = sellers[0] || null;
+    return {
+      store,
+      people,
+      sellers,
+      leaders,
+      participants: people.length,
+      sellerCount: sellers.length,
+      leaderCount: leaders.length,
+      points,
+      predictionCount,
+      readCount,
+      topSeller,
+    };
+  })
+  .sort((a, b) => b.points - a.points || b.predictionCount - a.predictionCount || a.store.localeCompare(b.store));
+
 function Brand({ compact = false }) {
   return (
     <div className="flex items-center gap-3">
@@ -520,6 +554,7 @@ function LoginScreen({ onLogin }) {
   const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formatCpf = (value) => {
     const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -529,16 +564,19 @@ function LoginScreen({ onLogin }) {
       .replace(/\.(\d{3})(\d)/, ".$1-$2");
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
     const cpfDigits = cpf.replace(/\D/g, "");
-    const passwordDigits = password.replace(/\D/g, "");
     const user = demoUsers[cpfDigits];
-    if (!user || passwordDigits !== cpfDigits) {
+    if (!user) {
       setError("CPF ou senha inválidos.");
       return;
     }
-    onLogin(user);
+    setIsSubmitting(true);
+    setError("");
+    const result = await onLogin(user, password);
+    if (!result?.ok) setError(result?.error || "CPF ou senha inválidos.");
+    setIsSubmitting(false);
   };
 
   return (
@@ -551,13 +589,13 @@ function LoginScreen({ onLogin }) {
             <h1 className="mt-6 font-display text-5xl font-extrabold leading-[1.02]">Leu.<br/>Palpitou.<br/><span className="text-potiguar-lime">Vendeu.</span></h1>
             <p className="mt-5 text-sm leading-6 text-white/60">Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja.</p>
           </div>
-          <p className="text-xs text-white/35">Acesso controlado • Piloto Imperatriz</p>
+          <p className="text-xs text-white/35">Acesso controlado • Piloto multi-lojas</p>
         </section>
         <section className="flex flex-col justify-center p-6 sm:p-10 lg:p-14">
           <div className="mb-9 lg:hidden"><Brand compact /></div>
           <p className="text-xs font-extrabold uppercase tracking-[.16em] text-potiguar-700">Bem-vindo</p>
           <h2 className="mt-2 font-display text-3xl font-extrabold text-potiguar-950">Entre na Copa Potiguar</h2>
-          <p className="mt-2 text-sm text-slate-400">Use seu CPF. Nesta largada do piloto, a senha é o próprio CPF.</p>
+          <p className="mt-2 text-sm text-slate-400">Use seu CPF. No primeiro acesso, a senha temporária é o próprio CPF.</p>
           <form onSubmit={submit} className="mt-8 space-y-4">
             <label className="block">
               <span className="mb-2 block text-xs font-extrabold text-potiguar-950">CPF</span>
@@ -568,9 +606,64 @@ function LoginScreen({ onLogin }) {
               <input aria-label="Senha" type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white" />
             </label>
             {error && <p className="rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600">{error}</p>}
-            <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15"><Icon name="lock" size={17}/> Entrar</button>
+            <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60"><Icon name="lock" size={17}/> {isSubmitting ? "Entrando..." : "Entrar"}</button>
           </form>
+          <p className="mt-4 text-center text-xs font-semibold text-slate-400">Esqueceu a senha? Solicite a redefinição ao administrador.</p>
         </section>
+      </div>
+    </div>
+  );
+}
+
+function ChangePasswordScreen({ user, currentPassword, onChanged, onCancel }) {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    if (newPassword.length < 6) {
+      setError("A nova senha precisa ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("A confirmação precisa ser igual à nova senha.");
+      return;
+    }
+    if (onlyDigits(newPassword) === onlyDigits(user.cpf)) {
+      setError("Escolha uma senha diferente do CPF.");
+      return;
+    }
+    setIsSubmitting(true);
+    setError("");
+    const result = await onChanged(newPassword);
+    if (!result?.ok) setError(result?.error || "Não foi possível alterar a senha.");
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="login-bg min-h-screen p-4 sm:grid sm:place-items-center sm:p-8">
+      <div className="mx-auto w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl shadow-potiguar-950/20 sm:p-8">
+        <div className="mb-8 rounded-3xl bg-potiguar-950 p-5 text-white">
+          <Brand compact />
+          <p className="mt-6 text-[10px] font-extrabold uppercase tracking-[.16em] text-potiguar-lime">Primeiro acesso</p>
+          <h1 className="mt-2 font-display text-2xl font-extrabold">Crie sua senha</h1>
+          <p className="mt-2 text-sm text-white/60">{user.name}, por segurança você precisa trocar a senha temporária antes de continuar.</p>
+        </div>
+        <form onSubmit={submit} className="space-y-4">
+          <label className="block">
+            <span className="mb-2 block text-xs font-extrabold text-potiguar-950">Nova senha</span>
+            <input aria-label="Nova senha" type="password" autoComplete="new-password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white" />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-xs font-extrabold text-potiguar-950">Confirmar nova senha</span>
+            <input aria-label="Confirmar nova senha" type="password" autoComplete="new-password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white" />
+          </label>
+          {error && <p className="rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600">{error}</p>}
+          <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60"><Icon name="lock" size={17}/> {isSubmitting ? "Salvando..." : "Salvar nova senha"}</button>
+          <button type="button" onClick={onCancel} className="w-full rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400">Voltar ao login</button>
+        </form>
       </div>
     </div>
   );
@@ -828,7 +921,7 @@ function Announcement({ acknowledged, setToast, user, onAcknowledge, announcemen
           <p className="mt-3 text-sm leading-6 text-slate-500">{activeAnnouncement.body}</p>
           <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
             <strong className="block font-extrabold">Como participar hoje</strong>
-            Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe as vendas do produto foco.
+            Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe o ranking da rodada.
           </div>
           <div className="mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-potiguar-950 p-3">
             <div className="mb-3 flex items-center justify-between gap-3 px-1">
@@ -1101,7 +1194,7 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
             <strong className="block">Regra de horário</strong>
             {predictionRules.join(" • ")}
           </div>
-          <button onClick={() => setPage("store")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Ver produto foco e loja</button>
+          <button onClick={() => setPage("store")} className="mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white">Ver ranking da loja</button>
         </div>
       </div>
     </div>
@@ -1259,6 +1352,9 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
   const storeGoal = storeFocus.goal || 1;
   const storePercent = Math.round((totalSold / storeGoal) * 100);
   const localRanking = pilotRanking.filter(person => person.store === user.store);
+  const localPoints = localRanking.reduce((sum, person) => sum + person.points, 0);
+  const localReads = localRanking.reduce((sum, person) => sum + person.announcementPoints, 0);
+  const localHits = localRanking.reduce((sum, person) => sum + person.predictionHits, 0);
   const networkRanking = stores.map(store => store.name === user.store ? { ...store, sold: totalSold, goal: storeGoal } : { ...store, sold: 0, goal: storeGoal }).sort((a, b) => (b.sold / b.goal) - (a.sold / a.goal));
   const dayChampion = networkRanking[0];
   if (!productFocusEnabled) return (
@@ -1268,6 +1364,13 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
         <h2 className="mt-3 font-display text-3xl font-extrabold">Fase teste: foco nos palpites</h2>
         <p className="mt-2 text-sm leading-6 text-white/65">Nesta etapa não teremos produto foco nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.</p>
       </section>
+      {user.accessRole === "leadership" && (
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard icon="users" label="Equipe" value={localRanking.length} detail="Participantes da loja" accent="green" />
+          <StatCard icon="megaphone" label="Leituras" value={localReads} detail="Endomarketing confirmado" accent="lime" />
+          <StatCard icon="ranking" label="Pontos da loja" value={localPoints} detail={`${localHits} acerto(s) em palpites`} accent="white" />
+        </div>
+      )}
       <section className="soft-card rounded-2xl p-5 sm:p-6">
         <div className="flex items-center justify-between">
           <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Nosso time</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking {user.store}</h3></div>
@@ -1348,7 +1451,7 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
   );
 }
 
-function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, activeGames, worldCupMatches, onSaveSetting, onRefreshData }) {
+function AdminPage({ adminUser, setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, activeGames, worldCupMatches, onSaveSetting, onRefreshData }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
@@ -1415,6 +1518,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
   const roundWindow = getPredictionWindow(roundForm || defaultRoundConfig);
   const roundClosingSummary = getRoundClosingSummary(pilotRanking);
   const productFocusEnabled = isProductFocusEnabled(settings);
+  const storeSummaries = getStoreSummaries(pilotRanking, predictionEntries, readEntries);
 
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11)
     .replace(/^(\d{3})(\d)/, "$1.$2")
@@ -1435,6 +1539,26 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
     setNewUser({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
     setShowUserForm(false);
     setToast("Colaborador cadastrado no piloto.");
+  };
+
+  const resetUserPassword = async (targetUser) => {
+    if (!window.confirm(`Redefinir a senha de ${targetUser.name} para o CPF do usuário?`)) return;
+    try {
+      const response = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adminCpf: adminUser?.cpf,
+          targetCpf: targetUser.cpf,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Falha ao redefinir senha.");
+      setToast(`Senha de ${targetUser.name} redefinida para o CPF. No próximo login, ele deverá criar nova senha.`);
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível redefinir a senha no servidor.");
+    }
   };
 
   const assignProduct = event => {
@@ -1627,7 +1751,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
         <StatCard icon="users" label="Participantes do piloto" value={participantCount} detail={`${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`} accent="green"/>
         <StatCard icon="megaphone" label="Leituras" value={readEntries.length} detail={readEntries.length ? "Comunicados confirmados" : "Aguardando confirmações"} accent="lime"/>
         <StatCard icon="ball" label="Palpites" value={predictionEntries.length} detail={predictionEntries.length ? "Enviados para apuração" : "Aguardando envio"} accent="white"/>
-        <StatCard icon="store" label="Meta Imperatriz" value={`${Math.round(totalSold / storeGoal * 100)}%`} detail={`${totalSold} de ${storeGoal} m²`} accent="white"/>
+        <StatCard icon={productFocusEnabled ? "store" : "trophy"} label={productFocusEnabled ? "Meta da rede" : "Fase teste"} value={productFocusEnabled ? `${Math.round(totalSold / storeGoal * 100)}%` : "16 avos"} detail={productFocusEnabled ? `${totalSold} de ${storeGoal}` : "Somente endomarketing e palpites"} accent="white"/>
       </div>
       <section className="soft-card rounded-2xl p-5 sm:p-6">
         <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Ações rápidas</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">O que vamos movimentar?</h3></div>
@@ -1820,7 +1944,7 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
 	                ))}
               </div>
             </section>
-            <section className="soft-card overflow-hidden rounded-2xl">
+            {productFocusEnabled && <section className="soft-card overflow-hidden rounded-2xl">
               <div className="border-b border-slate-100 p-5">
                 <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Produto foco</p>
                 <h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Quantidade por vendedor</h4>
@@ -1834,15 +1958,15 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
                   </div>
                 ))}
               </div>
-            </section>
+            </section>}
           </div>
           <section className="soft-card rounded-2xl p-5 sm:p-6">
             <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Desempenho acumulado</p><h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking das lojas</h4></div>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
-              {[...stores].sort((a,b)=>(b.sold/b.goal)-(a.sold/a.goal)).map((store, index) => (
-                <div key={store.name} className="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
+              {storeSummaries.map((store, index) => (
+                <div key={store.store} className="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
                   <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-xs font-extrabold text-potiguar-900">{index + 1}º</span>
-                  <div className="min-w-0 flex-1"><div className="flex justify-between text-xs"><strong className="text-potiguar-950">{store.name}</strong><strong className="text-potiguar-700">{Math.round(store.sold/store.goal*100)}%</strong></div><div className="progress-track mt-2 h-2 rounded-full"><div className="progress-fill h-full rounded-full" style={{width:`${Math.min(store.sold/store.goal*100,100)}%`}}></div></div></div>
+                  <div className="min-w-0 flex-1"><div className="flex justify-between text-xs"><strong className="text-potiguar-950">{store.store}</strong><strong className="text-potiguar-700">{store.points} pts</strong></div><div className="mt-1 text-[10px] text-slate-400">{store.readCount} leituras • {store.predictionCount} palpites • {store.participants} participantes</div></div>
                 </div>
               ))}
             </div>
@@ -2026,7 +2150,12 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
                     <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{user.profile}</span></td>
                     <td className="px-4 py-4 text-xs font-bold text-potiguar-800">{user.store}</td>
                     <td className="px-4 py-4"><span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>{user.status}</span></td>
-                    <td className="px-6 py-4 text-right"><button onClick={() => setToast(`Abrindo cadastro de ${user.name}.`)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button></td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => resetUserPassword(user)} className="rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700">Resetar senha</button>
+                        <button onClick={() => setToast(`Abrindo cadastro de ${user.name}.`)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -2057,15 +2186,35 @@ function AdminPage({ setToast, predictionEntries, readEntries, salesEntries, set
       )}
       {module === "dashboard" && <div className="grid gap-6 xl:grid-cols-[1.25fr_.75fr]">
 	        <section className="soft-card rounded-2xl p-5 sm:p-6">
-	          <div className="flex items-center justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Desempenho comercial</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Metas por loja</h3></div><span className="text-xs font-bold text-slate-400">Atualização automática</span></div>
-	          <div className="mt-6 space-y-5">
-	            {stores.map((s,i) => <div key={s.name} className="grid grid-cols-[76px_1fr_42px] items-center gap-3"><span className="truncate text-xs font-bold text-potiguar-950">{s.name}</span><div className="progress-track h-2.5 rounded-full"><div className="progress-fill h-full rounded-full" style={{width:`${Math.min(totalSold/storeGoal*100,100)}%`}}></div></div><span className="text-right text-xs font-extrabold text-potiguar-700">{Math.round(totalSold/storeGoal*100)}%</span></div>)}
+	          <div className="flex items-center justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">{productFocusEnabled ? "Desempenho por loja" : "Fase teste"}</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Acompanhamento das lojas</h3></div><span className="text-xs font-bold text-slate-400">Atualização automática</span></div>
+	          <div className="mt-6 grid gap-3 md:grid-cols-2">
+	            {storeSummaries.map((summary, index) => {
+                const maxPoints = Math.max(1, ...storeSummaries.map(item => item.points));
+                return (
+                  <div key={summary.store} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">{index + 1}º lugar</p>
+                        <h4 className="mt-1 text-sm font-extrabold text-potiguar-950">{summary.store}</h4>
+                        <p className="mt-1 text-[10px] text-slate-400">{summary.sellerCount} vendedores • {summary.leaderCount} líderes</p>
+                      </div>
+                      <strong className="font-display text-xl text-potiguar-900">{summary.points} pts</strong>
+                    </div>
+                    <div className="mt-3 progress-track h-2.5 rounded-full"><div className="progress-fill h-full rounded-full" style={{width:`${Math.min(summary.points / maxPoints * 100, 100)}%`}}></div></div>
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded-xl bg-white p-2"><p className="text-[9px] font-bold text-slate-400">Leituras</p><p className="text-sm font-extrabold text-potiguar-800">{summary.readCount}</p></div>
+                      <div className="rounded-xl bg-white p-2"><p className="text-[9px] font-bold text-slate-400">Palpites</p><p className="text-sm font-extrabold text-potiguar-800">{summary.predictionCount}</p></div>
+                      <div className="rounded-xl bg-white p-2"><p className="text-[9px] font-bold text-slate-400">Top vendedor</p><p className="truncate text-[10px] font-extrabold text-potiguar-800">{summary.topSeller?.name?.split(" ")[0] || "—"}</p></div>
+                    </div>
+                  </div>
+                );
+              })}
 	          </div>
 	        </section>
         <section className="hero-pattern pitch-lines rounded-2xl p-6 text-white">
           <div className="flex items-center justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime">Rodada atual</p><h3 className="mt-1 font-display text-xl font-extrabold">Status operacional</h3></div><Icon name="shield" className="text-potiguar-lime"/></div>
           <div className="mt-6 space-y-4">
-            {[["Comunicado publicado",true],["Produto do dia ativo",true],["Metas configuradas",true],["Resultados dos jogos",false]].map(([label,ok])=><div key={label} className="flex items-center justify-between rounded-xl bg-white/7 p-3"><span className="text-xs font-bold">{label}</span><span className={`grid h-6 w-6 place-items-center rounded-full ${ok?"bg-potiguar-lime text-potiguar-950":"bg-white/10 text-white/40"}`}><Icon name={ok?"check":"clock"} size={13}/></span></div>)}
+            {[[ "Comunicado publicado", true ], [ productFocusEnabled ? "Produto do dia ativo" : "Produto foco nas oitavas", productFocusEnabled ], [ productFocusEnabled ? "Metas configuradas" : "Metas comerciais pausadas", productFocusEnabled ], [ "Resultados dos jogos", false ]].map(([label,ok])=><div key={label} className="flex items-center justify-between rounded-xl bg-white/7 p-3"><span className="text-xs font-bold">{label}</span><span className={`grid h-6 w-6 place-items-center rounded-full ${ok?"bg-potiguar-lime text-potiguar-950":"bg-white/10 text-white/40"}`}><Icon name={ok?"check":"clock"} size={13}/></span></div>)}
           </div>
           <button onClick={() => setToast("Encerramento simulado. Em produção, a ação será auditada e impedirá novos palpites.")} className="mt-6 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-xs font-extrabold hover:bg-white/15">Encerrar rodada</button>
         </section>
@@ -2089,6 +2238,8 @@ function App() {
   const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
   const [acknowledgedRoundId, setAcknowledgedRoundId] = useState("");
   const [user, setUser] = useState(restoredUser);
+  const [pendingPasswordUser, setPendingPasswordUser] = useState(null);
+  const [pendingCurrentPassword, setPendingCurrentPassword] = useState("");
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
@@ -2189,11 +2340,14 @@ function App() {
     ...appSettings,
     matchResults: { ...(appSettings.matchResults || defaultMatchResults), ...syncedMatchResults },
   };
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, scoringSettings);
-  const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const activePredictionEntries = predictionEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
+  const activeSalesEntries = salesEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
+  const activeReadEntries = readEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
+  const pilotRanking = buildPilotRanking(registeredUsers, activePredictionEntries, activeSalesEntries, activeReadEntries, profilePhotos, scoringSettings);
+  const totalSold = isProductFocusEnabled(scoringSettings) ? activeSalesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
   const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
-  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
+  const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
   const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
 
@@ -2307,7 +2461,7 @@ function App() {
     }
   };
 
-  const login = (nextUser) => {
+  const completeLogin = (nextUser) => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
       localStorage.removeItem("copaPotiguarSessionCpfV2");
@@ -2317,8 +2471,55 @@ function App() {
       console.warn("Não foi possível salvar a sessão local.", error);
     }
     setUser(nextUser);
+    setPendingPasswordUser(null);
+    setPendingCurrentPassword("");
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
     setAcknowledgedRoundId("");
+  };
+
+  const login = async (nextUser, password) => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cpf: nextUser.cpf, password }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return { ok: false, error: data.error || "CPF ou senha inválidos." };
+      if (data.mustChangePassword) {
+        setPendingPasswordUser(nextUser);
+        setPendingCurrentPassword(password);
+        return { ok: true, mustChangePassword: true };
+      }
+      completeLogin(nextUser);
+      return { ok: true };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, error: "Não foi possível validar o acesso no servidor." };
+    }
+  };
+
+  const changeInitialPassword = async (newPassword) => {
+    if (!pendingPasswordUser) return { ok: false, error: "Sessão de primeiro acesso não encontrada." };
+    try {
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cpf: pendingPasswordUser.cpf,
+          currentPassword: pendingCurrentPassword,
+          newPassword,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return { ok: false, error: data.error || "Não foi possível alterar a senha." };
+      completeLogin(pendingPasswordUser);
+      setToast("Senha criada com sucesso.");
+      return { ok: true };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, error: "Não foi possível salvar a nova senha no servidor." };
+    }
   };
 
   const logout = () => {
@@ -2331,11 +2532,14 @@ function App() {
       console.warn("Não foi possível limpar a sessão local.", error);
     }
     setUser(null);
+    setPendingPasswordUser(null);
+    setPendingCurrentPassword("");
     setPage("home");
     setAcknowledgedRoundId("");
     setToast("");
   };
 
+  if (pendingPasswordUser) return <ChangePasswordScreen user={pendingPasswordUser} currentPassword={pendingCurrentPassword} onChanged={changeInitialPassword} onCancel={logout} />;
   if (!effectiveUser) return <LoginScreen onLogin={login} />;
 
   return (
@@ -2348,7 +2552,7 @@ function App() {
           {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} activeGames={activeGames} onSavePrediction={savePrediction} />}
           {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
           {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} settings={appSettings} />}
-          {activePage === "admin" && <AdminPage setToast={setToast} predictionEntries={predictionEntries} readEntries={readEntries} salesEntries={salesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
+          {activePage === "admin" && <AdminPage adminUser={effectiveUser} setToast={setToast} predictionEntries={activePredictionEntries} readEntries={activeReadEntries} salesEntries={activeSalesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
         </main>
       </div>
       <MobileNav page={activePage} setPage={setPage} user={effectiveUser} />

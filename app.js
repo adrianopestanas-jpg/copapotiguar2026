@@ -524,6 +524,7 @@ const defaultAnnouncement = {
   minimumSeconds: 30,
   publishedAt: "25 JUN • ativo"
 };
+const defaultScoringStartAt = "2026-07-02T19:55:00-03:00";
 const defaultMatchResults = {
   1: {
     homeScore: 0,
@@ -548,7 +549,13 @@ const defaultAppSettings = {
   announcement: defaultAnnouncement,
   round: defaultRoundConfig,
   award: defaultAward,
+  scoringStartAt: defaultScoringStartAt,
   matchResults: defaultMatchResults
+};
+const getEntryDate = entry => new Date(entry.submitted_at || entry.submittedAt || entry.readAt || entry.createdAt || entry.created_at || 0);
+const isAfterScoringStart = (entry, settings = defaultAppSettings) => {
+  const startAt = new Date(settings.scoringStartAt || defaultScoringStartAt);
+  return getEntryDate(entry) >= startAt;
 };
 const youtubeEmbedUrl = url => {
   const text = String(url || "");
@@ -606,14 +613,14 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     isTopSeller: false
   }));
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
-  readEntries.forEach(entry => {
+  readEntries.filter(entry => isAfterScoringStart(entry, settings)).forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row || entry.roundId !== activeRound.id || row.announcementRead) return;
     row.announcementRead = true;
     row.announcementPoints += 1;
     row.points += 1;
   });
-  predictionEntries.forEach(entry => {
+  predictionEntries.filter(entry => isAfterScoringStart(entry, settings)).forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row) return;
     const {
@@ -626,7 +633,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     row.exactPredictions += exact ? 1 : 0;
     row.points += points;
   });
-  const salesByCpf = productFocusEnabled ? salesEntries.reduce((acc, entry) => {
+  const salesByCpf = productFocusEnabled ? salesEntries.filter(entry => isAfterScoringStart(entry, settings)).reduce((acc, entry) => {
     const cpf = onlyDigits(entry.sellerCpf || "");
     if (!cpf) return acc;
     acc[cpf] = (acc[cpf] || 0) + Number(entry.quantity || 0);
@@ -673,6 +680,28 @@ const getRoundClosingSummary = rankingRows => {
     })).filter(item => item.winner)
   };
 };
+const getStoreSummaries = (rankingRows, predictionEntries = [], readEntries = []) => fixedStores.map(store => {
+  const people = rankingRows.filter(person => person.store === store);
+  const sellers = people.filter(person => person.role === "Vendedor");
+  const leaders = people.filter(person => person.role === "Liderança");
+  const points = people.reduce((sum, person) => sum + person.points, 0);
+  const predictionCount = predictionEntries.filter(entry => entry.store === store).length;
+  const readCount = readEntries.filter(entry => entry.store === store).length;
+  const topSeller = sellers[0] || null;
+  return {
+    store,
+    people,
+    sellers,
+    leaders,
+    participants: people.length,
+    sellerCount: sellers.length,
+    leaderCount: leaders.length,
+    points,
+    predictionCount,
+    readCount,
+    topSeller
+  };
+}).sort((a, b) => b.points - a.points || b.predictionCount - a.predictionCount || a.store.localeCompare(b.store));
 function Brand({
   compact = false
 }) {
@@ -695,20 +724,24 @@ function LoginScreen({
   const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const formatCpf = value => {
     const digits = value.replace(/\D/g, "").slice(0, 11);
     return digits.replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   };
-  const submit = event => {
+  const submit = async event => {
     event.preventDefault();
     const cpfDigits = cpf.replace(/\D/g, "");
-    const passwordDigits = password.replace(/\D/g, "");
     const user = demoUsers[cpfDigits];
-    if (!user || passwordDigits !== cpfDigits) {
+    if (!user) {
       setError("CPF ou senha inválidos.");
       return;
     }
-    onLogin(user);
+    setIsSubmitting(true);
+    setError("");
+    const result = await onLogin(user, password);
+    if (!result?.ok) setError(result?.error || "CPF ou senha inválidos.");
+    setIsSubmitting(false);
   };
   return /*#__PURE__*/React.createElement("div", {
     className: "login-bg min-h-screen p-4 sm:grid sm:place-items-center sm:p-8"
@@ -728,7 +761,7 @@ function LoginScreen({
     className: "mt-5 text-sm leading-6 text-white/60"
   }, "Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja.")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-white/35"
-  }, "Acesso controlado • Piloto Imperatriz")), /*#__PURE__*/React.createElement("section", {
+  }, "Acesso controlado • Piloto multi-lojas")), /*#__PURE__*/React.createElement("section", {
     className: "flex flex-col justify-center p-6 sm:p-10 lg:p-14"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-9 lg:hidden"
@@ -740,7 +773,7 @@ function LoginScreen({
     className: "mt-2 font-display text-3xl font-extrabold text-potiguar-950"
   }, "Entre na Copa Potiguar"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-slate-400"
-  }, "Use seu CPF. Nesta largada do piloto, a senha é o próprio CPF."), /*#__PURE__*/React.createElement("form", {
+  }, "Use seu CPF. No primeiro acesso, a senha temporária é o próprio CPF."), /*#__PURE__*/React.createElement("form", {
     onSubmit: submit,
     className: "mt-8 space-y-4"
   }, /*#__PURE__*/React.createElement("label", {
@@ -768,11 +801,98 @@ function LoginScreen({
     className: "rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600"
   }, error), /*#__PURE__*/React.createElement("button", {
     type: "submit",
-    className: "flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15"
+    disabled: isSubmitting,
+    className: "flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "lock",
     size: 17
-  }), " Entrar")))));
+  }), " ", isSubmitting ? "Entrando..." : "Entrar")), /*#__PURE__*/React.createElement("p", {
+    className: "mt-4 text-center text-xs font-semibold text-slate-400"
+  }, "Esqueceu a senha? Solicite a redefinição ao administrador."))));
+}
+function ChangePasswordScreen({
+  user,
+  currentPassword,
+  onChanged,
+  onCancel
+}) {
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submit = async event => {
+    event.preventDefault();
+    if (newPassword.length < 6) {
+      setError("A nova senha precisa ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("A confirmação precisa ser igual à nova senha.");
+      return;
+    }
+    if (onlyDigits(newPassword) === onlyDigits(user.cpf)) {
+      setError("Escolha uma senha diferente do CPF.");
+      return;
+    }
+    setIsSubmitting(true);
+    setError("");
+    const result = await onChanged(newPassword);
+    if (!result?.ok) setError(result?.error || "Não foi possível alterar a senha.");
+    setIsSubmitting(false);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "login-bg min-h-screen p-4 sm:grid sm:place-items-center sm:p-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mx-auto w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl shadow-potiguar-950/20 sm:p-8"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "mb-8 rounded-3xl bg-potiguar-950 p-5 text-white"
+  }, /*#__PURE__*/React.createElement(Brand, {
+    compact: true
+  }), /*#__PURE__*/React.createElement("p", {
+    className: "mt-6 text-[10px] font-extrabold uppercase tracking-[.16em] text-potiguar-lime"
+  }, "Primeiro acesso"), /*#__PURE__*/React.createElement("h1", {
+    className: "mt-2 font-display text-2xl font-extrabold"
+  }, "Crie sua senha"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 text-sm text-white/60"
+  }, user.name, ", por segurança você precisa trocar a senha temporária antes de continuar.")), /*#__PURE__*/React.createElement("form", {
+    onSubmit: submit,
+    className: "space-y-4"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Nova senha"), /*#__PURE__*/React.createElement("input", {
+    "aria-label": "Nova senha",
+    type: "password",
+    autoComplete: "new-password",
+    value: newPassword,
+    onChange: e => setNewPassword(e.target.value),
+    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
+  })), /*#__PURE__*/React.createElement("label", {
+    className: "block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Confirmar nova senha"), /*#__PURE__*/React.createElement("input", {
+    "aria-label": "Confirmar nova senha",
+    type: "password",
+    autoComplete: "new-password",
+    value: confirmPassword,
+    onChange: e => setConfirmPassword(e.target.value),
+    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
+  })), error && /*#__PURE__*/React.createElement("p", {
+    className: "rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600"
+  }, error), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    disabled: isSubmitting,
+    className: "flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "lock",
+    size: 17
+  }), " ", isSubmitting ? "Salvando..." : "Salvar nova senha"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: onCancel,
+    className: "w-full rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400"
+  }, "Voltar ao login"))));
 }
 function Sidebar({
   page,
@@ -1101,7 +1221,7 @@ function Announcement({
     className: "mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block font-extrabold"
-  }, "Como participar hoje"), "Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe as vendas do produto foco."), /*#__PURE__*/React.createElement("div", {
+  }, "Como participar hoje"), "Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe o ranking da rodada."), /*#__PURE__*/React.createElement("div", {
     className: "mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-potiguar-950 p-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-3 flex items-center justify-between gap-3 px-1"
@@ -1472,7 +1592,7 @@ function Guesses({
   }, "Regra de horário"), predictionRules.join(" • ")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage("store"),
     className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
-  }, "Ver produto foco e loja"))));
+  }, "Ver ranking da loja"))));
   return /*#__PURE__*/React.createElement("div", {
     className: "mx-auto max-w-4xl space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -1674,6 +1794,9 @@ function StorePage({
   const storeGoal = storeFocus.goal || 1;
   const storePercent = Math.round(totalSold / storeGoal * 100);
   const localRanking = pilotRanking.filter(person => person.store === user.store);
+  const localPoints = localRanking.reduce((sum, person) => sum + person.points, 0);
+  const localReads = localRanking.reduce((sum, person) => sum + person.announcementPoints, 0);
+  const localHits = localRanking.reduce((sum, person) => sum + person.predictionHits, 0);
   const networkRanking = stores.map(store => store.name === user.store ? {
     ...store,
     sold: totalSold,
@@ -1697,7 +1820,27 @@ function StorePage({
     className: "mt-3 font-display text-3xl font-extrabold"
   }, "Fase teste: foco nos palpites"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm leading-6 text-white/65"
-  }, "Nesta etapa não teremos produto foco nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.")), /*#__PURE__*/React.createElement("section", {
+  }, "Nesta etapa não teremos produto foco nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.")), user.accessRole === "leadership" && /*#__PURE__*/React.createElement("div", {
+    className: "grid grid-cols-3 gap-3"
+  }, /*#__PURE__*/React.createElement(StatCard, {
+    icon: "users",
+    label: "Equipe",
+    value: localRanking.length,
+    detail: "Participantes da loja",
+    accent: "green"
+  }), /*#__PURE__*/React.createElement(StatCard, {
+    icon: "megaphone",
+    label: "Leituras",
+    value: localReads,
+    detail: "Endomarketing confirmado",
+    accent: "lime"
+  }), /*#__PURE__*/React.createElement(StatCard, {
+    icon: "ranking",
+    label: "Pontos da loja",
+    value: localPoints,
+    detail: `${localHits} acerto(s) em palpites`,
+    accent: "white"
+  })), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between"
@@ -1835,6 +1978,7 @@ function StorePage({
   })))))))));
 }
 function AdminPage({
+  adminUser,
   setToast,
   predictionEntries,
   readEntries,
@@ -1935,6 +2079,7 @@ function AdminPage({
   const roundWindow = getPredictionWindow(roundForm || defaultRoundConfig);
   const roundClosingSummary = getRoundClosingSummary(pilotRanking);
   const productFocusEnabled = isProductFocusEnabled(settings);
+  const storeSummaries = getStoreSummaries(pilotRanking, predictionEntries, readEntries);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const createUser = event => {
     event.preventDefault();
@@ -1960,6 +2105,27 @@ function AdminPage({
     });
     setShowUserForm(false);
     setToast("Colaborador cadastrado no piloto.");
+  };
+  const resetUserPassword = async targetUser => {
+    if (!window.confirm(`Redefinir a senha de ${targetUser.name} para o CPF do usuário?`)) return;
+    try {
+      const response = await fetch("/api/admin/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          adminCpf: adminUser?.cpf,
+          targetCpf: targetUser.cpf
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Falha ao redefinir senha.");
+      setToast(`Senha de ${targetUser.name} redefinida para o CPF. No próximo login, ele deverá criar nova senha.`);
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível redefinir a senha no servidor.");
+    }
   };
   const assignProduct = event => {
     event.preventDefault();
@@ -2181,10 +2347,10 @@ function AdminPage({
     detail: predictionEntries.length ? "Enviados para apuração" : "Aguardando envio",
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "store",
-    label: "Meta Imperatriz",
-    value: `${Math.round(totalSold / storeGoal * 100)}%`,
-    detail: `${totalSold} de ${storeGoal} m²`,
+    icon: productFocusEnabled ? "store" : "trophy",
+    label: productFocusEnabled ? "Meta da rede" : "Fase teste",
+    value: productFocusEnabled ? `${Math.round(totalSold / storeGoal * 100)}%` : "16 avos",
+    detail: productFocusEnabled ? `${totalSold} de ${storeGoal}` : "Somente endomarketing e palpites",
     accent: "white"
   })), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
@@ -2610,7 +2776,7 @@ function AdminPage({
     className: "text-[10px] text-slate-400"
   }, person.store, " • ", person.role, " • Comunicado ", person.announcementPoints, " pt • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s)", person.salesPoints + person.topSellerPoints || person.storeGoalPoints ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts/${person.soldQuantity} m²${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : "")), /*#__PURE__*/React.createElement("strong", {
     className: "font-display text-lg text-potiguar-900"
-  }, person.points, " pts"))))), /*#__PURE__*/React.createElement("section", {
+  }, person.points, " pts"))))), productFocusEnabled && /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
   }, /*#__PURE__*/React.createElement("div", {
     className: "border-b border-slate-100 p-5"
@@ -2641,8 +2807,8 @@ function AdminPage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Ranking das lojas")), /*#__PURE__*/React.createElement("div", {
     className: "mt-5 grid gap-3 md:grid-cols-2"
-  }, [...stores].sort((a, b) => b.sold / b.goal - a.sold / a.goal).map((store, index) => /*#__PURE__*/React.createElement("div", {
-    key: store.name,
+  }, storeSummaries.map((store, index) => /*#__PURE__*/React.createElement("div", {
+    key: store.store,
     className: "flex items-center gap-4 rounded-xl bg-slate-50 p-4"
   }, /*#__PURE__*/React.createElement("span", {
     className: "grid h-9 w-9 place-items-center rounded-xl bg-white text-xs font-extrabold text-potiguar-900"
@@ -2652,16 +2818,11 @@ function AdminPage({
     className: "flex justify-between text-xs"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "text-potiguar-950"
-  }, store.name), /*#__PURE__*/React.createElement("strong", {
+  }, store.store), /*#__PURE__*/React.createElement("strong", {
     className: "text-potiguar-700"
-  }, Math.round(store.sold / store.goal * 100), "%")), /*#__PURE__*/React.createElement("div", {
-    className: "progress-track mt-2 h-2 rounded-full"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "progress-fill h-full rounded-full",
-    style: {
-      width: `${Math.min(store.sold / store.goal * 100, 100)}%`
-    }
-  })))))))), module === "predictions" && /*#__PURE__*/React.createElement("section", {
+  }, store.points, " pts")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-1 text-[10px] text-slate-400"
+  }, store.readCount, " leituras • ", store.predictionCount, " palpites • ", store.participants, " participantes"))))))), module === "predictions" && /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between"
@@ -3196,10 +3357,15 @@ function AdminPage({
     className: "h-1.5 w-1.5 rounded-full bg-emerald-500"
   }), user.status)), /*#__PURE__*/React.createElement("td", {
     className: "px-6 py-4 text-right"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex justify-end gap-2"
   }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => resetUserPassword(user),
+    className: "rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700"
+  }, "Resetar senha"), /*#__PURE__*/React.createElement("button", {
     onClick: () => setToast(`Abrindo cadastro de ${user.name}.`),
     className: "rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500"
-  }, "Editar")))))), visibleUsers.length === 0 && /*#__PURE__*/React.createElement("div", {
+  }, "Editar"))))))), visibleUsers.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "p-10 text-center text-sm font-semibold text-slate-400"
   }, "Nenhum usuário encontrado."))), formModule && /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
@@ -3243,27 +3409,56 @@ function AdminPage({
     className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Desempenho comercial"), /*#__PURE__*/React.createElement("h3", {
+  }, productFocusEnabled ? "Desempenho por loja" : "Fase teste"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Metas por loja")), /*#__PURE__*/React.createElement("span", {
+  }, "Acompanhamento das lojas")), /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold text-slate-400"
   }, "Atualização automática")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-6 space-y-5"
-  }, stores.map((s, i) => /*#__PURE__*/React.createElement("div", {
-    key: s.name,
-    className: "grid grid-cols-[76px_1fr_42px] items-center gap-3"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "truncate text-xs font-bold text-potiguar-950"
-  }, s.name), /*#__PURE__*/React.createElement("div", {
-    className: "progress-track h-2.5 rounded-full"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "progress-fill h-full rounded-full",
-    style: {
-      width: `${Math.min(totalSold / storeGoal * 100, 100)}%`
-    }
-  })), /*#__PURE__*/React.createElement("span", {
-    className: "text-right text-xs font-extrabold text-potiguar-700"
-  }, Math.round(totalSold / storeGoal * 100), "%"))))), /*#__PURE__*/React.createElement("section", {
+    className: "mt-6 grid gap-3 md:grid-cols-2"
+  }, storeSummaries.map((summary, index) => {
+    const maxPoints = Math.max(1, ...storeSummaries.map(item => item.points));
+    return /*#__PURE__*/React.createElement("div", {
+      key: summary.store,
+      className: "rounded-2xl border border-slate-100 bg-slate-50 p-4"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-start justify-between gap-3"
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+      className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+    }, index + 1, "º lugar"), /*#__PURE__*/React.createElement("h4", {
+      className: "mt-1 text-sm font-extrabold text-potiguar-950"
+    }, summary.store), /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 text-[10px] text-slate-400"
+    }, summary.sellerCount, " vendedores • ", summary.leaderCount, " líderes")), /*#__PURE__*/React.createElement("strong", {
+      className: "font-display text-xl text-potiguar-900"
+    }, summary.points, " pts")), /*#__PURE__*/React.createElement("div", {
+      className: "mt-3 progress-track h-2.5 rounded-full"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "progress-fill h-full rounded-full",
+      style: {
+        width: `${Math.min(summary.points / maxPoints * 100, 100)}%`
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "mt-3 grid grid-cols-3 gap-2 text-center"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "rounded-xl bg-white p-2"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] font-bold text-slate-400"
+    }, "Leituras"), /*#__PURE__*/React.createElement("p", {
+      className: "text-sm font-extrabold text-potiguar-800"
+    }, summary.readCount)), /*#__PURE__*/React.createElement("div", {
+      className: "rounded-xl bg-white p-2"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] font-bold text-slate-400"
+    }, "Palpites"), /*#__PURE__*/React.createElement("p", {
+      className: "text-sm font-extrabold text-potiguar-800"
+    }, summary.predictionCount)), /*#__PURE__*/React.createElement("div", {
+      className: "rounded-xl bg-white p-2"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "text-[9px] font-bold text-slate-400"
+    }, "Top vendedor"), /*#__PURE__*/React.createElement("p", {
+      className: "truncate text-[10px] font-extrabold text-potiguar-800"
+    }, summary.topSeller?.name?.split(" ")[0] || "—"))));
+  }))), /*#__PURE__*/React.createElement("section", {
     className: "hero-pattern pitch-lines rounded-2xl p-6 text-white"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between"
@@ -3276,7 +3471,7 @@ function AdminPage({
     className: "text-potiguar-lime"
   })), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 space-y-4"
-  }, [["Comunicado publicado", true], ["Produto do dia ativo", true], ["Metas configuradas", true], ["Resultados dos jogos", false]].map(([label, ok]) => /*#__PURE__*/React.createElement("div", {
+  }, [["Comunicado publicado", true], [productFocusEnabled ? "Produto do dia ativo" : "Produto foco nas oitavas", productFocusEnabled], [productFocusEnabled ? "Metas configuradas" : "Metas comerciais pausadas", productFocusEnabled], ["Resultados dos jogos", false]].map(([label, ok]) => /*#__PURE__*/React.createElement("div", {
     key: label,
     className: "flex items-center justify-between rounded-xl bg-white/7 p-3"
   }, /*#__PURE__*/React.createElement("span", {
@@ -3306,6 +3501,8 @@ function App() {
   const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
   const [acknowledgedRoundId, setAcknowledgedRoundId] = useState("");
   const [user, setUser] = useState(restoredUser);
+  const [pendingPasswordUser, setPendingPasswordUser] = useState(null);
+  const [pendingCurrentPassword, setPendingCurrentPassword] = useState("");
   const [toast, setToast] = useState("");
   const [predictionEntries, setPredictionEntries] = useState([]);
   const [salesEntries, setSalesEntries] = useState([]);
@@ -3416,11 +3613,14 @@ function App() {
       ...syncedMatchResults
     }
   };
-  const pilotRanking = buildPilotRanking(registeredUsers, predictionEntries, salesEntries, readEntries, profilePhotos, scoringSettings);
-  const totalSold = salesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const activePredictionEntries = predictionEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
+  const activeSalesEntries = salesEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
+  const activeReadEntries = readEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
+  const pilotRanking = buildPilotRanking(registeredUsers, activePredictionEntries, activeSalesEntries, activeReadEntries, profilePhotos, scoringSettings);
+  const totalSold = isProductFocusEnabled(scoringSettings) ? activeSalesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
   const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
-  const currentUserRead = effectiveUser ? readEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
+  const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
   const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
   useEffect(() => {
@@ -3545,7 +3745,7 @@ function App() {
       return false;
     }
   };
-  const login = nextUser => {
+  const completeLogin = nextUser => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
       localStorage.removeItem("copaPotiguarSessionCpfV2");
@@ -3555,8 +3755,82 @@ function App() {
       console.warn("Não foi possível salvar a sessão local.", error);
     }
     setUser(nextUser);
+    setPendingPasswordUser(null);
+    setPendingCurrentPassword("");
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
     setAcknowledgedRoundId("");
+  };
+  const login = async (nextUser, password) => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          cpf: nextUser.cpf,
+          password
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return {
+        ok: false,
+        error: data.error || "CPF ou senha inválidos."
+      };
+      if (data.mustChangePassword) {
+        setPendingPasswordUser(nextUser);
+        setPendingCurrentPassword(password);
+        return {
+          ok: true,
+          mustChangePassword: true
+        };
+      }
+      completeLogin(nextUser);
+      return {
+        ok: true
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        ok: false,
+        error: "Não foi possível validar o acesso no servidor."
+      };
+    }
+  };
+  const changeInitialPassword = async newPassword => {
+    if (!pendingPasswordUser) return {
+      ok: false,
+      error: "Sessão de primeiro acesso não encontrada."
+    };
+    try {
+      const response = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          cpf: pendingPasswordUser.cpf,
+          currentPassword: pendingCurrentPassword,
+          newPassword
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return {
+        ok: false,
+        error: data.error || "Não foi possível alterar a senha."
+      };
+      completeLogin(pendingPasswordUser);
+      setToast("Senha criada com sucesso.");
+      return {
+        ok: true
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        ok: false,
+        error: "Não foi possível salvar a nova senha no servidor."
+      };
+    }
   };
   const logout = () => {
     try {
@@ -3568,10 +3842,18 @@ function App() {
       console.warn("Não foi possível limpar a sessão local.", error);
     }
     setUser(null);
+    setPendingPasswordUser(null);
+    setPendingCurrentPassword("");
     setPage("home");
     setAcknowledgedRoundId("");
     setToast("");
   };
+  if (pendingPasswordUser) return /*#__PURE__*/React.createElement(ChangePasswordScreen, {
+    user: pendingPasswordUser,
+    currentPassword: pendingCurrentPassword,
+    onChanged: changeInitialPassword,
+    onCancel: logout
+  });
   if (!effectiveUser) return /*#__PURE__*/React.createElement(LoginScreen, {
     onLogin: login
   });
@@ -3621,10 +3903,11 @@ function App() {
     totalSold: totalSold,
     settings: appSettings
   }), activePage === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
+    adminUser: effectiveUser,
     setToast: setToast,
-    predictionEntries: predictionEntries,
-    readEntries: readEntries,
-    salesEntries: salesEntries,
+    predictionEntries: activePredictionEntries,
+    readEntries: activeReadEntries,
+    salesEntries: activeSalesEntries,
     setSalesEntries: setSalesEntries,
     pilotRanking: pilotRanking,
     totalSold: totalSold,
