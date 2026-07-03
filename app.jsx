@@ -848,7 +848,7 @@ function ProfilePhotoUploader({ user, photoUrl, onSaveProfilePhoto, setToast }) 
   );
 }
 
-function Topbar({ page, user, onLogout, profilePhotos }) {
+function Topbar({ page, user, onLogout, profilePhotos, isImpersonating = false, onStopImpersonation }) {
   const labels = { home: "Visão geral", guesses: "Palpites", ranking: "Rankings", store: "Minha loja", admin: "Painel administrativo" };
   return (
     <header className="sticky top-0 z-20 flex h-[72px] items-center justify-between border-b border-black/5 bg-[#f4f7f4]/90 px-5 backdrop-blur-xl sm:px-8 lg:px-10">
@@ -858,6 +858,11 @@ function Topbar({ page, user, onLogout, profilePhotos }) {
         <h1 className="font-display text-xl font-bold text-potiguar-950">{labels[page]}</h1>
       </div>
       <div className="flex items-center gap-3">
+        {isImpersonating && (
+          <button onClick={onStopImpersonation} className="hidden rounded-full bg-potiguar-lime px-4 py-2 text-xs font-extrabold text-potiguar-950 shadow-sm sm:inline-flex">
+            Voltar ao admin
+          </button>
+        )}
         <div className="hidden items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-potiguar-800 shadow-sm sm:flex">
           <span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span>
           Dados ao vivo
@@ -1534,7 +1539,7 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
   );
 }
 
-function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, activeGames, worldCupMatches, onSaveSetting, onRefreshData }) {
+function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, activeGames, worldCupMatches, onSaveSetting, onRefreshData, onAccessAs }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
@@ -2130,7 +2135,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
             <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <h3 className="font-display text-3xl font-extrabold">Rankings do piloto</h3>
-                <p className="mt-2 text-sm text-white/60">Vendedores competem em categoria única. Lojas são classificadas pelo atingimento das metas.</p>
+                <p className="mt-2 text-sm text-white/60">Ranking calculado com dados gravados no banco: leituras, palpites e vendas. Atualização automática a cada 15 segundos.</p>
               </div>
               <div className="glass rounded-2xl px-5 py-3">
                 <p className="text-[10px] font-bold uppercase text-white/45">Atualização</p>
@@ -2142,7 +2147,8 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
             <section className="soft-card overflow-hidden rounded-2xl">
               <div className="border-b border-slate-100 p-5">
                 <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Pontuação geral</p>
-                <h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking de vendedores</h4>
+                <h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking geral de participantes</h4>
+                <p className="mt-1 text-xs text-slate-400">Fonte: leituras, palpites e vendas registradas no servidor.</p>
               </div>
               <div className="divide-y divide-slate-100">
 	                {pilotRanking.slice(0, 10).map((person, index) => (
@@ -2178,6 +2184,70 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                 <div key={store.store} className="flex items-center gap-4 rounded-xl bg-slate-50 p-4">
                   <span className="grid h-9 w-9 place-items-center rounded-xl bg-white text-xs font-extrabold text-potiguar-900">{index + 1}º</span>
                   <div className="min-w-0 flex-1"><div className="flex justify-between text-xs"><strong className="text-potiguar-950">{store.store}</strong><strong className="text-potiguar-700">{store.points} pts</strong></div><div className="mt-1 text-[10px] text-slate-400">{store.readCount} leituras • {store.predictionCount} palpites • {store.participants} participantes</div></div>
+                </div>
+              ))}
+            </div>
+          </section>
+          <section className="soft-card overflow-hidden rounded-2xl">
+            <div className="border-b border-slate-100 p-5 sm:p-6">
+              <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Detalhamento por loja</p>
+              <h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking interno de cada loja</h4>
+              <p className="mt-1 text-xs text-slate-400">Mostra a composição dos pontos por colaborador: comunicado, palpites, acertos e vendas/metas quando estiverem ativas.</p>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {storeSummaries.map(summary => (
+                <div key={summary.store} className="p-5 sm:p-6">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">{summary.sellerCount} vendedores • {summary.leaderCount} líderes</p>
+                      <h5 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">{summary.store}</h5>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-[10px] font-extrabold">
+                      <span className="rounded-full bg-potiguar-lime/20 px-3 py-1 text-potiguar-800">{summary.points} pts</span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-500">{summary.readCount} leituras</span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-500">{summary.predictionCount} palpites</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full min-w-[840px] text-left">
+                      <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        <tr>
+                          <th className="px-4 py-3">#</th>
+                          <th className="px-4 py-3">Colaborador</th>
+                          <th className="px-4 py-3">Perfil</th>
+                          <th className="px-4 py-3 text-center">Comunicado</th>
+                          <th className="px-4 py-3 text-center">Palpite</th>
+                          <th className="px-4 py-3 text-center">Acertos</th>
+                          <th className="px-4 py-3 text-center">Placar exato</th>
+                          <th className="px-4 py-3 text-center">Venda/meta</th>
+                          <th className="px-4 py-3 text-right">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {summary.people.map((person, index) => (
+                          <tr key={person.cpf} className={index === 0 ? "bg-potiguar-lime/10" : ""}>
+                            <td className="px-4 py-3 text-xs font-extrabold text-slate-400">{index === 0 ? "🥇" : index + 1}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <Avatar initials={person.name.split(" ").map(part => part[0]).slice(0,2).join("")} photoUrl={person.photoUrl}/>
+                                <div className="min-w-0">
+                                  <p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p>
+                                  <p className="text-[10px] text-slate-400">CPF {person.cpf}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${person.role === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{person.role}</span></td>
+                            <td className="px-4 py-3 text-center text-xs font-bold text-potiguar-900">{person.announcementPoints}</td>
+                            <td className="px-4 py-3 text-center text-xs font-bold text-potiguar-900">{person.predictionPoints}</td>
+                            <td className="px-4 py-3 text-center text-xs font-bold text-potiguar-900">{person.predictionHits}</td>
+                            <td className="px-4 py-3 text-center text-xs font-bold text-potiguar-900">{person.exactPredictions}</td>
+                            <td className="px-4 py-3 text-center text-xs font-bold text-potiguar-900">{person.salesPoints + person.topSellerPoints + person.storeGoalPoints}</td>
+                            <td className="px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-900">{person.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ))}
             </div>
@@ -2366,6 +2436,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                     <td className="px-4 py-4"><span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>{user.status}</span></td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
+                        {user.profile !== "Administrador" && <button onClick={() => onAccessAs(user)} className="rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950">Acessar como</button>}
                         <button onClick={() => resetUserPassword(user)} className="rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700">Resetar senha</button>
                         <button onClick={() => startEditUser(user)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button>
                       </div>
@@ -2458,6 +2529,7 @@ function App() {
   const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
   const [acknowledgedRoundId, setAcknowledgedRoundId] = useState("");
   const [user, setUser] = useState(restoredUser);
+  const [impersonatedCpf, setImpersonatedCpf] = useState("");
   const [pendingPasswordUser, setPendingPasswordUser] = useState(null);
   const [pendingCurrentPassword, setPendingCurrentPassword] = useState("");
   const [toast, setToast] = useState("");
@@ -2568,7 +2640,10 @@ function App() {
   const activeReadEntries = readEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
   const pilotRanking = buildPilotRanking(allRegisteredUsers, activePredictionEntries, activeSalesEntries, activeReadEntries, profilePhotos, scoringSettings);
   const totalSold = isProductFocusEnabled(scoringSettings) ? activeSalesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
-  const effectiveUser = user ? dynamicDemoUsers[onlyDigits(user.cpf)] || user : savedSessionCpf ? dynamicDemoUsers[savedSessionCpf] || null : null;
+  const loggedUser = user ? dynamicDemoUsers[onlyDigits(user.cpf)] || user : savedSessionCpf ? dynamicDemoUsers[savedSessionCpf] || null : null;
+  const viewedUser = impersonatedCpf ? dynamicDemoUsers[impersonatedCpf] || null : null;
+  const effectiveUser = viewedUser || loggedUser;
+  const isImpersonating = Boolean(viewedUser && loggedUser?.accessRole === "admin");
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
   const announcementActive = isAnnouncementActive(activeAnnouncement);
   const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
@@ -2587,6 +2662,10 @@ function App() {
   }, [effectiveUser?.accessRole, page, savedSessionCpf]);
 
   const savePrediction = async (currentUser, scores, gamesToSave = activeGames) => {
+    if (isImpersonating) {
+      setToast("Modo validação: palpite não foi gravado para este colaborador.");
+      return false;
+    }
     try {
       const predictions = gamesToSave.map(game => ({
         matchId: game.id,
@@ -2617,6 +2696,10 @@ function App() {
   };
 
   const saveAnnouncementRead = async (currentUser, watchedSeconds) => {
+    if (isImpersonating) {
+      setToast("Modo validação: leitura não foi gravada para este colaborador.");
+      return false;
+    }
     try {
       const response = await fetch("/api/announcement-reads", {
         method: "POST",
@@ -2646,6 +2729,10 @@ function App() {
   };
 
   const saveProfilePhoto = async (currentUser, photoData) => {
+    if (isImpersonating) {
+      setToast("Modo validação: foto não foi alterada para este colaborador.");
+      return false;
+    }
     try {
       const response = await fetch("/api/profile-photos", {
         method: "POST",
@@ -2696,6 +2783,7 @@ function App() {
       console.warn("Não foi possível salvar a sessão local.", error);
     }
     setUser(nextUser);
+    setImpersonatedCpf("");
     setPendingPasswordUser(null);
     setPendingCurrentPassword("");
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
@@ -2747,6 +2835,29 @@ function App() {
     }
   };
 
+  const accessAsUser = (targetUser) => {
+    const target = dynamicDemoUsers[onlyDigits(targetUser.cpf)];
+    if (!target) {
+      setToast("Usuário não encontrado para simulação.");
+      return;
+    }
+    if (target.accessRole === "admin") {
+      setToast("Acesso como administrador não precisa de simulação.");
+      return;
+    }
+    setImpersonatedCpf(onlyDigits(target.cpf));
+    setPage("home");
+    setAcknowledgedRoundId("");
+    setToast(`Visualizando como ${target.name}.`);
+  };
+
+  const stopAccessAsUser = () => {
+    setImpersonatedCpf("");
+    setPage("admin");
+    setAcknowledgedRoundId("");
+    setToast("Você voltou para a visão de administrador.");
+  };
+
   const logout = () => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
@@ -2757,6 +2868,7 @@ function App() {
       console.warn("Não foi possível limpar a sessão local.", error);
     }
     setUser(null);
+    setImpersonatedCpf("");
     setPendingPasswordUser(null);
     setPendingCurrentPassword("");
     setPage("home");
@@ -2771,13 +2883,22 @@ function App() {
     <div className="app-shell">
       <Sidebar page={activePage} setPage={setPage} user={effectiveUser} onLogout={logout} profilePhotos={profilePhotos} />
       <div className="main-column">
-        <Topbar page={activePage} user={effectiveUser} onLogout={logout} profilePhotos={profilePhotos} />
+        <Topbar page={activePage} user={effectiveUser} onLogout={logout} profilePhotos={profilePhotos} isImpersonating={isImpersonating} onStopImpersonation={stopAccessAsUser} />
         <main className="mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10">
+          {isImpersonating && (
+            <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-potiguar-lime/40 bg-potiguar-lime/15 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Modo validação</p>
+                <p className="text-sm font-extrabold text-potiguar-950">Você está vendo o sistema como {effectiveUser.name} • {effectiveUser.store} • {effectiveUser.accessRole === "leadership" ? "Liderança" : "Vendedor"}</p>
+              </div>
+              <button onClick={stopAccessAsUser} className="rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white">Voltar ao admin</button>
+            </div>
+          )}
           {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={appSettings} activeGames={activeGames} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
           {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} activeGames={activeGames} onSavePrediction={savePrediction} />}
           {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
           {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} settings={appSettings} />}
-          {activePage === "admin" && <AdminPage adminUser={effectiveUser} users={allRegisteredUsers} customUsers={customUsers} setToast={setToast} predictionEntries={activePredictionEntries} readEntries={activeReadEntries} salesEntries={activeSalesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
+          {activePage === "admin" && <AdminPage adminUser={effectiveUser} users={allRegisteredUsers} customUsers={customUsers} setToast={setToast} predictionEntries={activePredictionEntries} readEntries={activeReadEntries} salesEntries={activeSalesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} onAccessAs={accessAsUser} />}
         </main>
       </div>
       <MobileNav page={activePage} setPage={setPage} user={effectiveUser} />
