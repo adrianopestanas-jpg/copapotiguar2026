@@ -107,8 +107,7 @@ const makeInitials = name => String(name ?? "")
 
 const participantRows = (typeof window !== "undefined" && window.COPA_PARTICIPANTS) || [];
 
-const registeredUsers = participantRows
-  .map(([name, cpf, job, store, explicitProfile]) => {
+const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
     const profile = resolveProfile(job, explicitProfile);
     return {
       name: toTitleCase(name),
@@ -120,18 +119,35 @@ const registeredUsers = participantRows
       store: normalizeStore(store),
       status: "Ativo",
     };
+  };
+
+const normalizeCustomUser = user => {
+  const profile = user.profile || resolveProfile(user.job, user.explicitProfile);
+  return {
+    name: toTitleCase(user.name),
+    cpf: formatCpfValue(user.cpf),
+    email: user.email || "",
+    job: user.job || resolveJob(user.originalJob, profile),
+    originalJob: user.originalJob || user.job || resolveJob(user.job, profile),
+    profile,
+    store: normalizeStore(user.store),
+    status: user.status || "Ativo",
+  };
+};
+
+const mergeUsers = (baseUsers, customUsers = []) => {
+  const byCpf = {};
+  baseUsers.forEach(user => {
+    byCpf[onlyDigits(user.cpf)] = user;
   });
+  customUsers.map(normalizeCustomUser).forEach(user => {
+    const cpf = onlyDigits(user.cpf);
+    if (cpf.length === 11) byCpf[cpf] = user;
+  });
+  return Object.values(byCpf);
+};
 
-const rankedSellers = registeredUsers.filter(user => user.profile === "Vendedor");
-const ranking = rankedSellers.slice(0, 10).map((user, index) => ({
-  name: user.name,
-  store: user.store,
-  role: user.job,
-  points: 0,
-  trend: "—",
-}));
-
-const demoUsers = registeredUsers.reduce((acc, participant, index) => {
+const buildDemoUsers = users => users.reduce((acc, participant) => {
   const document = onlyDigits(participant.cpf);
   acc[document] = {
     name: participant.name,
@@ -147,6 +163,19 @@ const demoUsers = registeredUsers.reduce((acc, participant, index) => {
   };
   return acc;
 }, {});
+
+const registeredUsers = participantRows.map(normalizeParticipantUser);
+
+const rankedSellers = registeredUsers.filter(user => user.profile === "Vendedor");
+const ranking = rankedSellers.slice(0, 10).map((user, index) => ({
+  name: user.name,
+  store: user.store,
+  role: user.job,
+  points: 0,
+  trend: "—",
+}));
+
+const demoUsers = buildDemoUsers(registeredUsers);
 
 const focusProducts = [
   { id: "qualiz-18", sku: "10001", name: "Tinta Qualiz Fosco Completo 18L", brand: "Qualiz", price: "R$ 289,90", description: "Tinta acrílica fosca para ambientes internos e externos.", imageUrl: "" },
@@ -551,7 +580,7 @@ function Brand({ compact = false }) {
   );
 }
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, userMap }) {
   const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -568,7 +597,7 @@ function LoginScreen({ onLogin }) {
   const submit = async (event) => {
     event.preventDefault();
     const cpfDigits = cpf.replace(/\D/g, "");
-    const user = demoUsers[cpfDigits];
+    const user = userMap[cpfDigits];
     if (!user) {
       setError("CPF ou senha inválidos.");
       return;
@@ -1452,11 +1481,11 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
   );
 }
 
-function AdminPage({ adminUser, setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, activeGames, worldCupMatches, onSaveSetting, onRefreshData }) {
+function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predictionEntries, readEntries, salesEntries, setSalesEntries, pilotRanking, totalSold, profilePhotos, settings, activeGames, worldCupMatches, onSaveSetting, onRefreshData }) {
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
-  const [users, setUsers] = useState(registeredUsers);
+  const [users, setUsers] = useState(allUsers);
   const [showUserForm, setShowUserForm] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
   const [assignments, setAssignments] = useState(initialProductAssignments);
@@ -1478,12 +1507,13 @@ function AdminPage({ adminUser, setToast, predictionEntries, readEntries, salesE
   });
 
   useEffect(() => {
+    setUsers(allUsers);
     setAnnouncementForm(settings.announcement || defaultAnnouncement);
     setAwardForm(settings.award || defaultAward);
     setRoundForm(settings.round || defaultRoundConfig);
     const result = (settings.matchResults || defaultMatchResults)[currentAdminGame.id] || defaultMatchResults[1] || {};
     setResultForm({ homeScore: String(result.homeScore), awayScore: String(result.awayScore) });
-  }, [settings, currentAdminGame.id]);
+  }, [allUsers, settings, currentAdminGame.id]);
   const actions = [
     ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"],
     ["fire", "Produtos", "Cadastrar o produto foco", "products"],
@@ -1526,7 +1556,7 @@ function AdminPage({ adminUser, setToast, predictionEntries, readEntries, salesE
     .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
     .replace(/\.(\d{3})(\d)/, ".$1-$2");
 
-  const createUser = event => {
+  const createUser = async event => {
     event.preventDefault();
     if (!newUser.name || newUser.cpf.replace(/\D/g, "").length !== 11) {
       setToast("Informe o nome e um CPF com 11 dígitos.");
@@ -1536,10 +1566,20 @@ function AdminPage({ adminUser, setToast, predictionEntries, readEntries, salesE
       setToast("Já existe um colaborador cadastrado com este CPF.");
       return;
     }
-    setUsers([...users, { ...newUser, email: "", status: "Ativo" }]);
+    const created = normalizeCustomUser({ ...newUser, email: "", status: "Ativo" });
+    const nextCustomUsers = [
+      ...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== onlyDigits(created.cpf)),
+      created,
+    ];
+    const ok = await onSaveSetting("customUsers", nextCustomUsers);
+    if (!ok) {
+      setToast("Não foi possível salvar o colaborador no banco.");
+      return;
+    }
+    setUsers(mergeUsers(registeredUsers, nextCustomUsers));
     setNewUser({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
     setShowUserForm(false);
-    setToast("Colaborador cadastrado no piloto.");
+    setToast(`${created.name} cadastrado. Senha inicial: CPF.`);
   };
 
   const resetUserPassword = async (targetUser) => {
@@ -2225,13 +2265,19 @@ function AdminPage({ adminUser, setToast, predictionEntries, readEntries, salesE
 }
 
 function App() {
-  const restoredUser = (() => {
+  const savedSessionCpf = (() => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
       localStorage.removeItem("copaPotiguarSessionCpfV2");
       sessionStorage.removeItem("copaPotiguarSessionCpf");
-      const savedCpf = sessionStorage.getItem("copaPotiguarTabSessionCpf");
-      return savedCpf ? demoUsers[onlyDigits(savedCpf)] || null : null;
+      return onlyDigits(sessionStorage.getItem("copaPotiguarTabSessionCpf"));
+    } catch (error) {
+      return "";
+    }
+  })();
+  const restoredUser = (() => {
+    try {
+      return savedSessionCpf ? demoUsers[savedSessionCpf] || null : null;
     } catch (error) {
       return null;
     }
@@ -2335,6 +2381,9 @@ function App() {
   }, []);
 
   const activeRound = appSettings.round || defaultRoundConfig;
+  const customUsers = Array.isArray(appSettings.customUsers) ? appSettings.customUsers : [];
+  const allRegisteredUsers = useMemo(() => mergeUsers(registeredUsers, customUsers), [appSettings.customUsers]);
+  const dynamicDemoUsers = useMemo(() => buildDemoUsers(allRegisteredUsers), [allRegisteredUsers]);
   const activeGames = getActiveGames(worldCupMatches, activeRound);
   const syncedMatchResults = getMatchResultsFromGames(activeGames);
   const scoringSettings = {
@@ -2344,9 +2393,9 @@ function App() {
   const activePredictionEntries = predictionEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
   const activeSalesEntries = salesEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
   const activeReadEntries = readEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
-  const pilotRanking = buildPilotRanking(registeredUsers, activePredictionEntries, activeSalesEntries, activeReadEntries, profilePhotos, scoringSettings);
+  const pilotRanking = buildPilotRanking(allRegisteredUsers, activePredictionEntries, activeSalesEntries, activeReadEntries, profilePhotos, scoringSettings);
   const totalSold = isProductFocusEnabled(scoringSettings) ? activeSalesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
-  const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
+  const effectiveUser = user ? dynamicDemoUsers[onlyDigits(user.cpf)] || user : savedSessionCpf ? dynamicDemoUsers[savedSessionCpf] || null : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
   const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
   const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
@@ -2354,13 +2403,14 @@ function App() {
 
   useEffect(() => {
     if (!effectiveUser) return;
+    if (!user && savedSessionCpf) setUser(effectiveUser);
     if (effectiveUser.accessRole === "admin" && page !== "admin") {
       setPage("admin");
     }
     if (effectiveUser.accessRole !== "admin" && page === "admin") {
       setPage("home");
     }
-  }, [effectiveUser?.accessRole, page]);
+  }, [effectiveUser?.accessRole, page, savedSessionCpf]);
 
   const savePrediction = async (currentUser, scores, gamesToSave = activeGames) => {
     try {
@@ -2541,7 +2591,7 @@ function App() {
   };
 
   if (pendingPasswordUser) return <ChangePasswordScreen user={pendingPasswordUser} currentPassword={pendingCurrentPassword} onChanged={changeInitialPassword} onCancel={logout} />;
-  if (!effectiveUser) return <LoginScreen onLogin={login} />;
+  if (!effectiveUser) return <LoginScreen onLogin={login} userMap={dynamicDemoUsers} />;
 
   return (
     <div className="app-shell">
@@ -2553,7 +2603,7 @@ function App() {
           {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} activeGames={activeGames} onSavePrediction={savePrediction} />}
           {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
           {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={totalSold} settings={appSettings} />}
-          {activePage === "admin" && <AdminPage adminUser={effectiveUser} setToast={setToast} predictionEntries={activePredictionEntries} readEntries={activeReadEntries} salesEntries={activeSalesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
+          {activePage === "admin" && <AdminPage adminUser={effectiveUser} users={allRegisteredUsers} customUsers={customUsers} setToast={setToast} predictionEntries={activePredictionEntries} readEntries={activeReadEntries} salesEntries={activeSalesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} />}
         </main>
       </div>
       <MobileNav page={activePage} setPage={setPage} user={effectiveUser} />

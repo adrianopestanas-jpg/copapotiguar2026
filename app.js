@@ -164,7 +164,7 @@ const resolveJob = (job, explicitProfile) => {
 };
 const makeInitials = name => String(name ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join("");
 const participantRows = typeof window !== "undefined" && window.COPA_PARTICIPANTS || [];
-const registeredUsers = participantRows.map(([name, cpf, job, store, explicitProfile]) => {
+const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
   const profile = resolveProfile(job, explicitProfile);
   return {
     name: toTitleCase(name),
@@ -176,16 +176,32 @@ const registeredUsers = participantRows.map(([name, cpf, job, store, explicitPro
     store: normalizeStore(store),
     status: "Ativo"
   };
-});
-const rankedSellers = registeredUsers.filter(user => user.profile === "Vendedor");
-const ranking = rankedSellers.slice(0, 10).map((user, index) => ({
-  name: user.name,
-  store: user.store,
-  role: user.job,
-  points: 0,
-  trend: "—"
-}));
-const demoUsers = registeredUsers.reduce((acc, participant, index) => {
+};
+const normalizeCustomUser = user => {
+  const profile = user.profile || resolveProfile(user.job, user.explicitProfile);
+  return {
+    name: toTitleCase(user.name),
+    cpf: formatCpfValue(user.cpf),
+    email: user.email || "",
+    job: user.job || resolveJob(user.originalJob, profile),
+    originalJob: user.originalJob || user.job || resolveJob(user.job, profile),
+    profile,
+    store: normalizeStore(user.store),
+    status: user.status || "Ativo"
+  };
+};
+const mergeUsers = (baseUsers, customUsers = []) => {
+  const byCpf = {};
+  baseUsers.forEach(user => {
+    byCpf[onlyDigits(user.cpf)] = user;
+  });
+  customUsers.map(normalizeCustomUser).forEach(user => {
+    const cpf = onlyDigits(user.cpf);
+    if (cpf.length === 11) byCpf[cpf] = user;
+  });
+  return Object.values(byCpf);
+};
+const buildDemoUsers = users => users.reduce((acc, participant) => {
   const document = onlyDigits(participant.cpf);
   acc[document] = {
     name: participant.name,
@@ -201,6 +217,16 @@ const demoUsers = registeredUsers.reduce((acc, participant, index) => {
   };
   return acc;
 }, {});
+const registeredUsers = participantRows.map(normalizeParticipantUser);
+const rankedSellers = registeredUsers.filter(user => user.profile === "Vendedor");
+const ranking = rankedSellers.slice(0, 10).map((user, index) => ({
+  name: user.name,
+  store: user.store,
+  role: user.job,
+  points: 0,
+  trend: "—"
+}));
+const demoUsers = buildDemoUsers(registeredUsers);
 const focusProducts = [{
   id: "qualiz-18",
   sku: "10001",
@@ -719,7 +745,8 @@ function Brand({
   }, "2026")));
 }
 function LoginScreen({
-  onLogin
+  onLogin,
+  userMap
 }) {
   const [cpf, setCpf] = useState("");
   const [password, setPassword] = useState("");
@@ -732,7 +759,7 @@ function LoginScreen({
   const submit = async event => {
     event.preventDefault();
     const cpfDigits = cpf.replace(/\D/g, "");
-    const user = demoUsers[cpfDigits];
+    const user = userMap[cpfDigits];
     if (!user) {
       setError("CPF ou senha inválidos.");
       return;
@@ -1979,6 +2006,8 @@ function StorePage({
 }
 function AdminPage({
   adminUser,
+  users: allUsers,
+  customUsers,
   setToast,
   predictionEntries,
   readEntries,
@@ -1996,7 +2025,7 @@ function AdminPage({
   const [module, setModule] = useState("dashboard");
   const [userSearch, setUserSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("Todas");
-  const [users, setUsers] = useState(registeredUsers);
+  const [users, setUsers] = useState(allUsers);
   const [showUserForm, setShowUserForm] = useState(false);
   const [newUser, setNewUser] = useState({
     name: "",
@@ -2043,6 +2072,7 @@ function AdminPage({
     };
   });
   useEffect(() => {
+    setUsers(allUsers);
     setAnnouncementForm(settings.announcement || defaultAnnouncement);
     setAwardForm(settings.award || defaultAward);
     setRoundForm(settings.round || defaultRoundConfig);
@@ -2051,7 +2081,7 @@ function AdminPage({
       homeScore: String(result.homeScore),
       awayScore: String(result.awayScore)
     });
-  }, [settings, currentAdminGame.id]);
+  }, [allUsers, settings, currentAdminGame.id]);
   const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Produtos", "Cadastrar o produto foco", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
   const formModule = null;
   const visibleUsers = users.filter(user => {
@@ -2081,7 +2111,7 @@ function AdminPage({
   const productFocusEnabled = isProductFocusEnabled(settings);
   const storeSummaries = getStoreSummaries(pilotRanking, predictionEntries, readEntries);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
-  const createUser = event => {
+  const createUser = async event => {
     event.preventDefault();
     if (!newUser.name || newUser.cpf.replace(/\D/g, "").length !== 11) {
       setToast("Informe o nome e um CPF com 11 dígitos.");
@@ -2091,11 +2121,18 @@ function AdminPage({
       setToast("Já existe um colaborador cadastrado com este CPF.");
       return;
     }
-    setUsers([...users, {
+    const created = normalizeCustomUser({
       ...newUser,
       email: "",
       status: "Ativo"
-    }]);
+    });
+    const nextCustomUsers = [...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== onlyDigits(created.cpf)), created];
+    const ok = await onSaveSetting("customUsers", nextCustomUsers);
+    if (!ok) {
+      setToast("Não foi possível salvar o colaborador no banco.");
+      return;
+    }
+    setUsers(mergeUsers(registeredUsers, nextCustomUsers));
     setNewUser({
       name: "",
       cpf: "",
@@ -2104,7 +2141,7 @@ function AdminPage({
       store: PILOT_STORE
     });
     setShowUserForm(false);
-    setToast("Colaborador cadastrado no piloto.");
+    setToast(`${created.name} cadastrado. Senha inicial: CPF.`);
   };
   const resetUserPassword = async targetUser => {
     if (!window.confirm(`Redefinir a senha de ${targetUser.name} para o CPF do usuário?`)) return;
@@ -3487,13 +3524,19 @@ function AdminPage({
   }, "Encerrar rodada"))));
 }
 function App() {
-  const restoredUser = (() => {
+  const savedSessionCpf = (() => {
     try {
       localStorage.removeItem("copaPotiguarSessionCpf");
       localStorage.removeItem("copaPotiguarSessionCpfV2");
       sessionStorage.removeItem("copaPotiguarSessionCpf");
-      const savedCpf = sessionStorage.getItem("copaPotiguarTabSessionCpf");
-      return savedCpf ? demoUsers[onlyDigits(savedCpf)] || null : null;
+      return onlyDigits(sessionStorage.getItem("copaPotiguarTabSessionCpf"));
+    } catch (error) {
+      return "";
+    }
+  })();
+  const restoredUser = (() => {
+    try {
+      return savedSessionCpf ? demoUsers[savedSessionCpf] || null : null;
     } catch (error) {
       return null;
     }
@@ -3604,6 +3647,9 @@ function App() {
     return () => clearInterval(timer);
   }, []);
   const activeRound = appSettings.round || defaultRoundConfig;
+  const customUsers = Array.isArray(appSettings.customUsers) ? appSettings.customUsers : [];
+  const allRegisteredUsers = useMemo(() => mergeUsers(registeredUsers, customUsers), [appSettings.customUsers]);
+  const dynamicDemoUsers = useMemo(() => buildDemoUsers(allRegisteredUsers), [allRegisteredUsers]);
   const activeGames = getActiveGames(worldCupMatches, activeRound);
   const syncedMatchResults = getMatchResultsFromGames(activeGames);
   const scoringSettings = {
@@ -3616,22 +3662,23 @@ function App() {
   const activePredictionEntries = predictionEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
   const activeSalesEntries = salesEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
   const activeReadEntries = readEntries.filter(entry => isAfterScoringStart(entry, scoringSettings));
-  const pilotRanking = buildPilotRanking(registeredUsers, activePredictionEntries, activeSalesEntries, activeReadEntries, profilePhotos, scoringSettings);
+  const pilotRanking = buildPilotRanking(allRegisteredUsers, activePredictionEntries, activeSalesEntries, activeReadEntries, profilePhotos, scoringSettings);
   const totalSold = isProductFocusEnabled(scoringSettings) ? activeSalesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
-  const effectiveUser = user ? demoUsers[onlyDigits(user.cpf)] || user : null;
+  const effectiveUser = user ? dynamicDemoUsers[onlyDigits(user.cpf)] || user : savedSessionCpf ? dynamicDemoUsers[savedSessionCpf] || null : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
   const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
   const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
   useEffect(() => {
     if (!effectiveUser) return;
+    if (!user && savedSessionCpf) setUser(effectiveUser);
     if (effectiveUser.accessRole === "admin" && page !== "admin") {
       setPage("admin");
     }
     if (effectiveUser.accessRole !== "admin" && page === "admin") {
       setPage("home");
     }
-  }, [effectiveUser?.accessRole, page]);
+  }, [effectiveUser?.accessRole, page, savedSessionCpf]);
   const savePrediction = async (currentUser, scores, gamesToSave = activeGames) => {
     try {
       const predictions = gamesToSave.map(game => ({
@@ -3855,7 +3902,8 @@ function App() {
     onCancel: logout
   });
   if (!effectiveUser) return /*#__PURE__*/React.createElement(LoginScreen, {
-    onLogin: login
+    onLogin: login,
+    userMap: dynamicDemoUsers
   });
   return /*#__PURE__*/React.createElement("div", {
     className: "app-shell"
@@ -3904,6 +3952,8 @@ function App() {
     settings: appSettings
   }), activePage === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     adminUser: effectiveUser,
+    users: allRegisteredUsers,
+    customUsers: customUsers,
     setToast: setToast,
     predictionEntries: activePredictionEntries,
     readEntries: activeReadEntries,
