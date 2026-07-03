@@ -447,7 +447,7 @@ const server = http.createServer(async (request, response) => {
       const key = String(payload.key || "").trim();
       const value = payload.value;
 
-      if (!key || typeof value !== "object" || value === null || Array.isArray(value)) {
+      if (!key || value === undefined || value === null || typeof value !== "object") {
         sendJson(response, 400, { error: "Configuração inválida." });
         return;
       }
