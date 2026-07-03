@@ -332,6 +332,29 @@ const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
   minute: "2-digit",
 });
 
+const getGreeting = (date = new Date()) => {
+  const hour = date.getHours();
+  if (hour < 12) return "Bom dia";
+  if (hour < 18) return "Boa tarde";
+  return "Boa noite";
+};
+
+const formatDateTimeInput = value => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = number => String(number).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const isAnnouncementActive = (announcement = {}, date = new Date()) => {
+  const startsAt = announcement.startsAt ? new Date(announcement.startsAt) : null;
+  const endsAt = announcement.endsAt ? new Date(announcement.endsAt) : null;
+  if (startsAt && date < startsAt) return false;
+  if (endsAt && date > endsAt) return false;
+  return true;
+};
+
 const knockoutRounds = [
   { id: "teste-16avos", phase: "16 avos", name: "Teste 16 avos", official: false, kickoffAt: "2026-07-03T21:00:00" },
   { id: "oitavas-dia-1", phase: "Oitavas", name: "Oitavas de final • Dia 1", official: true, kickoffAt: "2026-07-04T17:00:00" },
@@ -379,6 +402,9 @@ const defaultAnnouncement = {
   videoUrl: "https://youtu.be/7EzZjpmw6FQ",
   minimumSeconds: 30,
   publishedAt: "25 JUN • ativo",
+  startsAt: "",
+  endsAt: "",
+  attachments: [],
 };
 const defaultScoringStartAt = "2026-07-02T19:55:00-03:00";
 const defaultMatchResults = {
@@ -923,6 +949,7 @@ function Announcement({ acknowledged, setToast, user, onAcknowledge, announcemen
   const activeAnnouncement = announcement || defaultAnnouncement;
   const readyToConfirm = secondsViewed >= Number(activeAnnouncement.minimumSeconds || 30);
   const remainingSeconds = Math.max(Number(activeAnnouncement.minimumSeconds || 30) - secondsViewed, 0);
+  const attachments = Array.isArray(activeAnnouncement.attachments) ? activeAnnouncement.attachments : [];
 
   useEffect(() => {
     if (!videoStarted || acknowledged || readyToConfirm) return;
@@ -949,6 +976,19 @@ function Announcement({ acknowledged, setToast, user, onAcknowledge, announcemen
             <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500">{activeAnnouncement.publishedAt || "ATIVO"}</span>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-500">{activeAnnouncement.body}</p>
+          {attachments.length > 0 && (
+            <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3">
+              <strong className="block text-xs font-extrabold text-potiguar-950">Arquivos do comunicado</strong>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {attachments.map(file => (
+                  <a key={file.id || file.name} href={file.dataUrl || file.url} download={file.name} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-3 rounded-xl bg-white p-3 text-xs font-bold text-potiguar-800 transition hover:bg-potiguar-lime/10">
+                    <span className="truncate">{file.name}</span>
+                    <Icon name="chevron" size={14} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
             <strong className="block font-extrabold">Como participar hoje</strong>
             Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe o ranking da rodada.
@@ -1087,12 +1127,14 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
   const storePercent = Math.round((totalSold / storeGoal) * 100);
   const totalPredictionHits = pilotRanking.reduce((sum, person) => sum + person.predictionHits, 0);
   const award = settings.award || defaultAward;
+  const greeting = getGreeting(now);
+  const announcementActive = isAnnouncementActive(settings.announcement || defaultAnnouncement, now);
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-400">{round.name} • {firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"}</p>
-          <h2 className="mt-1 font-display text-3xl font-extrabold text-potiguar-950">Boa noite, {user.firstName}! <span className="inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]">👋</span></h2>
+          <h2 className="mt-1 font-display text-3xl font-extrabold text-potiguar-950">{greeting}, {user.firstName}! <span className="inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]">👋</span></h2>
           <p className="mt-1 text-sm text-slate-500">{leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? productFocusEnabled ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "Palpites encerrados. Acompanhe o ranking da rodada." : "A janela de palpites está aberta para os jogos disponíveis."}</p>
         </div>
         <div className="flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm">
@@ -1133,7 +1175,15 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
-        <Announcement acknowledged={acknowledged} setToast={setToast} user={user} onAcknowledge={onAcknowledge} announcement={settings.announcement} />
+        {announcementActive ? (
+          <Announcement acknowledged={acknowledged} setToast={setToast} user={user} onAcknowledge={onAcknowledge} announcement={settings.announcement} />
+        ) : (
+          <section className="soft-card rounded-2xl p-5 sm:p-6">
+            <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Endomarketing</p>
+            <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Nenhum comunicado ativo agora</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">Quando o RH liberar o próximo comunicado dentro do horário agendado, ele aparecerá aqui para leitura e confirmação.</p>
+          </section>
+        )}
         <button onClick={() => setPage(predictionsClosed && productFocusEnabled ? "store" : "guesses")} className="group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6">
           <div className="flex h-full items-center justify-between gap-5">
             <div>
@@ -1237,7 +1287,7 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> {round.official ? "Rodada oficial" : "Rodada teste"} • {round.phase}</div>
             <h2 className="mt-3 font-display text-3xl font-extrabold">{round.name}</h2>
-            <p className="mt-2 text-sm text-white/60">Placar exato vale 4 pontos; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.</p>
+            <p className="mt-2 text-sm text-white/60">Digite o placar nos campos vermelhos. Placar exato vale 6 pontos no total; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.</p>
           </div>
           <div className="glass flex items-center gap-3 rounded-2xl px-4 py-3">
             <Icon name="clock" className="text-potiguar-lime" />
@@ -1288,10 +1338,13 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
                 <span className="text-3xl">{game.homeFlag}</span>
                 <strong className="text-center text-sm text-potiguar-950 sm:text-base">{game.home}</strong>
               </div>
-              <div className="flex items-center gap-2">
-                <input aria-label={`Gols ${game.home}`} disabled={closed} className="score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14" type="number" min="0" max="9" value={(scores[game.id] || ["", ""])[0]} onChange={e => updateScore(game.id, 0, e.target.value)} />
-                <span className="font-extrabold text-slate-300">×</span>
-                <input aria-label={`Gols ${game.away}`} disabled={closed} className="score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14" type="number" min="0" max="9" value={(scores[game.id] || ["", ""])[1]} onChange={e => updateScore(game.id, 1, e.target.value)} />
+              <div className="rounded-2xl border-2 border-potiguar-red/25 bg-potiguar-red/5 p-2 text-center shadow-lg shadow-red-500/10">
+                <p className="mb-1 text-[9px] font-extrabold uppercase tracking-wider text-potiguar-red">Digite seu palpite</p>
+                <div className="flex items-center gap-2">
+                  <input aria-label={`Gols ${game.home}`} disabled={closed} placeholder="0" className="score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16" type="number" min="0" max="9" value={(scores[game.id] || ["", ""])[0]} onChange={e => updateScore(game.id, 0, e.target.value)} />
+                  <span className="font-extrabold text-potiguar-red">×</span>
+                  <input aria-label={`Gols ${game.away}`} disabled={closed} placeholder="0" className="score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16" type="number" min="0" max="9" value={(scores[game.id] || ["", ""])[1]} onChange={e => updateScore(game.id, 1, e.target.value)} />
+                </div>
               </div>
               <div className="flex flex-col items-center gap-2 sm:flex-row">
                 <span className="text-3xl sm:order-2">{game.awayFlag}</span>
@@ -1712,9 +1765,55 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       id: announcementForm.id || `comunicado-${Date.now()}`,
       minimumSeconds: Number(announcementForm.minimumSeconds || 30),
       publishedAt: announcementForm.publishedAt || "ATIVO",
+      attachments: Array.isArray(announcementForm.attachments) ? announcementForm.attachments : [],
     };
     const ok = await onSaveSetting("announcement", next);
     if (ok) setToast("Comunicado publicado e disponível na Home.");
+  };
+
+  const attachAnnouncementFiles = async event => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = "";
+    if (!files.length) return;
+    const currentAttachments = Array.isArray(announcementForm.attachments) ? announcementForm.attachments : [];
+    if (currentAttachments.length + files.length > 5) {
+      setToast("Inclua no máximo 5 arquivos por comunicado.");
+      return;
+    }
+    const tooLarge = files.find(file => file.size > 900 * 1024);
+    if (tooLarge) {
+      setToast(`Arquivo muito grande: ${tooLarge.name}. Use até 900 KB por arquivo nesta fase.`);
+      return;
+    }
+    try {
+      const attachments = await Promise.all(files.map(file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({
+          id: `arquivo-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          size: file.size,
+          dataUrl: reader.result,
+        });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      })));
+      setAnnouncementForm({
+        ...announcementForm,
+        attachments: [...currentAttachments, ...attachments],
+      });
+      setToast(`${attachments.length} arquivo(s) anexado(s) ao comunicado.`);
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível anexar os arquivos.");
+    }
+  };
+
+  const removeAnnouncementAttachment = attachmentId => {
+    setAnnouncementForm({
+      ...announcementForm,
+      attachments: (announcementForm.attachments || []).filter(file => file.id !== attachmentId),
+    });
   };
 
   const saveAward = async event => {
@@ -1831,20 +1930,61 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
         </div>
       </section>
       {module === "announcements" && (
-        <section className="soft-card rounded-2xl p-5 sm:p-6">
-          <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Endomarketing</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Comunicado ativo</h3><p className="mt-1 text-xs text-slate-400">Ao publicar, a Home passa a mostrar este comunicado. A confirmação vale +1 ponto uma vez por rodada.</p></div>
-          <form onSubmit={saveAnnouncement} className="mt-5 grid gap-4">
-            <div className="grid gap-4 md:grid-cols-[1fr_.7fr_.5fr]">
-              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Título</span><input value={announcementForm.title || ""} onChange={e=>setAnnouncementForm({...announcementForm,title:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
-              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">ID do comunicado</span><input value={announcementForm.id || ""} onChange={e=>setAnnouncementForm({...announcementForm,id:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
-              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Tempo mínimo</span><input type="number" min="0" value={announcementForm.minimumSeconds || 30} onChange={e=>setAnnouncementForm({...announcementForm,minimumSeconds:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+        <section className="soft-card overflow-hidden rounded-2xl">
+          <div className="hero-pattern pitch-lines p-6 text-white">
+            <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime">RH • Endomarketing</p>
+            <h3 className="mt-2 font-display text-2xl font-extrabold">Central de comunicados</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">Cadastre o comunicado da rodada, inclua vídeo/anexos e agende quando ele deve aparecer para os participantes.</p>
+          </div>
+          <form onSubmit={saveAnnouncement} className="grid gap-5 p-5 sm:p-6">
+            <div className="rounded-2xl bg-potiguar-lime/10 p-4">
+              <p className="text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700">1. Conteúdo principal</p>
+              <div className="mt-4 grid gap-4 md:grid-cols-[1fr_.45fr]">
+                <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Título que aparecerá para o colaborador</span><input value={announcementForm.title || ""} onChange={e=>setAnnouncementForm({...announcementForm,title:e.target.value})} placeholder="Ex.: Vídeo obrigatório da rodada" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+                <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Tempo mínimo do vídeo</span><input type="number" min="0" value={announcementForm.minimumSeconds || 30} onChange={e=>setAnnouncementForm({...announcementForm,minimumSeconds:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+              </div>
+              <label className="mt-4 block"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Texto do comunicado</span><textarea rows="5" value={announcementForm.body || ""} onChange={e=>setAnnouncementForm({...announcementForm,body:e.target.value})} placeholder="Escreva aqui a orientação que o colaborador precisa ler antes de palpitar." className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"></textarea></label>
             </div>
-            <div className="grid gap-4 md:grid-cols-[1fr_.4fr]">
-              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">URL do vídeo</span><input value={announcementForm.videoUrl || ""} onChange={e=>setAnnouncementForm({...announcementForm,videoUrl:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
-              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Data/Status</span><input value={announcementForm.publishedAt || ""} onChange={e=>setAnnouncementForm({...announcementForm,publishedAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700">2. Vídeo e arquivos</p>
+                <label className="mt-4 block"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">URL do vídeo</span><input value={announcementForm.videoUrl || ""} onChange={e=>setAnnouncementForm({...announcementForm,videoUrl:e.target.value})} placeholder="Cole o link do YouTube" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+                <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-potiguar-700/25 bg-white p-5 text-center transition hover:border-potiguar-lime">
+                  <Icon name="plus" className="text-potiguar-700" />
+                  <span className="mt-2 text-xs font-extrabold text-potiguar-950">Adicionar arquivos</span>
+                  <span className="mt-1 text-[10px] text-slate-400">PDF, imagem ou documento • até 5 arquivos • 900 KB cada</span>
+                  <input type="file" multiple onChange={attachAnnouncementFiles} className="hidden" />
+                </label>
+                <div className="mt-4 space-y-2">
+                  {(announcementForm.attachments || []).map(file => (
+                    <div key={file.id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-extrabold text-potiguar-950">{file.name}</p>
+                        <p className="text-[10px] text-slate-400">{Math.round((file.size || 0) / 1024)} KB</p>
+                      </div>
+                      <button type="button" onClick={() => removeAnnouncementAttachment(file.id)} className="rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red">Remover</button>
+                    </div>
+                  ))}
+                  {!(announcementForm.attachments || []).length && <p className="text-xs text-slate-400">Nenhum arquivo anexado.</p>}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700">3. Agendamento</p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Iniciar em</span><input type="datetime-local" value={formatDateTimeInput(announcementForm.startsAt)} onChange={e=>setAnnouncementForm({...announcementForm,startsAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+                  <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Finalizar em</span><input type="datetime-local" value={formatDateTimeInput(announcementForm.endsAt)} onChange={e=>setAnnouncementForm({...announcementForm,endsAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+                </div>
+                <label className="mt-4 block"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status visível</span><input value={announcementForm.publishedAt || ""} onChange={e=>setAnnouncementForm({...announcementForm,publishedAt:e.target.value})} placeholder="Ex.: ATIVO, Programado, Rodada 16 avos" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+                <label className="mt-4 block"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">ID interno</span><input value={announcementForm.id || ""} onChange={e=>setAnnouncementForm({...announcementForm,id:e.target.value})} placeholder="Pode deixar automático" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+                <div className="mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500">
+                  Dica para o RH: ao mudar o ID do comunicado, a leitura será exigida novamente para a rodada.
+                </div>
+              </div>
             </div>
-            <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Texto do comunicado</span><textarea rows="5" value={announcementForm.body || ""} onChange={e=>setAnnouncementForm({...announcementForm,body:e.target.value})} className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"></textarea></label>
-            <div className="flex justify-end"><button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Publicar comunicado</button></div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button type="button" onClick={() => setAnnouncementForm(settings.announcement || defaultAnnouncement)} className="rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400">Desfazer alterações</button>
+              <button type="submit" className="rounded-xl bg-potiguar-900 px-6 py-3 text-xs font-extrabold text-white">Salvar comunicado</button>
+            </div>
           </form>
         </section>
       )}
@@ -2430,8 +2570,9 @@ function App() {
   const totalSold = isProductFocusEnabled(scoringSettings) ? activeSalesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
   const effectiveUser = user ? dynamicDemoUsers[onlyDigits(user.cpf)] || user : savedSessionCpf ? dynamicDemoUsers[savedSessionCpf] || null : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
+  const announcementActive = isAnnouncementActive(activeAnnouncement);
   const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
-  const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
+  const announcementAcknowledged = !announcementActive || acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
 
   useEffect(() => {

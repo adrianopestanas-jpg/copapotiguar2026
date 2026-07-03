@@ -53,7 +53,7 @@ const readBody = request => new Promise((resolve, reject) => {
   let body = "";
   request.on("data", chunk => {
     body += chunk;
-    if (body.length > 1024 * 1024) {
+    if (body.length > 8 * 1024 * 1024) {
       reject(new Error("Payload muito grande"));
       request.destroy();
     }

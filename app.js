@@ -407,6 +407,26 @@ const formatDateTime = value => new Date(value).toLocaleString("pt-BR", {
   hour: "2-digit",
   minute: "2-digit"
 });
+const getGreeting = (date = new Date()) => {
+  const hour = date.getHours();
+  if (hour < 12) return "Bom dia";
+  if (hour < 18) return "Boa tarde";
+  return "Boa noite";
+};
+const formatDateTimeInput = value => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = number => String(number).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+const isAnnouncementActive = (announcement = {}, date = new Date()) => {
+  const startsAt = announcement.startsAt ? new Date(announcement.startsAt) : null;
+  const endsAt = announcement.endsAt ? new Date(announcement.endsAt) : null;
+  if (startsAt && date < startsAt) return false;
+  if (endsAt && date > endsAt) return false;
+  return true;
+};
 const knockoutRounds = [{
   id: "teste-16avos",
   phase: "16 avos",
@@ -548,7 +568,10 @@ const defaultAnnouncement = {
   body: "Começamos a fase teste da Copa Potiguar 2026 com todos os vendedores e líderes participantes. Assista ao vídeo, confirme a leitura da rodada e faça seus palpites. Nesta etapa vamos medir engajamento; produto foco entra a partir das oitavas.",
   videoUrl: "https://youtu.be/7EzZjpmw6FQ",
   minimumSeconds: 30,
-  publishedAt: "25 JUN • ativo"
+  publishedAt: "25 JUN • ativo",
+  startsAt: "",
+  endsAt: "",
+  attachments: []
 };
 const defaultScoringStartAt = "2026-07-02T19:55:00-03:00";
 const defaultMatchResults = {
@@ -1214,6 +1237,7 @@ function Announcement({
   const activeAnnouncement = announcement || defaultAnnouncement;
   const readyToConfirm = secondsViewed >= Number(activeAnnouncement.minimumSeconds || 30);
   const remainingSeconds = Math.max(Number(activeAnnouncement.minimumSeconds || 30) - secondsViewed, 0);
+  const attachments = Array.isArray(activeAnnouncement.attachments) ? activeAnnouncement.attachments : [];
   useEffect(() => {
     if (!videoStarted || acknowledged || readyToConfirm) return;
     const timer = setInterval(() => setSecondsViewed(value => value + 1), 1000);
@@ -1244,7 +1268,25 @@ function Announcement({
     className: "rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500"
   }, activeAnnouncement.publishedAt || "ATIVO")), /*#__PURE__*/React.createElement("p", {
     className: "mt-3 text-sm leading-6 text-slate-500"
-  }, activeAnnouncement.body), /*#__PURE__*/React.createElement("div", {
+  }, activeAnnouncement.body), attachments.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3"
+  }, /*#__PURE__*/React.createElement("strong", {
+    className: "block text-xs font-extrabold text-potiguar-950"
+  }, "Arquivos do comunicado"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 grid gap-2 sm:grid-cols-2"
+  }, attachments.map(file => /*#__PURE__*/React.createElement("a", {
+    key: file.id || file.name,
+    href: file.dataUrl || file.url,
+    download: file.name,
+    target: "_blank",
+    rel: "noreferrer",
+    className: "flex items-center justify-between gap-3 rounded-xl bg-white p-3 text-xs font-bold text-potiguar-800 transition hover:bg-potiguar-lime/10"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "truncate"
+  }, file.name), /*#__PURE__*/React.createElement(Icon, {
+    name: "chevron",
+    size: 14
+  }))))), /*#__PURE__*/React.createElement("div", {
     className: "mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800"
   }, /*#__PURE__*/React.createElement("strong", {
     className: "block font-extrabold"
@@ -1406,6 +1448,8 @@ function Home({
   const storePercent = Math.round(totalSold / storeGoal * 100);
   const totalPredictionHits = pilotRanking.reduce((sum, person) => sum + person.predictionHits, 0);
   const award = settings.award || defaultAward;
+  const greeting = getGreeting(now);
+  const announcementActive = isAnnouncementActive(settings.announcement || defaultAnnouncement, now);
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement("section", {
@@ -1414,7 +1458,7 @@ function Home({
     className: "text-sm font-semibold text-slate-400"
   }, round.name, " • ", firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"), /*#__PURE__*/React.createElement("h2", {
     className: "mt-1 font-display text-3xl font-extrabold text-potiguar-950"
-  }, "Boa noite, ", user.firstName, "! ", /*#__PURE__*/React.createElement("span", {
+  }, greeting, ", ", user.firstName, "! ", /*#__PURE__*/React.createElement("span", {
     className: "inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]"
   }, "👋")), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-sm text-slate-500"
@@ -1493,13 +1537,21 @@ function Home({
     className: "mt-2 text-xs leading-5 text-slate-500"
   }, award.criterion, " • ", award.description)))), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
-  }, /*#__PURE__*/React.createElement(Announcement, {
+  }, announcementActive ? /*#__PURE__*/React.createElement(Announcement, {
     acknowledged: acknowledged,
     setToast: setToast,
     user: user,
     onAcknowledge: onAcknowledge,
     announcement: settings.announcement
-  }), /*#__PURE__*/React.createElement("button", {
+  }) : /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Endomarketing"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Nenhum comunicado ativo agora"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 text-sm leading-6 text-slate-500"
+  }, "Quando o RH liberar o próximo comunicado dentro do horário agendado, ele aparecerá aqui para leitura e confirmação.")), /*#__PURE__*/React.createElement("button", {
     onClick: () => setPage(predictionsClosed && productFocusEnabled ? "store" : "guesses"),
     className: "group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1634,7 +1686,7 @@ function Guesses({
     className: "mt-3 font-display text-3xl font-extrabold"
   }, round.name), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
-  }, "Placar exato vale 4 pontos; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.")), /*#__PURE__*/React.createElement("div", {
+  }, "Digite o placar nos campos vermelhos. Placar exato vale 6 pontos no total; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.")), /*#__PURE__*/React.createElement("div", {
     className: "glass flex items-center gap-3 rounded-2xl px-4 py-3"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "clock",
@@ -1687,28 +1739,34 @@ function Guesses({
     }, game.homeFlag), /*#__PURE__*/React.createElement("strong", {
       className: "text-center text-sm text-potiguar-950 sm:text-base"
     }, game.home)), /*#__PURE__*/React.createElement("div", {
+      className: "rounded-2xl border-2 border-potiguar-red/25 bg-potiguar-red/5 p-2 text-center shadow-lg shadow-red-500/10"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "mb-1 text-[9px] font-extrabold uppercase tracking-wider text-potiguar-red"
+    }, "Digite seu palpite"), /*#__PURE__*/React.createElement("div", {
       className: "flex items-center gap-2"
     }, /*#__PURE__*/React.createElement("input", {
       "aria-label": `Gols ${game.home}`,
       disabled: closed,
-      className: "score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14",
+      placeholder: "0",
+      className: "score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16",
       type: "number",
       min: "0",
       max: "9",
       value: (scores[game.id] || ["", ""])[0],
       onChange: e => updateScore(game.id, 0, e.target.value)
     }), /*#__PURE__*/React.createElement("span", {
-      className: "font-extrabold text-slate-300"
+      className: "font-extrabold text-potiguar-red"
     }, "×"), /*#__PURE__*/React.createElement("input", {
       "aria-label": `Gols ${game.away}`,
       disabled: closed,
-      className: "score-input h-12 w-12 rounded-xl border-2 border-slate-100 bg-slate-50 text-center font-display text-xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:bg-white disabled:opacity-40 sm:h-14 sm:w-14",
+      placeholder: "0",
+      className: "score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16",
       type: "number",
       min: "0",
       max: "9",
       value: (scores[game.id] || ["", ""])[1],
       onChange: e => updateScore(game.id, 1, e.target.value)
-    })), /*#__PURE__*/React.createElement("div", {
+    }))), /*#__PURE__*/React.createElement("div", {
       className: "flex flex-col items-center gap-2 sm:flex-row"
     }, /*#__PURE__*/React.createElement("span", {
       className: "text-3xl sm:order-2"
@@ -2283,10 +2341,54 @@ function AdminPage({
       ...announcementForm,
       id: announcementForm.id || `comunicado-${Date.now()}`,
       minimumSeconds: Number(announcementForm.minimumSeconds || 30),
-      publishedAt: announcementForm.publishedAt || "ATIVO"
+      publishedAt: announcementForm.publishedAt || "ATIVO",
+      attachments: Array.isArray(announcementForm.attachments) ? announcementForm.attachments : []
     };
     const ok = await onSaveSetting("announcement", next);
     if (ok) setToast("Comunicado publicado e disponível na Home.");
+  };
+  const attachAnnouncementFiles = async event => {
+    const files = Array.from(event.target.files || []);
+    event.target.value = "";
+    if (!files.length) return;
+    const currentAttachments = Array.isArray(announcementForm.attachments) ? announcementForm.attachments : [];
+    if (currentAttachments.length + files.length > 5) {
+      setToast("Inclua no máximo 5 arquivos por comunicado.");
+      return;
+    }
+    const tooLarge = files.find(file => file.size > 900 * 1024);
+    if (tooLarge) {
+      setToast(`Arquivo muito grande: ${tooLarge.name}. Use até 900 KB por arquivo nesta fase.`);
+      return;
+    }
+    try {
+      const attachments = await Promise.all(files.map(file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({
+          id: `arquivo-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+          name: file.name,
+          type: file.type || "application/octet-stream",
+          size: file.size,
+          dataUrl: reader.result
+        });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      })));
+      setAnnouncementForm({
+        ...announcementForm,
+        attachments: [...currentAttachments, ...attachments]
+      });
+      setToast(`${attachments.length} arquivo(s) anexado(s) ao comunicado.`);
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível anexar os arquivos.");
+    }
+  };
+  const removeAnnouncementAttachment = attachmentId => {
+    setAnnouncementForm({
+      ...announcementForm,
+      attachments: (announcementForm.attachments || []).filter(file => file.id !== attachmentId)
+    });
   };
   const saveAward = async event => {
     event.preventDefault();
@@ -2439,39 +2541,37 @@ function AdminPage({
   }, title), /*#__PURE__*/React.createElement("span", {
     className: "mt-1 block text-[10px] leading-4 text-slate-400"
   }, desc))))), module === "announcements" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Endomarketing"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Comunicado ativo"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Ao publicar, a Home passa a mostrar este comunicado. A confirmação vale +1 ponto uma vez por rodada.")), /*#__PURE__*/React.createElement("form", {
-    onSubmit: saveAnnouncement,
-    className: "mt-5 grid gap-4"
+    className: "soft-card overflow-hidden rounded-2xl"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-4 md:grid-cols-[1fr_.7fr_.5fr]"
+    className: "hero-pattern pitch-lines p-6 text-white"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
+  }, "RH • Endomarketing"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-2 font-display text-2xl font-extrabold"
+  }, "Central de comunicados"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 max-w-2xl text-sm leading-6 text-white/65"
+  }, "Cadastre o comunicado da rodada, inclua vídeo/anexos e agende quando ele deve aparecer para os participantes.")), /*#__PURE__*/React.createElement("form", {
+    onSubmit: saveAnnouncement,
+    className: "grid gap-5 p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rounded-2xl bg-potiguar-lime/10 p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "1. Conteúdo principal"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 grid gap-4 md:grid-cols-[1fr_.45fr]"
   }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Título"), /*#__PURE__*/React.createElement("input", {
+  }, "Título que aparecerá para o colaborador"), /*#__PURE__*/React.createElement("input", {
     value: announcementForm.title || "",
     onChange: e => setAnnouncementForm({
       ...announcementForm,
       title: e.target.value
     }),
+    placeholder: "Ex.: Vídeo obrigatório da rodada",
     className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
   })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "ID do comunicado"), /*#__PURE__*/React.createElement("input", {
-    value: announcementForm.id || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      id: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Tempo mínimo"), /*#__PURE__*/React.createElement("input", {
+  }, "Tempo mínimo do vídeo"), /*#__PURE__*/React.createElement("input", {
     type: "number",
     min: "0",
     value: announcementForm.minimumSeconds || 30,
@@ -2480,27 +2580,9 @@ function AdminPage({
       minimumSeconds: e.target.value
     }),
     className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-4 md:grid-cols-[1fr_.4fr]"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "URL do vídeo"), /*#__PURE__*/React.createElement("input", {
-    value: announcementForm.videoUrl || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      videoUrl: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Data/Status"), /*#__PURE__*/React.createElement("input", {
-    value: announcementForm.publishedAt || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      publishedAt: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  }))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+  }))), /*#__PURE__*/React.createElement("label", {
+    className: "mt-4 block"
+  }, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Texto do comunicado"), /*#__PURE__*/React.createElement("textarea", {
     rows: "5",
@@ -2509,13 +2591,119 @@ function AdminPage({
       ...announcementForm,
       body: e.target.value
     }),
+    placeholder: "Escreva aqui a orientação que o colaborador precisa ler antes de palpitar.",
     className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "grid gap-5 lg:grid-cols-2"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rounded-2xl bg-slate-50 p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "2. Vídeo e arquivos"), /*#__PURE__*/React.createElement("label", {
+    className: "mt-4 block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "URL do vídeo"), /*#__PURE__*/React.createElement("input", {
+    value: announcementForm.videoUrl || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      videoUrl: e.target.value
+    }),
+    placeholder: "Cole o link do YouTube",
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", {
+    className: "mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-potiguar-700/25 bg-white p-5 text-center transition hover:border-potiguar-lime"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "plus",
+    className: "text-potiguar-700"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "mt-2 text-xs font-extrabold text-potiguar-950"
+  }, "Adicionar arquivos"), /*#__PURE__*/React.createElement("span", {
+    className: "mt-1 text-[10px] text-slate-400"
+  }, "PDF, imagem ou documento • até 5 arquivos • 900 KB cada"), /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    multiple: true,
+    onChange: attachAnnouncementFiles,
+    className: "hidden"
   })), /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-end"
+    className: "mt-4 space-y-2"
+  }, (announcementForm.attachments || []).map(file => /*#__PURE__*/React.createElement("div", {
+    key: file.id,
+    className: "flex items-center justify-between gap-3 rounded-xl bg-white p-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "min-w-0"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-xs font-extrabold text-potiguar-950"
+  }, file.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-400"
+  }, Math.round((file.size || 0) / 1024), " KB")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => removeAnnouncementAttachment(file.id),
+    className: "rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red"
+  }, "Remover"))), !(announcementForm.attachments || []).length && /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Nenhum arquivo anexado."))), /*#__PURE__*/React.createElement("div", {
+    className: "rounded-2xl bg-slate-50 p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "3. Agendamento"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 grid gap-4 sm:grid-cols-2"
+  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Iniciar em"), /*#__PURE__*/React.createElement("input", {
+    type: "datetime-local",
+    value: formatDateTimeInput(announcementForm.startsAt),
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      startsAt: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Finalizar em"), /*#__PURE__*/React.createElement("input", {
+    type: "datetime-local",
+    value: formatDateTimeInput(announcementForm.endsAt),
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      endsAt: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  }))), /*#__PURE__*/React.createElement("label", {
+    className: "mt-4 block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Status visível"), /*#__PURE__*/React.createElement("input", {
+    value: announcementForm.publishedAt || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      publishedAt: e.target.value
+    }),
+    placeholder: "Ex.: ATIVO, Programado, Rodada 16 avos",
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", {
+    className: "mt-4 block"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "ID interno"), /*#__PURE__*/React.createElement("input", {
+    value: announcementForm.id || "",
+    onChange: e => setAnnouncementForm({
+      ...announcementForm,
+      id: e.target.value
+    }),
+    placeholder: "Pode deixar automático",
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500"
+  }, "Dica para o RH: ao mudar o ID do comunicado, a leitura será exigida novamente para a rodada."))), /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-3 sm:flex-row sm:justify-end"
   }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: () => setAnnouncementForm(settings.announcement || defaultAnnouncement),
+    className: "rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400"
+  }, "Desfazer alterações"), /*#__PURE__*/React.createElement("button", {
     type: "submit",
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, "Publicar comunicado")))), module === "awards" && /*#__PURE__*/React.createElement("section", {
+    className: "rounded-xl bg-potiguar-900 px-6 py-3 text-xs font-extrabold text-white"
+  }, "Salvar comunicado")))), module === "awards" && /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600"
@@ -3700,8 +3888,9 @@ function App() {
   const totalSold = isProductFocusEnabled(scoringSettings) ? activeSalesEntries.reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
   const effectiveUser = user ? dynamicDemoUsers[onlyDigits(user.cpf)] || user : savedSessionCpf ? dynamicDemoUsers[savedSessionCpf] || null : null;
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
+  const announcementActive = isAnnouncementActive(activeAnnouncement);
   const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
-  const announcementAcknowledged = acknowledgedRoundId === activeRound.id || currentUserRead;
+  const announcementAcknowledged = !announcementActive || acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
   useEffect(() => {
     if (!effectiveUser) return;
