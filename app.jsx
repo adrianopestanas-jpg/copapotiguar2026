@@ -1488,6 +1488,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   const [users, setUsers] = useState(allUsers);
   const [showUserForm, setShowUserForm] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
+  const [editingCpf, setEditingCpf] = useState("");
   const [assignments, setAssignments] = useState(initialProductAssignments);
   const [productCatalog, setProductCatalog] = useState(focusProducts);
   const [newProduct, setNewProduct] = useState({ sku: "", name: "", brand: "", price: "", description: "", imageUrl: "", siteUrl: "" });
@@ -1556,19 +1557,49 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
     .replace(/\.(\d{3})(\d)/, ".$1-$2");
 
+  const startEditUser = user => {
+    const cpf = onlyDigits(user.cpf);
+    const editable = (Array.isArray(customUsers) ? customUsers : []).some(item => onlyDigits(item.cpf) === cpf);
+    if (!editable) {
+      setToast("Este usuário veio da base importada. Nesta fase, edite apenas usuários cadastrados pelo admin.");
+      return;
+    }
+    setEditingCpf(cpf);
+    setNewUser({
+      name: user.name,
+      cpf: user.cpf,
+      job: user.profile === "Administrador" ? "Administrador" : user.profile === "Liderança" ? "Líder de loja" : "Vendedor",
+      profile: user.profile,
+      store: user.store,
+    });
+    setShowUserForm(true);
+    setModule("users");
+  };
+
+  const cancelUserForm = () => {
+    setShowUserForm(false);
+    setEditingCpf("");
+    setNewUser({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
+  };
+
   const createUser = async event => {
     event.preventDefault();
     if (!newUser.name || newUser.cpf.replace(/\D/g, "").length !== 11) {
       setToast("Informe o nome e um CPF com 11 dígitos.");
       return;
     }
-    if (users.some(user => user.cpf.replace(/\D/g, "") === newUser.cpf.replace(/\D/g, ""))) {
+    const cpfDigits = onlyDigits(newUser.cpf);
+    if (!editingCpf && users.some(user => onlyDigits(user.cpf) === cpfDigits)) {
       setToast("Já existe um colaborador cadastrado com este CPF.");
+      return;
+    }
+    if (editingCpf && cpfDigits !== editingCpf && users.some(user => onlyDigits(user.cpf) === cpfDigits)) {
+      setToast("Já existe outro colaborador cadastrado com este CPF.");
       return;
     }
     const created = normalizeCustomUser({ ...newUser, email: "", status: "Ativo" });
     const nextCustomUsers = [
-      ...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== onlyDigits(created.cpf)),
+      ...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== (editingCpf || onlyDigits(created.cpf))),
       created,
     ];
     const ok = await onSaveSetting("customUsers", nextCustomUsers);
@@ -1577,9 +1608,8 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       return;
     }
     setUsers(mergeUsers(registeredUsers, nextCustomUsers));
-    setNewUser({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
-    setShowUserForm(false);
-    setToast(`${created.name} cadastrado. Senha inicial: CPF.`);
+    cancelUserForm();
+    setToast(editingCpf ? `${created.name} atualizado com sucesso.` : `${created.name} cadastrado. Senha inicial: CPF.`);
   };
 
   const resetUserPassword = async (targetUser) => {
@@ -2165,17 +2195,20 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                     <option>Rede Potiguar</option>
                   </select>
                 </label>
-                <button onClick={() => setShowUserForm(!showUserForm)} className="flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"><Icon name="plus" size={15}/> Novo usuário</button>
+                <button onClick={() => { if (showUserForm) cancelUserForm(); else setShowUserForm(true); }} className="flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"><Icon name="plus" size={15}/> Novo usuário</button>
               </div>
             </div>
           </div>
           {showUserForm && (
             <form onSubmit={createUser} className="grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-5">
+              <div className="sm:col-span-2 xl:col-span-5">
+                <p className="text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700">{editingCpf ? "Editando colaborador" : "Novo colaborador"}</p>
+              </div>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Nome completo</span><input aria-label="Nome do novo colaborador" value={newUser.name} onChange={e => setNewUser({...newUser,name:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">CPF</span><input aria-label="CPF do novo colaborador" inputMode="numeric" value={newUser.cpf} onChange={e => setNewUser({...newUser,cpf:formatCpf(e.target.value)})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Cargo</span><select aria-label="Cargo do novo colaborador" value={newUser.job} onChange={e => {const job=e.target.value; setNewUser({...newUser,job,profile:job==="Administrador"?"Administrador":job==="Líder de loja"?"Liderança":"Vendedor",store:job==="Administrador"?"Rede Potiguar":newUser.store});}} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option>Vendedor</option><option>Líder de loja</option><option>Administrador</option></select></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Loja</span><select aria-label="Loja do novo colaborador" value={newUser.store} onChange={e => setNewUser({...newUser,store:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs">{[...fixedStores, "Rede Potiguar"].map(store=><option key={store}>{store}</option>)}</select></label>
-              <div className="flex items-end gap-2"><button type="button" onClick={() => setShowUserForm(false)} className="rounded-xl px-4 py-3 text-xs font-bold text-slate-400">Cancelar</button><button type="submit" className="flex-1 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white">Cadastrar</button></div>
+              <div className="flex items-end gap-2"><button type="button" onClick={cancelUserForm} className="rounded-xl px-4 py-3 text-xs font-bold text-slate-400">Cancelar</button><button type="submit" className="flex-1 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white">{editingCpf ? "Salvar" : "Cadastrar"}</button></div>
             </form>
           )}
           <div className="overflow-x-auto">
@@ -2194,7 +2227,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button onClick={() => resetUserPassword(user)} className="rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700">Resetar senha</button>
-                        <button onClick={() => setToast(`Abrindo cadastro de ${user.name}.`)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button>
+                        <button onClick={() => startEditUser(user)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button>
                       </div>
                     </td>
                   </tr>

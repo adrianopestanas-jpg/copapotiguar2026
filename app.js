@@ -2034,6 +2034,7 @@ function AdminPage({
     profile: "Vendedor",
     store: PILOT_STORE
   });
+  const [editingCpf, setEditingCpf] = useState("");
   const [assignments, setAssignments] = useState(initialProductAssignments);
   const [productCatalog, setProductCatalog] = useState(focusProducts);
   const [newProduct, setNewProduct] = useState({
@@ -2111,28 +2112,27 @@ function AdminPage({
   const productFocusEnabled = isProductFocusEnabled(settings);
   const storeSummaries = getStoreSummaries(pilotRanking, predictionEntries, readEntries);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
-  const createUser = async event => {
-    event.preventDefault();
-    if (!newUser.name || newUser.cpf.replace(/\D/g, "").length !== 11) {
-      setToast("Informe o nome e um CPF com 11 dígitos.");
+  const startEditUser = user => {
+    const cpf = onlyDigits(user.cpf);
+    const editable = (Array.isArray(customUsers) ? customUsers : []).some(item => onlyDigits(item.cpf) === cpf);
+    if (!editable) {
+      setToast("Este usuário veio da base importada. Nesta fase, edite apenas usuários cadastrados pelo admin.");
       return;
     }
-    if (users.some(user => user.cpf.replace(/\D/g, "") === newUser.cpf.replace(/\D/g, ""))) {
-      setToast("Já existe um colaborador cadastrado com este CPF.");
-      return;
-    }
-    const created = normalizeCustomUser({
-      ...newUser,
-      email: "",
-      status: "Ativo"
+    setEditingCpf(cpf);
+    setNewUser({
+      name: user.name,
+      cpf: user.cpf,
+      job: user.profile === "Administrador" ? "Administrador" : user.profile === "Liderança" ? "Líder de loja" : "Vendedor",
+      profile: user.profile,
+      store: user.store
     });
-    const nextCustomUsers = [...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== onlyDigits(created.cpf)), created];
-    const ok = await onSaveSetting("customUsers", nextCustomUsers);
-    if (!ok) {
-      setToast("Não foi possível salvar o colaborador no banco.");
-      return;
-    }
-    setUsers(mergeUsers(registeredUsers, nextCustomUsers));
+    setShowUserForm(true);
+    setModule("users");
+  };
+  const cancelUserForm = () => {
+    setShowUserForm(false);
+    setEditingCpf("");
     setNewUser({
       name: "",
       cpf: "",
@@ -2140,8 +2140,36 @@ function AdminPage({
       profile: "Vendedor",
       store: PILOT_STORE
     });
-    setShowUserForm(false);
-    setToast(`${created.name} cadastrado. Senha inicial: CPF.`);
+  };
+  const createUser = async event => {
+    event.preventDefault();
+    if (!newUser.name || newUser.cpf.replace(/\D/g, "").length !== 11) {
+      setToast("Informe o nome e um CPF com 11 dígitos.");
+      return;
+    }
+    const cpfDigits = onlyDigits(newUser.cpf);
+    if (!editingCpf && users.some(user => onlyDigits(user.cpf) === cpfDigits)) {
+      setToast("Já existe um colaborador cadastrado com este CPF.");
+      return;
+    }
+    if (editingCpf && cpfDigits !== editingCpf && users.some(user => onlyDigits(user.cpf) === cpfDigits)) {
+      setToast("Já existe outro colaborador cadastrado com este CPF.");
+      return;
+    }
+    const created = normalizeCustomUser({
+      ...newUser,
+      email: "",
+      status: "Ativo"
+    });
+    const nextCustomUsers = [...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== (editingCpf || onlyDigits(created.cpf))), created];
+    const ok = await onSaveSetting("customUsers", nextCustomUsers);
+    if (!ok) {
+      setToast("Não foi possível salvar o colaborador no banco.");
+      return;
+    }
+    setUsers(mergeUsers(registeredUsers, nextCustomUsers));
+    cancelUserForm();
+    setToast(editingCpf ? `${created.name} atualizado com sucesso.` : `${created.name} cadastrado. Senha inicial: CPF.`);
   };
   const resetUserPassword = async targetUser => {
     if (!window.confirm(`Redefinir a senha de ${targetUser.name} para o CPF do usuário?`)) return;
@@ -3279,7 +3307,9 @@ function AdminPage({
   }, /*#__PURE__*/React.createElement("option", null, "Todas"), fixedStores.map(store => /*#__PURE__*/React.createElement("option", {
     key: store
   }, store)), /*#__PURE__*/React.createElement("option", null, "Rede Potiguar"))), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setShowUserForm(!showUserForm),
+    onClick: () => {
+      if (showUserForm) cancelUserForm();else setShowUserForm(true);
+    },
     className: "flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "plus",
@@ -3287,7 +3317,11 @@ function AdminPage({
   }), " Novo usuário")))), showUserForm && /*#__PURE__*/React.createElement("form", {
     onSubmit: createUser,
     className: "grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-5"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sm:col-span-2 xl:col-span-5"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, editingCpf ? "Editando colaborador" : "Novo colaborador")), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Nome completo"), /*#__PURE__*/React.createElement("input", {
     "aria-label": "Nome do novo colaborador",
@@ -3339,12 +3373,12 @@ function AdminPage({
     className: "flex items-end gap-2"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
-    onClick: () => setShowUserForm(false),
+    onClick: cancelUserForm,
     className: "rounded-xl px-4 py-3 text-xs font-bold text-slate-400"
   }, "Cancelar"), /*#__PURE__*/React.createElement("button", {
     type: "submit",
     className: "flex-1 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
-  }, "Cadastrar"))), /*#__PURE__*/React.createElement("div", {
+  }, editingCpf ? "Salvar" : "Cadastrar"))), /*#__PURE__*/React.createElement("div", {
     className: "overflow-x-auto"
   }, /*#__PURE__*/React.createElement("table", {
     className: "w-full min-w-[820px] text-left"
@@ -3400,7 +3434,7 @@ function AdminPage({
     onClick: () => resetUserPassword(user),
     className: "rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700"
   }, "Resetar senha"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setToast(`Abrindo cadastro de ${user.name}.`),
+    onClick: () => startEditUser(user),
     className: "rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500"
   }, "Editar"))))))), visibleUsers.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "p-10 text-center text-sm font-semibold text-slate-400"
