@@ -4152,6 +4152,7 @@ function App() {
   })();
   const [page, setPage] = useState(restoredUser?.accessRole === "admin" ? "admin" : "home");
   const [acknowledgedRoundId, setAcknowledgedRoundId] = useState("");
+  const [acknowledgedAccessKey, setAcknowledgedAccessKey] = useState("");
   const [user, setUser] = useState(restoredUser);
   const [impersonatedCpf, setImpersonatedCpf] = useState("");
   const [pendingPasswordUser, setPendingPasswordUser] = useState(null);
@@ -4281,8 +4282,9 @@ function App() {
   const isImpersonating = Boolean(viewedUser && loggedUser?.accessRole === "admin");
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
   const announcementActive = isAnnouncementActive(activeAnnouncement);
+  const currentAcknowledgedAccessKey = effectiveUser ? `${onlyDigits(effectiveUser.cpf)}:${activeRound.id}` : "";
   const currentUserRead = effectiveUser ? activeReadEntries.some(entry => onlyDigits(entry.cpf) === onlyDigits(effectiveUser.cpf) && entry.roundId === activeRound.id) : false;
-  const announcementAcknowledged = !announcementActive || acknowledgedRoundId === activeRound.id || currentUserRead;
+  const announcementAcknowledged = !announcementActive || acknowledgedAccessKey === currentAcknowledgedAccessKey || acknowledgedRoundId === activeRound.id || currentUserRead;
   const activePage = effectiveUser?.accessRole === "admin" ? "admin" : page === "admin" ? "home" : page;
   useEffect(() => {
     if (!effectiveUser) return;
@@ -4356,6 +4358,7 @@ function App() {
       const data = await response.json();
       setReadEntries(data.reads || []);
       setAcknowledgedRoundId(activeRound.id);
+      setAcknowledgedAccessKey(`${onlyDigits(currentUser.cpf)}:${activeRound.id}`);
       return true;
     } catch (error) {
       console.error(error);
@@ -4434,6 +4437,7 @@ function App() {
     setPendingCurrentPassword("");
     setPage(nextUser.accessRole === "admin" ? "admin" : "home");
     setAcknowledgedRoundId("");
+    setAcknowledgedAccessKey("");
   };
   const login = async (nextUser, password) => {
     try {
@@ -4520,12 +4524,14 @@ function App() {
     setImpersonatedCpf(onlyDigits(target.cpf));
     setPage("home");
     setAcknowledgedRoundId("");
+    setAcknowledgedAccessKey("");
     setToast(`Visualizando como ${target.name}.`);
   };
   const stopAccessAsUser = () => {
     setImpersonatedCpf("");
     setPage("admin");
     setAcknowledgedRoundId("");
+    setAcknowledgedAccessKey("");
     setToast("Você voltou para a visão de administrador.");
   };
   const logout = () => {
@@ -4543,6 +4549,7 @@ function App() {
     setPendingCurrentPassword("");
     setPage("home");
     setAcknowledgedRoundId("");
+    setAcknowledgedAccessKey("");
     setToast("");
   };
   if (pendingPasswordUser) return /*#__PURE__*/React.createElement(ChangePasswordScreen, {
