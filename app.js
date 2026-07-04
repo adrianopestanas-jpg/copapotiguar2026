@@ -265,9 +265,63 @@ const focusProducts = [{
   name: "Piso 60x60 TPA House Color CZ RT Formigres",
   brand: "Formigres",
   price: "Preço a confirmar",
-  description: "Produto foco cadastrado manualmente para teste da loja Imperatriz.",
+  description: "Desafio da semana cadastrado manualmente para teste da loja Imperatriz.",
   imageUrl: "",
   unit: "m²"
+}, {
+  id: "baston-limpa-air-fryer",
+  sku: "3278",
+  name: "Limpa Air Fryer 250ml Super Dom Baston",
+  brand: "Baston",
+  price: "Preço a confirmar",
+  description: "Desafio da semana para a loja Maiobão.",
+  imageUrl: "",
+  unit: "un."
+}, {
+  id: "camesa-pano-prato-chef",
+  sku: "499870",
+  name: "Pano de Prato do Chef Camesa",
+  brand: "Camesa",
+  price: "Preço a confirmar",
+  description: "Desafio da semana para a loja Centro.",
+  imageUrl: "",
+  unit: "un."
+}, {
+  id: "oxford-linha-completa",
+  sku: "Vários",
+  name: "Toda linha de produtos da marca Oxford",
+  brand: "Oxford",
+  price: "Preço a confirmar",
+  description: "Desafio da semana: qualquer produto da linha Oxford conta para a loja.",
+  imageUrl: "",
+  unit: "un."
+}, {
+  id: "coala-essencia-algas-mar",
+  sku: "470872",
+  name: "Essência Concentrada Algas Mar 120ml Coala",
+  brand: "Coala",
+  price: "Preço a confirmar",
+  description: "Desafio da semana para a loja Africanos.",
+  imageUrl: "",
+  unit: "un."
+}, {
+  id: "casa-ok-kit-cabide",
+  sku: "2639",
+  name: "Kit 3pcs Cabide Madeira BR Casa OK",
+  brand: "Casa OK/UD",
+  price: "Preço a confirmar",
+  description: "Desafio da semana para Bacabal e Olho Dagua.",
+  imageUrl: "",
+  unit: "un."
+}, {
+  id: "genco-tablete-multipla-acao",
+  sku: "638749",
+  name: "Tablete Múltipla Ação 3 em 1 T200 Genco",
+  brand: "Genco",
+  price: "Preço a confirmar",
+  description: "Desafio da semana para Santa Inês.",
+  imageUrl: "",
+  unit: "un."
 }];
 const siteProductDemo = {
   sku: "219134",
@@ -279,9 +333,45 @@ const siteProductDemo = {
   siteUrl: "https://www.apotiguar.com.br/produto/manta-liquida-impermeabilizante-branca-18kg-quartzolit-89313"
 };
 const initialProductAssignments = [{
-  store: "Imperatriz",
-  productId: "piso-house-color-formigres",
+  store: "Maiobão",
+  productId: "baston-limpa-air-fryer",
+  goal: 40
+}, {
+  store: "Centro",
+  productId: "camesa-pano-prato-chef",
+  goal: 50
+}, {
+  store: "Cohama",
+  productId: "oxford-linha-completa",
   goal: 200
+}, {
+  store: "Forquilha",
+  productId: "oxford-linha-completa",
+  goal: 200
+}, {
+  store: "Cohafuma",
+  productId: "oxford-linha-completa",
+  goal: 200
+}, {
+  store: "Imperatriz",
+  productId: "oxford-linha-completa",
+  goal: 200
+}, {
+  store: "Africanos",
+  productId: "coala-essencia-algas-mar",
+  goal: 30
+}, {
+  store: "Bacabal",
+  productId: "casa-ok-kit-cabide",
+  goal: 30
+}, {
+  store: "Olho Dagua",
+  productId: "casa-ok-kit-cabide",
+  goal: 50
+}, {
+  store: "Santa Inês",
+  productId: "genco-tablete-multipla-acao",
+  goal: 50
 }];
 const initialSalesEntries = [];
 const stores = fixedStores.map(name => ({
@@ -563,17 +653,17 @@ const getGamePredictionAccess = (game, now = new Date()) => {
   };
 };
 const defaultAnnouncement = {
-  id: "copa-potiguar-video-2026-06-25",
-  title: "Copa Potiguar 2026: começou o jogo",
-  body: "Começamos a fase teste da Copa Potiguar 2026 com todos os vendedores e líderes participantes. Assista ao vídeo, confirme a leitura da rodada e faça seus palpites. Nesta etapa vamos medir engajamento; produto foco entra a partir das oitavas.",
-  videoUrl: "https://youtu.be/7EzZjpmw6FQ",
+  id: "endomarketing-oitavas-produto-em-foco-17",
+  title: "Produto em Foco #17: produtos versáteis",
+  body: "Prezados Gestores, boa tarde! 🚀\n\nO 17º episódio do Produto em Foco está no ar! O tema da vez são produtos versáteis (mesas dobráveis, bancos, coolers e caixas térmicas), uma categoria com enorme potencial de vendas combinadas.\n\nO Valor do Rito em Grupo: este formato foi feito para ser assistido e debatido juntos, com todo o time ou em minigrupos. Incentive a equipe a maratonar e rever os vídeos sempre que precisar. Isso constrói o repertório técnico necessário para surpreender o consumidor e melhorar a experiência do cliente no chão de loja.\n\nFoco da liderança no rito de hoje:\n• Troca real: estimule o time a falar sobre os benefícios e a quebra de objeções.\n• Venda consultiva: provoque a oferta de soluções complementares (mesa + cooler + banquetas).\n\nChecklist rápido:\n1. Assistir em grupo e debater a aplicação imediata nas vendas.\n2. Aplicar a prova da semana.\n3. Garantir a inscrição de todos no canal para consultas frequentes.\n\nLíder: sua condução transforma o vídeo em resultado e constrói a segurança que o time precisa para vender mais.\n\nContamos com você. Excelentes vendas!",
+  videoUrl: "https://www.youtube.com/shorts/vrCzG8vK6To",
   minimumSeconds: 30,
-  publishedAt: "25 JUN • ativo",
+  publishedAt: "OITAVAS • ativo",
   startsAt: "",
   endsAt: "",
   attachments: []
 };
-const defaultScoringStartAt = "2026-07-02T19:55:00-03:00";
+const defaultScoringStartAt = "2026-07-04T00:00:00-03:00";
 const defaultMatchResults = {
   1: {
     homeScore: 0,
@@ -581,18 +671,23 @@ const defaultMatchResults = {
   }
 };
 const defaultRoundConfig = {
-  id: "teste-16avos",
-  phase: "16 avos",
-  name: "Teste 16 avos",
-  official: false,
+  id: "oitavas",
+  phase: "Oitavas",
+  name: "Oitavas de final",
+  official: true,
   status: "open",
-  kickoffAt: "2026-07-03T21:00:00",
-  predictionsCloseAt: "2026-07-03T20:50:00"
+  kickoffAt: "2026-07-04T13:00:00",
+  predictionsCloseAt: "2026-07-04T12:50:00"
 };
 const defaultAward = {
-  name: "Robô Aspirador Potiguar",
-  criterion: "Maior pontuação geral da rodada",
-  description: "Prêmio para o ganhador da rodada piloto."
+  name: "Premiação Oitavas de Final",
+  criterion: "Desafio da semana + endomarketing + palpites",
+  description: "1º vendedor de cada loja ganha uma Mochila Potiguar. 1º vendedor geral e os 2 primeiros líderes geral ganham um Robô Aspirador Potiguar.",
+  storeSellerPrize: "Mochila Potiguar",
+  storeSellerPrizeUrl: "https://www.apotiguar.com.br/produto/mochila-reforcada-preta-potiguar-105635",
+  overallSellerPrize: "Robô Aspirador Potiguar",
+  leadershipPrize: "Robô Aspirador Potiguar",
+  mainPrizeUrl: "https://www.apotiguar.com.br/produto/robo-aspirador-de-po-preto-potiguar-105639"
 };
 const defaultAppSettings = {
   announcement: defaultAnnouncement,
@@ -638,6 +733,12 @@ const getPredictionStats = (entry, matchResults = defaultMatchResults) => {
     exact
   };
 };
+const getTieTime = value => {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.getTime() : Number.POSITIVE_INFINITY;
+};
+const compareRankingRows = (a, b) => b.points - a.points || b.exactPredictions - a.exactPredictions || b.predictionHits - a.predictionHits || b.soldQuantity - a.soldQuantity || (b.storeGoalHit ? 1 : 0) - (a.storeGoalHit ? 1 : 0) || b.storeGoalPercent - a.storeGoalPercent || b.storeActiveSellers - a.storeActiveSellers || b.storeSellerPoints - a.storeSellerPoints || getTieTime(a.firstReadAt) - getTieTime(b.firstReadAt) || getTieTime(a.firstPredictionAt) - getTieTime(b.firstPredictionAt) || getTieTime(a.firstSaleAt) - getTieTime(b.firstSaleAt) || a.name.localeCompare(b.name);
+const compareStoreTopSellerTie = (a, b) => b.soldQuantity - a.soldQuantity || b.predictionPoints - a.predictionPoints || b.exactPredictions - a.exactPredictions || b.predictionHits - a.predictionHits || getTieTime(a.firstSaleAt) - getTieTime(b.firstSaleAt) || a.name.localeCompare(b.name);
 const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
   const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
@@ -659,13 +760,21 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     topSellerPoints: 0,
     storeGoalPoints: 0,
     soldQuantity: 0,
-    isTopSeller: false
+    isTopSeller: false,
+    firstReadAt: "",
+    firstPredictionAt: "",
+    firstSaleAt: "",
+    storeGoalHit: false,
+    storeGoalPercent: 0,
+    storeActiveSellers: 0,
+    storeSellerPoints: 0
   }));
   const byCpf = Object.fromEntries(rows.map(row => [row.cpf, row]));
   readEntries.filter(entry => isAfterScoringStart(entry, settings)).forEach(entry => {
     const row = byCpf[onlyDigits(entry.cpf)];
     if (!row || entry.roundId !== activeRound.id || row.announcementRead) return;
     row.announcementRead = true;
+    row.firstReadAt = entry.readAt || entry.read_at || "";
     row.announcementPoints += 1;
     row.points += 1;
   });
@@ -680,12 +789,19 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     row.predictionPoints += points;
     row.predictionHits += hit ? 1 : 0;
     row.exactPredictions += exact ? 1 : 0;
+    const submittedAt = entry.submitted_at || entry.submittedAt || "";
+    if (submittedAt && getTieTime(submittedAt) < getTieTime(row.firstPredictionAt)) row.firstPredictionAt = submittedAt;
     row.points += points;
   });
   const salesByCpf = productFocusEnabled ? salesEntries.filter(entry => isAfterScoringStart(entry, settings)).reduce((acc, entry) => {
     const cpf = onlyDigits(entry.sellerCpf || "");
     if (!cpf) return acc;
     acc[cpf] = (acc[cpf] || 0) + Number(entry.quantity || 0);
+    return acc;
+  }, {}) : {};
+  const salesByStore = productFocusEnabled ? salesEntries.filter(entry => isAfterScoringStart(entry, settings)).reduce((acc, entry) => {
+    const store = normalizeStore(entry.store);
+    acc[store] = (acc[store] || 0) + Number(entry.quantity || 0);
     return acc;
   }, {}) : {};
   Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
@@ -695,25 +811,50 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     row.salesPoints += 5;
     row.points += 5;
   });
-  const maxSold = Math.max(0, ...Object.values(salesByCpf));
-  if (maxSold > 0) {
-    Object.entries(salesByCpf).filter(([, quantity]) => quantity === maxSold).slice(0, 1).forEach(([cpf]) => {
-      const row = byCpf[cpf];
-      if (!row) return;
-      row.isTopSeller = true;
-      row.topSellerPoints += 8;
-      row.points += 8;
+  if (productFocusEnabled) {
+    salesEntries.filter(entry => isAfterScoringStart(entry, settings)).forEach(entry => {
+      const row = byCpf[onlyDigits(entry.sellerCpf || "")];
+      const createdAt = entry.createdAt || entry.created_at || "";
+      if (row && createdAt && getTieTime(createdAt) < getTieTime(row.firstSaleAt)) row.firstSaleAt = createdAt;
     });
   }
-  const storeGoal = initialProductAssignments.find(item => item.store === PILOT_STORE)?.goal || 200;
-  const totalSold = Object.values(salesByCpf).reduce((sum, value) => sum + value, 0);
-  if (totalSold >= storeGoal) {
-    rows.forEach(row => {
+  fixedStores.forEach(store => {
+    const storeSellers = rows.filter(row => row.store === store && row.role === "Vendedor" && row.soldQuantity > 0);
+    const maxSold = Math.max(0, ...storeSellers.map(row => row.soldQuantity));
+    if (maxSold > 0) {
+      storeSellers.filter(row => row.soldQuantity === maxSold).sort(compareStoreTopSellerTie).slice(0, 1).forEach(row => {
+        row.isTopSeller = true;
+        row.topSellerPoints += 8;
+        row.points += 8;
+      });
+    }
+  });
+  initialProductAssignments.forEach(assignment => {
+    const storeGoal = Number(assignment.goal || 0);
+    if (!storeGoal || Number(salesByStore[assignment.store] || 0) < storeGoal) return;
+    rows.filter(row => row.store === assignment.store).forEach(row => {
       row.storeGoalPoints += row.role === "Liderança" ? 4 : 2;
       row.points += row.role === "Liderança" ? 4 : 2;
     });
-  }
-  return rows.sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+  });
+  fixedStores.forEach(store => {
+    const assignment = initialProductAssignments.find(item => item.store === store);
+    const goal = Number(assignment?.goal || 0);
+    const sold = Number(salesByStore[store] || 0);
+    const storeRows = rows.filter(row => row.store === store);
+    const storeSellers = storeRows.filter(row => row.role === "Vendedor");
+    const storeGoalHit = goal > 0 && sold >= goal;
+    const storeGoalPercent = goal > 0 ? Math.round(sold / goal * 100) : 0;
+    const storeActiveSellers = storeSellers.filter(row => row.soldQuantity > 0).length;
+    const storeSellerPoints = storeSellers.reduce((sum, row) => sum + row.points, 0);
+    storeRows.forEach(row => {
+      row.storeGoalHit = storeGoalHit;
+      row.storeGoalPercent = storeGoalPercent;
+      row.storeActiveSellers = storeActiveSellers;
+      row.storeSellerPoints = storeSellerPoints;
+    });
+  });
+  return rows.sort(compareRankingRows);
 };
 const getRoundClosingSummary = rankingRows => {
   const eligibleRows = rankingRows.filter(row => row.role !== "Administrador");
@@ -722,7 +863,8 @@ const getRoundClosingSummary = rankingRows => {
   return {
     overallWinner: eligibleRows[0] || null,
     topOverall: eligibleRows.slice(0, 3),
-    topLeaders: leaders.slice(0, 3),
+    topSellerOverall: sellers[0] || null,
+    topLeaders: leaders.slice(0, 2),
     storeWinners: fixedStores.map(store => ({
       store,
       winner: sellers.filter(row => row.store === store)[0] || null
@@ -1189,7 +1331,7 @@ function ProductCard({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "fire",
     size: 16
-  }), " ", leadership ? "Resultado dos vendedores" : "Produto Foco"), /*#__PURE__*/React.createElement("h2", {
+  }), " ", leadership ? "Resultado dos vendedores" : "Desafio da Semana"), /*#__PURE__*/React.createElement("h2", {
     className: "mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl"
   }, focus.product.name), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
@@ -1421,6 +1563,46 @@ function StoreMiniRanking({
     }, person.points));
   })));
 }
+function LeaderPrizeRanking({
+  user,
+  pilotRanking,
+  award = defaultAward
+}) {
+  const leaders = pilotRanking.filter(person => person.role === "Liderança").slice(0, 2);
+  const myLeaderPosition = pilotRanking.filter(person => person.role === "Liderança").findIndex(person => person.cpf === onlyDigits(user.cpf)) + 1;
+  return /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-center justify-between gap-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Premiação liderança"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
+  }, "Top 2 líderes geral"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-400"
+  }, "Sua posição: ", myLeaderPosition || "—", "º entre líderes • prêmio: ", award.leadershipPrize)), /*#__PURE__*/React.createElement(Icon, {
+    name: "trophy",
+    className: "text-potiguar-red"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 space-y-3"
+  }, leaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
+    key: person.cpf,
+    className: `flex items-center gap-3 rounded-xl p-3 ${person.cpf === onlyDigits(user.cpf) ? "bg-potiguar-lime/15" : "bg-slate-50"}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-7 text-center text-xs"
+  }, index === 0 ? "🥇" : "🥈"), /*#__PURE__*/React.createElement(Avatar, {
+    initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
+    photoUrl: person.photoUrl
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "min-w-0 flex-1"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-sm font-extrabold text-potiguar-950"
+  }, person.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-400"
+  }, person.store, " • ", person.predictionHits, " acerto(s)")), /*#__PURE__*/React.createElement("strong", {
+    className: "font-display text-lg text-potiguar-900"
+  }, person.points)))));
+}
 function Home({
   acknowledged,
   setPage,
@@ -1467,7 +1649,7 @@ function Home({
     className: "inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]"
   }, "👋")), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-sm text-slate-500"
-  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? productFocusEnabled ? "Palpites encerrados. Agora vamos acompanhar as vendas do produto foco." : "Palpites encerrados. Acompanhe o ranking da rodada." : "A janela de palpites está aberta para os jogos disponíveis.")), /*#__PURE__*/React.createElement("div", {
+  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? productFocusEnabled ? "Palpites encerrados. Agora vamos acompanhar as vendas do desafio da semana." : "Palpites encerrados. Acompanhe o ranking da rodada." : "A janela de palpites está aberta para os jogos disponíveis.")), /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm"
   }, /*#__PURE__*/React.createElement(Avatar, {
     initials: user.initials,
@@ -1497,7 +1679,7 @@ function Home({
     icon: "ranking",
     label: "Posição geral",
     value: `${userPosition || "—"}º`,
-    detail: userRanking?.isTopSeller ? "Destaque do produto foco" : "Ranking atualizado automaticamente",
+    detail: userRanking?.isTopSeller ? "Destaque do desafio da semana" : "Ranking atualizado automaticamente",
     accent: "lime"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: "target",
@@ -1526,9 +1708,9 @@ function Home({
     size: 16
   }), " Fase teste"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-3 font-display text-3xl font-extrabold"
-  }, "16 avos sem produto foco"), /*#__PURE__*/React.createElement("p", {
+  }, "16 avos sem desafio da semana"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm leading-6 text-white/65"
-  }, "Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Produto foco e metas comerciais entram a partir das oitavas.")), /*#__PURE__*/React.createElement("div", {
+  }, "Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Desafio da semana e metas comerciais entram a partir das oitavas.")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement(MiniRanking, {
     pilotRanking: pilotRanking
@@ -1540,7 +1722,19 @@ function Home({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, award.name), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-xs leading-5 text-slate-500"
-  }, award.criterion, " • ", award.description)))), /*#__PURE__*/React.createElement("div", {
+  }, award.criterion, " • ", award.description), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 grid gap-2"
+  }, /*#__PURE__*/React.createElement("a", {
+    href: award.storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl,
+    target: "_blank",
+    rel: "noreferrer",
+    className: "rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15"
+  }, "1º vendedor por loja: ", award.storeSellerPrize || defaultAward.storeSellerPrize), /*#__PURE__*/React.createElement("a", {
+    href: award.mainPrizeUrl || defaultAward.mainPrizeUrl,
+    target: "_blank",
+    rel: "noreferrer",
+    className: "rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15"
+  }, "1º vendedor geral e Top 2 líderes: ", award.overallSellerPrize || defaultAward.overallSellerPrize))))), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
   }, announcementActive ? /*#__PURE__*/React.createElement(Announcement, {
     acknowledged: acknowledged,
@@ -1568,13 +1762,17 @@ function Home({
     size: 16
   }), " ", predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-2 font-display text-xl font-extrabold"
-  }, predictionsClosed ? productFocusEnabled ? "Acompanhar produto foco" : "Ver jogos da rodada" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
+  }, predictionsClosed ? productFocusEnabled ? "Acompanhar desafio da semana" : "Ver jogos da rodada" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-white/55"
   }, nextAccess?.reason || "Aguardando jogos da rodada.")), /*#__PURE__*/React.createElement("span", {
     className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "chevron"
-  }))))), user.accessRole !== "admin" && /*#__PURE__*/React.createElement(StoreMiniRanking, {
+  }))))), leadership && /*#__PURE__*/React.createElement(LeaderPrizeRanking, {
+    user: user,
+    pilotRanking: pilotRanking,
+    award: award
+  }), user.accessRole !== "admin" && /*#__PURE__*/React.createElement(StoreMiniRanking, {
     user: user,
     pilotRanking: pilotRanking
   }));
@@ -1910,7 +2108,7 @@ function StorePage({
     className: "mt-3 font-display text-3xl font-extrabold"
   }, "Fase teste: foco nos palpites"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm leading-6 text-white/65"
-  }, "Nesta etapa não teremos produto foco nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.")), user.accessRole === "leadership" && /*#__PURE__*/React.createElement("div", {
+  }, "Nesta etapa não teremos desafio da semana nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.")), user.accessRole === "leadership" && /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-3 gap-3"
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "users",
@@ -2111,9 +2309,9 @@ function AdminPage({
     siteUrl: ""
   });
   const [newAssignment, setNewAssignment] = useState({
-    store: PILOT_STORE,
-    productId: "piso-house-color-formigres",
-    goal: "200"
+    store: "Centro",
+    productId: "camesa-pano-prato-chef",
+    goal: "50"
   });
   const [announcementForm, setAnnouncementForm] = useState(settings.announcement || defaultAnnouncement);
   const [awardForm, setAwardForm] = useState(settings.award || defaultAward);
@@ -2147,7 +2345,7 @@ function AdminPage({
       awayScore: String(result.awayScore)
     });
   }, [allUsers, settings, currentAdminGame.id]);
-  const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Produtos", "Cadastrar o produto foco", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
+  const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Desafios", "Cadastrar desafio da semana", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
   const formModule = null;
   const visibleUsers = users.filter(user => {
     const search = userSearch.trim().toLowerCase();
@@ -2260,14 +2458,14 @@ function AdminPage({
     event.preventDefault();
     const exists = assignments.some(item => item.store === newAssignment.store && item.productId === newAssignment.productId);
     if (exists) {
-      setToast("Este produto já está definido como foco para a loja.");
+      setToast("Este desafio já está definido para a loja.");
       return;
     }
     setAssignments([...assignments, {
       ...newAssignment,
       goal: Number(newAssignment.goal)
     }]);
-    setToast("Produto foco vinculado à loja.");
+    setToast("Desafio da semana vinculado à loja.");
   };
   const lookupProduct = () => {
     const code = newProduct.sku.trim();
@@ -2335,7 +2533,7 @@ function AdminPage({
       if (!response.ok) throw new Error("Falha ao registrar venda.");
       const data = await response.json();
       setSalesEntries(data.sales || []);
-      setToast("Venda do produto foco registrada no servidor.");
+      setToast("Venda do desafio da semana registrada no servidor.");
     } catch (error) {
       console.error(error);
       setToast("Não foi possível registrar a venda no servidor.");
@@ -2458,7 +2656,7 @@ function AdminPage({
       winners: roundClosingSummary
     };
     const ok = await onSaveSetting("round", next);
-    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com ganhador geral e ganhadores por loja." : "Fase teste encerrada com top 3 geral, top 3 líderes e vendedores por loja.");
+    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com vendedor geral, vendedores por loja e top 2 líderes." : "Fase teste encerrada com top geral, líderes e vendedores por loja.");
   };
   const exportReport = () => {
     const rows = [["posicao", "nome", "cpf", "loja", "perfil", "pontos", "comunicado", "palpite_pts", "acertos", "placar_exato", "venda_pts", "quantidade", "meta_pts"], ...pilotRanking.map((person, index) => [index + 1, person.name, person.cpf, person.store, person.role, person.points, person.announcementPoints, person.predictionPoints, person.predictionHits, person.exactPredictions, person.salesPoints + person.topSellerPoints, person.soldQuantity, person.storeGoalPoints])];
@@ -2924,7 +3122,7 @@ function AdminPage({
     className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
   }, "Ganhadores da ", roundForm.phase || "rodada"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs leading-5 text-slate-500"
-  }, productFocusEnabled ? "Ao encerrar, o sistema grava o ganhador geral e o melhor colocado de cada loja nesta rodada." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites. Fechamento: vendedor ganhador por loja, top 3 líderes geral e top 3 geral.")), /*#__PURE__*/React.createElement("button", {
+  }, productFocusEnabled ? "Ao encerrar, o sistema registra o 1º vendedor geral, o 1º vendedor de cada loja e os 2 primeiros líderes geral." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites.")), /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: closeRound,
     className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
@@ -2955,7 +3153,7 @@ function AdminPage({
     className: "rounded-xl bg-white p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Top 3 líderes"), /*#__PURE__*/React.createElement("div", {
+  }, "Top 2 líderes"), /*#__PURE__*/React.createElement("div", {
     className: "mt-3 space-y-2"
   }, roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
     key: person.cpf,
@@ -3007,7 +3205,96 @@ function AdminPage({
     className: "text-[10px] font-bold uppercase text-white/45"
   }, "Atualização"), /*#__PURE__*/React.createElement("p", {
     className: "font-display text-lg font-extrabold"
-  }, "Automática")))), /*#__PURE__*/React.createElement("div", {
+  }, "Automática")))), /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Premiação Oitavas"), /*#__PURE__*/React.createElement("h4", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Ganhadores previstos da rodada"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-400"
+  }, "Acompanhamento ao vivo: 1º vendedor geral, 1º vendedor de cada loja e os 2 primeiros líderes geral.")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-4 grid gap-3 md:grid-cols-2"
+  }, /*#__PURE__*/React.createElement("a", {
+    href: (settings.award || defaultAward).storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl,
+    target: "_blank",
+    rel: "noreferrer",
+    className: "rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "Prêmio por loja"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-sm font-extrabold text-potiguar-950"
+  }, (settings.award || defaultAward).storeSellerPrize || defaultAward.storeSellerPrize), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-[10px] text-slate-400"
+  }, "Para o 1º vendedor de cada loja")), /*#__PURE__*/React.createElement("a", {
+    href: (settings.award || defaultAward).mainPrizeUrl || defaultAward.mainPrizeUrl,
+    target: "_blank",
+    rel: "noreferrer",
+    className: "rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "Prêmio geral/liderança"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-sm font-extrabold text-potiguar-950"
+  }, (settings.award || defaultAward).overallSellerPrize || defaultAward.overallSellerPrize), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-[10px] text-slate-400"
+  }, "Para 1º vendedor geral e top 2 líderes"))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 grid gap-4 xl:grid-cols-3"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "rounded-2xl bg-potiguar-lime/15 p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "1º vendedor geral"), roundClosingSummary.topSellerOverall ? /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 flex items-center gap-3"
+  }, /*#__PURE__*/React.createElement(Avatar, {
+    initials: roundClosingSummary.topSellerOverall.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
+    photoUrl: roundClosingSummary.topSellerOverall.photoUrl
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "min-w-0 flex-1"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-sm font-extrabold text-potiguar-950"
+  }, roundClosingSummary.topSellerOverall.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-500"
+  }, roundClosingSummary.topSellerOverall.store)), /*#__PURE__*/React.createElement("strong", {
+    className: "font-display text-lg text-potiguar-900"
+  }, roundClosingSummary.topSellerOverall.points)) : /*#__PURE__*/React.createElement("p", {
+    className: "mt-3 text-xs text-slate-400"
+  }, "Aguardando pontuação.")), /*#__PURE__*/React.createElement("div", {
+    className: "rounded-2xl bg-slate-50 p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "Top 2 líderes geral"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 space-y-2"
+  }, roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
+    key: person.cpf,
+    className: "flex items-center gap-2 rounded-xl bg-white p-2"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "w-6 text-center text-xs"
+  }, ["🥇", "🥈"][index]), /*#__PURE__*/React.createElement("div", {
+    className: "min-w-0 flex-1"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-xs font-extrabold text-potiguar-950"
+  }, person.name), /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] text-slate-400"
+  }, person.store)), /*#__PURE__*/React.createElement("strong", {
+    className: "text-xs text-potiguar-900"
+  }, person.points))) : /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Aguardando líderes pontuarem."))), /*#__PURE__*/React.createElement("div", {
+    className: "rounded-2xl bg-slate-50 p-4"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
+  }, "1º vendedor por loja"), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1"
+  }, roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => /*#__PURE__*/React.createElement("div", {
+    key: item.store,
+    className: "rounded-xl bg-white p-2"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold text-potiguar-800"
+  }, item.store), /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-xs font-extrabold text-potiguar-950"
+  }, item.winner?.name || "—"))) : /*#__PURE__*/React.createElement("p", {
+    className: "text-xs text-slate-400"
+  }, "Aguardando lojas pontuarem."))))), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-2"
   }, /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
@@ -3043,7 +3330,7 @@ function AdminPage({
     className: "border-b border-slate-100 p-5"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Produto foco"), /*#__PURE__*/React.createElement("h4", {
+  }, "Desafio da semana"), /*#__PURE__*/React.createElement("h4", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Quantidade por vendedor")), /*#__PURE__*/React.createElement("div", {
     className: "divide-y divide-slate-100"
@@ -3272,13 +3559,13 @@ function AdminPage({
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
   }, "Resumo comercial"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold"
-  }, "Produtos foco"), /*#__PURE__*/React.createElement("div", {
+  }, "Desafios da semana"), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 space-y-4"
   }, /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl bg-white/10 p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-white/45"
-  }, "Produtos ativos"), /*#__PURE__*/React.createElement("p", {
+  }, "Desafios ativos"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 font-display text-3xl font-extrabold"
   }, assignments.length)), /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl bg-white/10 p-4"
@@ -3298,7 +3585,7 @@ function AdminPage({
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
   }, "Configuração comercial"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Cadastro e produtos foco"), /*#__PURE__*/React.createElement("p", {
+  }, "Cadastro e desafios da semana"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
   }, "Informe o código/SKU usado pela Potiguar para preencher os dados do produto pelo site.")), /*#__PURE__*/React.createElement("form", {
     onSubmit: createProduct,
@@ -3390,13 +3677,13 @@ function AdminPage({
     className: "mt-5"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-xs font-extrabold text-potiguar-950"
-  }, "Vincular produto foco à loja")), /*#__PURE__*/React.createElement("form", {
+  }, "Vincular desafio à loja")), /*#__PURE__*/React.createElement("form", {
     onSubmit: assignProduct,
     className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.5fr_.7fr_auto] md:items-end"
   }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Loja"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Loja do produto foco",
+    "aria-label": "Loja do desafio da semana",
     value: newAssignment.store,
     onChange: e => setNewAssignment({
       ...newAssignment,
@@ -3408,7 +3695,7 @@ function AdminPage({
   }, store)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Produto"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Produto foco",
+    "aria-label": "Desafio da semana",
     value: newAssignment.productId,
     onChange: e => setNewAssignment({
       ...newAssignment,
@@ -3421,7 +3708,7 @@ function AdminPage({
   }, product.sku, " • ", product.name)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Meta"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Meta do produto foco",
+    "aria-label": "Meta do desafio da semana",
     type: "number",
     min: "1",
     value: newAssignment.goal,
@@ -3455,13 +3742,13 @@ function AdminPage({
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Apuração do produto foco"), /*#__PURE__*/React.createElement("h3", {
+  }, "Apuração do desafio da semana"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Quantidade vendida por vendedor"), /*#__PURE__*/React.createElement("p", {
+  }, "Vendas do desafio por vendedor"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, produto foco e quantidade." : "Produto foco desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas.")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
+  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas.")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
     className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800"
-  }, "Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de produto foco agora."), productFocusEnabled && /*#__PURE__*/React.createElement("form", {
+  }, "Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de desafio da semana agora."), productFocusEnabled && /*#__PURE__*/React.createElement("form", {
     onSubmit: addSale,
     className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.2fr_1.6fr_.7fr_auto] md:items-end"
   }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
@@ -3499,8 +3786,8 @@ function AdminPage({
     key: user.cpf
   }, user.name)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Produto foco"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Produto vendido",
+  }, "Desafio da semana"), /*#__PURE__*/React.createElement("select", {
+    "aria-label": "Desafio vendido",
     value: newSale.productId,
     onChange: e => setNewSale({
       ...newSale,
@@ -3830,7 +4117,7 @@ function AdminPage({
     className: "text-potiguar-lime"
   })), /*#__PURE__*/React.createElement("div", {
     className: "mt-6 space-y-4"
-  }, [["Comunicado publicado", true], [productFocusEnabled ? "Produto do dia ativo" : "Produto foco nas oitavas", productFocusEnabled], [productFocusEnabled ? "Metas configuradas" : "Metas comerciais pausadas", productFocusEnabled], ["Resultados dos jogos", false]].map(([label, ok]) => /*#__PURE__*/React.createElement("div", {
+  }, [["Comunicado publicado", true], [productFocusEnabled ? "Desafio da semana ativo" : "Desafio da semana nas oitavas", productFocusEnabled], [productFocusEnabled ? "Metas configuradas" : "Metas comerciais pausadas", productFocusEnabled], ["Resultados dos jogos", false]].map(([label, ok]) => /*#__PURE__*/React.createElement("div", {
     key: label,
     className: "flex items-center justify-between rounded-xl bg-white/7 p-3"
   }, /*#__PURE__*/React.createElement("span", {
@@ -3990,6 +4277,7 @@ function App() {
   const loggedUser = user ? dynamicDemoUsers[onlyDigits(user.cpf)] || user : savedSessionCpf ? dynamicDemoUsers[savedSessionCpf] || null : null;
   const viewedUser = impersonatedCpf ? dynamicDemoUsers[impersonatedCpf] || null : null;
   const effectiveUser = viewedUser || loggedUser;
+  const effectiveUserStoreSold = effectiveUser && isProductFocusEnabled(scoringSettings) ? activeSalesEntries.filter(entry => normalizeStore(entry.store) === effectiveUser.store).reduce((sum, item) => sum + Number(item.quantity || 0), 0) : 0;
   const isImpersonating = Boolean(viewedUser && loggedUser?.accessRole === "admin");
   const activeAnnouncement = appSettings.announcement || defaultAnnouncement;
   const announcementActive = isAnnouncementActive(activeAnnouncement);
@@ -4301,7 +4589,7 @@ function App() {
     setToast: setToast,
     user: effectiveUser,
     pilotRanking: pilotRanking,
-    totalSold: totalSold,
+    totalSold: effectiveUserStoreSold,
     profilePhotos: profilePhotos,
     settings: appSettings,
     activeGames: activeGames,
@@ -4321,7 +4609,7 @@ function App() {
   }), activePage === "store" && /*#__PURE__*/React.createElement(StorePage, {
     user: effectiveUser,
     pilotRanking: pilotRanking,
-    totalSold: totalSold,
+    totalSold: effectiveUserStoreSold,
     settings: appSettings
   }), activePage === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     adminUser: effectiveUser,
