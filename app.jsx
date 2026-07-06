@@ -686,6 +686,57 @@ const getStoreSummaries = (rankingRows, predictionEntries = [], readEntries = []
   })
   .sort((a, b) => b.points - a.points || b.predictionCount - a.predictionCount || a.store.localeCompare(b.store));
 
+const getPredictionEngagement = (users = [], predictionEntries = []) => {
+  const eligibleUsers = users.filter(user => user.profile !== "Administrador" && fixedStores.includes(user.store));
+  const predictionMap = predictionEntries.reduce((acc, entry) => {
+    const cpf = onlyDigits(entry.cpf);
+    if (!cpf) return acc;
+    const current = acc[cpf] || { count: 0, matches: new Set(), latest: "" };
+    current.count += 1;
+    current.matches.add(entry.match_id || entry.matchId);
+    if (!current.latest || new Date(entry.submitted_at || entry.submittedAt) > new Date(current.latest)) current.latest = entry.submitted_at || entry.submittedAt;
+    acc[cpf] = current;
+    return acc;
+  }, {});
+  const totals = {
+    eligible: eligibleUsers.length,
+    participated: eligibleUsers.filter(user => predictionMap[onlyDigits(user.cpf)]).length,
+  };
+  totals.missing = totals.eligible - totals.participated;
+  totals.adherence = totals.eligible ? Math.round((totals.participated / totals.eligible) * 100) : 0;
+  const stores = fixedStores.map(store => {
+    const people = eligibleUsers.filter(user => user.store === store);
+    const participatedPeople = people.filter(user => predictionMap[onlyDigits(user.cpf)]);
+    const missingPeople = people.filter(user => !predictionMap[onlyDigits(user.cpf)]).sort((a, b) => a.name.localeCompare(b.name));
+    const sellers = people.filter(user => user.profile === "Vendedor");
+    const leaders = people.filter(user => user.profile === "Liderança");
+    const sellerParticipated = participatedPeople.filter(user => user.profile === "Vendedor").length;
+    const leaderParticipated = participatedPeople.filter(user => user.profile === "Liderança").length;
+    const guesses = participatedPeople.reduce((sum, user) => sum + (predictionMap[onlyDigits(user.cpf)]?.matches.size || 0), 0);
+    const adherence = people.length ? Math.round((participatedPeople.length / people.length) * 100) : 0;
+    return {
+      store,
+      people,
+      total: people.length,
+      participated: participatedPeople.length,
+      missing: missingPeople.length,
+      adherence,
+      sellers: sellers.length,
+      leaders: leaders.length,
+      sellerParticipated,
+      leaderParticipated,
+      guesses,
+      missingPeople,
+    };
+  });
+  return {
+    totals,
+    stores,
+    bestStores: [...stores].sort((a, b) => b.adherence - a.adherence || b.participated - a.participated || a.store.localeCompare(b.store)),
+    worstStores: [...stores].sort((a, b) => a.adherence - b.adherence || b.missing - a.missing || a.store.localeCompare(b.store)),
+  };
+};
+
 function Brand({ compact = false }) {
   return (
     <div className="flex items-center gap-3">
@@ -1703,6 +1754,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     setResultForm({ homeScore: String(result.homeScore), awayScore: String(result.awayScore) });
   }, [allUsers, settings, currentAdminGame.id]);
   const actions = [
+    ["bolt", "Aderência", "Quem participou e quem falta", "engagement"],
     ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"],
     ["fire", "Desafios", "Cadastrar desafio da semana", "products"],
     ["target", "Metas", "Definir objetivos por loja", "goals"],
@@ -1711,7 +1763,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"],
     ["trophy", "Premiações", "Administrar reconhecimentos", "awards"],
     ["ranking", "Rankings", "Acompanhar classificação", "rankings"],
-    ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"],
+    ["chart", "Dashboards", "Visualizar indicadores", "dashboard"],
     ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"],
   ];
 
@@ -1738,6 +1790,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   const roundClosingSummary = getRoundClosingSummary(pilotRanking);
   const productFocusEnabled = isProductFocusEnabled(settings);
   const storeSummaries = getStoreSummaries(pilotRanking, predictionEntries, readEntries);
+  const predictionEngagement = getPredictionEngagement(users, predictionEntries);
 
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11)
     .replace(/^(\d{3})(\d)/, "$1.$2")
@@ -2054,7 +2107,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard icon="users" label="Participantes do piloto" value={participantCount} detail={`${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`} accent="green"/>
         <StatCard icon="megaphone" label="Leituras" value={readEntries.length} detail={readEntries.length ? "Comunicados confirmados" : "Aguardando confirmações"} accent="lime"/>
-        <StatCard icon="ball" label="Palpites" value={predictionEntries.length} detail={predictionEntries.length ? "Enviados para apuração" : "Aguardando envio"} accent="white"/>
+        <StatCard icon="ball" label="Aderência aos palpites" value={`${predictionEngagement.totals.adherence}%`} detail={`${predictionEngagement.totals.participated}/${predictionEngagement.totals.eligible} participaram • faltam ${predictionEngagement.totals.missing}`} accent="white"/>
         <StatCard icon={productFocusEnabled ? "store" : "trophy"} label={productFocusEnabled ? "Meta da rede" : "Fase teste"} value={productFocusEnabled ? `${Math.round(totalSold / storeGoal * 100)}%` : "16 avos"} detail={productFocusEnabled ? `${totalSold} de ${storeGoal}` : "Somente endomarketing e palpites"} accent="white"/>
       </div>
       <section className="soft-card rounded-2xl p-5 sm:p-6">
@@ -2063,6 +2116,103 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
           {actions.map(([icon,title,desc,value]) => <button key={title} onClick={() => setModule(value)} className={`lift rounded-2xl border p-4 text-left ${module === value ? "border-potiguar-500 bg-potiguar-lime/10" : "border-slate-100 bg-slate-50"}`}><span className="grid h-10 w-10 place-items-center rounded-xl bg-potiguar-900 text-potiguar-lime"><Icon name={icon} size={19}/></span><strong className="mt-4 block text-sm text-potiguar-950">{title}</strong><span className="mt-1 block text-[10px] leading-4 text-slate-400">{desc}</span></button>)}
         </div>
       </section>
+      {module === "engagement" && (
+        <section className="space-y-6">
+          <div className="hero-pattern pitch-lines overflow-hidden rounded-3xl p-6 text-white sm:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-potiguar-lime">Aderência em tempo real</p>
+                <h3 className="mt-2 font-display text-3xl font-extrabold">Quem já entrou no jogo?</h3>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">Acompanhe por loja quem já enviou palpite e quem ainda precisa ser acionado pelo líder.</p>
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="rounded-2xl bg-white/10 p-4"><p className="text-[10px] text-white/45">Aderência</p><p className="font-display text-3xl font-extrabold text-potiguar-lime">{predictionEngagement.totals.adherence}%</p></div>
+                <div className="rounded-2xl bg-white/10 p-4"><p className="text-[10px] text-white/45">Participaram</p><p className="font-display text-3xl font-extrabold">{predictionEngagement.totals.participated}</p></div>
+                <div className="rounded-2xl bg-white/10 p-4"><p className="text-[10px] text-white/45">Faltam</p><p className="font-display text-3xl font-extrabold text-potiguar-red">{predictionEngagement.totals.missing}</p></div>
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-2">
+            <section className="soft-card rounded-2xl p-5 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-emerald-600">Melhor aderência</p><h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Lojas mais engajadas</h4></div>
+                <Icon name="trophy" className="text-potiguar-700" />
+              </div>
+              <div className="mt-5 space-y-3">
+                {predictionEngagement.bestStores.slice(0, 5).map((store, index) => (
+                  <div key={store.store} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div><p className="text-xs font-extrabold text-potiguar-950">{index + 1}. {store.store}</p><p className="mt-1 text-[10px] text-slate-400">{store.participated}/{store.total} participantes • {store.guesses} palpites</p></div>
+                      <strong className="font-display text-2xl text-potiguar-900">{store.adherence}%</strong>
+                    </div>
+                    <div className="mt-3 h-2 rounded-full bg-white"><div className="h-full rounded-full bg-potiguar-lime" style={{width: `${Math.min(store.adherence, 100)}%`}}></div></div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="soft-card rounded-2xl p-5 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-red">Ponto de atenção</p><h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Lojas para acionar agora</h4></div>
+                <Icon name="megaphone" className="text-potiguar-red" />
+              </div>
+              <div className="mt-5 space-y-3">
+                {predictionEngagement.worstStores.slice(0, 5).map((store, index) => (
+                  <button key={store.store} onClick={() => setStoreFilter(store.store)} className="w-full rounded-2xl border border-red-100 bg-red-50 p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="flex items-center justify-between gap-3">
+                      <div><p className="text-xs font-extrabold text-potiguar-950">{index + 1}. {store.store}</p><p className="mt-1 text-[10px] text-red-500">Faltam {store.missing} de {store.total} • vendedores {store.sellerParticipated}/{store.sellers} • líderes {store.leaderParticipated}/{store.leaders}</p></div>
+                      <strong className="font-display text-2xl text-potiguar-red">{store.adherence}%</strong>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+          <section className="soft-card overflow-hidden rounded-2xl">
+            <div className="border-b border-slate-100 p-5 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Relação por loja</p>
+                  <h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Quem falta participar dos palpites</h4>
+                  <p className="mt-1 text-xs text-slate-400">Lista nominal comparando usuários elegíveis com palpites gravados no servidor.</p>
+                </div>
+                <select value={storeFilter} onChange={event => setStoreFilter(event.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-potiguar-900 outline-none focus:border-potiguar-500">
+                  <option>Todas</option>
+                  {fixedStores.map(store => <option key={store}>{store}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid gap-4 p-5 sm:p-6 xl:grid-cols-2">
+              {predictionEngagement.stores.filter(store => storeFilter === "Todas" || store.store === storeFilter).map(store => (
+                <div key={store.store} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">{store.store}</p>
+                      <h5 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">{store.adherence}% de aderência</h5>
+                      <p className="mt-1 text-[10px] text-slate-400">{store.participated}/{store.total} participaram • {store.guesses} palpites gravados</p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-extrabold ${store.missing ? "bg-red-100 text-potiguar-red" : "bg-potiguar-lime/25 text-potiguar-800"}`}>{store.missing ? `${store.missing} faltam` : "100%"}</span>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-center">
+                    <div className="rounded-xl bg-white p-3"><p className="text-[9px] font-bold text-slate-400">Vendedores</p><p className="text-sm font-extrabold text-potiguar-800">{store.sellerParticipated}/{store.sellers}</p></div>
+                    <div className="rounded-xl bg-white p-3"><p className="text-[9px] font-bold text-slate-400">Líderes</p><p className="text-sm font-extrabold text-potiguar-800">{store.leaderParticipated}/{store.leaders}</p></div>
+                  </div>
+                  <div className="mt-4 max-h-56 overflow-auto rounded-xl bg-white p-3">
+                    {store.missingPeople.length ? store.missingPeople.map(person => (
+                      <div key={person.cpf} className="flex items-center justify-between gap-3 border-b border-slate-50 py-2 last:border-0">
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p>
+                          <p className="text-[10px] text-slate-400">{person.profile} • CPF {formatCpf(person.cpf)}</p>
+                        </div>
+                        <span className="rounded-full bg-red-50 px-2.5 py-1 text-[9px] font-extrabold text-potiguar-red">Pendente</span>
+                      </div>
+                    )) : <div className="rounded-xl bg-potiguar-lime/15 p-4 text-center text-xs font-extrabold text-potiguar-900">Todos os elegíveis da loja já participaram 🎯</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </section>
+      )}
       {module === "announcements" && (
         <section className="soft-card overflow-hidden rounded-2xl">
           <div className="hero-pattern pitch-lines p-6 text-white">

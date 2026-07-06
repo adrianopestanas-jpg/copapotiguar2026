@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 const {
   useEffect,
   useMemo,
@@ -9,115 +10,141 @@ const Icon = ({
   className = ""
 }) => {
   const paths = {
-    home: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M3 11.5 12 4l9 7.5"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M5 10.5V20h14v-9.5M9 20v-6h6v6"
-    })),
-    ball: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("circle", {
-      cx: "12",
-      cy: "12",
-      r: "9"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "m12 8 3 2.2-1.2 3.6h-3.6L9 10.2 12 8ZM5.1 9l3.9 1.2M15 10.2 18.9 9M10.2 13.8 8 17.5M13.8 13.8l2.2 3.7"
-    })),
-    ranking: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M5 21v-8h4v8M10 21V8h4v13M15 21V3h4v18"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M3 21h18"
-    })),
-    store: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M4 10v10h16V10M3 10l2-6h14l2 6"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M8 20v-6h4v6M3 10c0 1.3 1 2 2.3 2S8 11.3 8 10c0 1.3 1 2 2.7 2s2.6-.7 2.6-2c0 1.3 1 2 2.7 2s2.7-.7 2.7-2"
-    })),
-    megaphone: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M4 13h3l9 4V5L7 9H4v4Z"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "m7 13 1.5 5h3L10 14M19 8v6"
-    })),
-    lock: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("rect", {
-      x: "5",
-      y: "10",
-      width: "14",
-      height: "11",
-      rx: "2"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M8 10V7a4 4 0 0 1 8 0v3"
-    })),
-    clock: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("circle", {
-      cx: "12",
-      cy: "12",
-      r: "9"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M12 7v5l3 2"
-    })),
-    check: /*#__PURE__*/React.createElement("path", {
+    home: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("path", {
+        d: "M3 11.5 12 4l9 7.5"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M5 10.5V20h14v-9.5M9 20v-6h6v6"
+      })]
+    }),
+    ball: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("circle", {
+        cx: "12",
+        cy: "12",
+        r: "9"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "m12 8 3 2.2-1.2 3.6h-3.6L9 10.2 12 8ZM5.1 9l3.9 1.2M15 10.2 18.9 9M10.2 13.8 8 17.5M13.8 13.8l2.2 3.7"
+      })]
+    }),
+    ranking: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("path", {
+        d: "M5 21v-8h4v8M10 21V8h4v13M15 21V3h4v18"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M3 21h18"
+      })]
+    }),
+    store: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("path", {
+        d: "M4 10v10h16V10M3 10l2-6h14l2 6"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M8 20v-6h4v6M3 10c0 1.3 1 2 2.3 2S8 11.3 8 10c0 1.3 1 2 2.7 2s2.6-.7 2.6-2c0 1.3 1 2 2.7 2s2.7-.7 2.7-2"
+      })]
+    }),
+    megaphone: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("path", {
+        d: "M4 13h3l9 4V5L7 9H4v4Z"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "m7 13 1.5 5h3L10 14M19 8v6"
+      })]
+    }),
+    lock: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("rect", {
+        x: "5",
+        y: "10",
+        width: "14",
+        height: "11",
+        rx: "2"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M8 10V7a4 4 0 0 1 8 0v3"
+      })]
+    }),
+    clock: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("circle", {
+        cx: "12",
+        cy: "12",
+        r: "9"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M12 7v5l3 2"
+      })]
+    }),
+    check: /*#__PURE__*/_jsx("path", {
       d: "m5 12 4 4L19 6"
     }),
-    fire: /*#__PURE__*/React.createElement("path", {
+    fire: /*#__PURE__*/_jsx("path", {
       d: "M13 3s1 3-2 5c-2.5 1.7-4 3.8-4 6.2A5 5 0 0 0 17 14c0-2-1-4-3-5 0 2-1 3-2 3 1-3-1-6-1-6"
     }),
-    trophy: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M8 4h8v4a4 4 0 0 1-8 0V4Z"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6v4"
-    })),
-    bolt: /*#__PURE__*/React.createElement("path", {
+    trophy: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("path", {
+        d: "M8 4h8v4a4 4 0 0 1-8 0V4Z"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M8 6H4v1a4 4 0 0 0 4 4M16 6h4v1a4 4 0 0 1-4 4M12 12v5M8 21h8M9 17h6v4"
+      })]
+    }),
+    bolt: /*#__PURE__*/_jsx("path", {
       d: "m13 2-8 12h7l-1 8 8-12h-7l1-8Z"
     }),
-    target: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("circle", {
-      cx: "12",
-      cy: "12",
-      r: "9"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "12",
-      cy: "12",
-      r: "5"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "12",
-      cy: "12",
-      r: "1"
-    })),
-    user: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("circle", {
-      cx: "12",
-      cy: "8",
-      r: "4"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M4 21a8 8 0 0 1 16 0"
-    })),
-    shield: /*#__PURE__*/React.createElement("path", {
+    target: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("circle", {
+        cx: "12",
+        cy: "12",
+        r: "9"
+      }), /*#__PURE__*/_jsx("circle", {
+        cx: "12",
+        cy: "12",
+        r: "5"
+      }), /*#__PURE__*/_jsx("circle", {
+        cx: "12",
+        cy: "12",
+        r: "1"
+      })]
+    }),
+    user: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("circle", {
+        cx: "12",
+        cy: "8",
+        r: "4"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M4 21a8 8 0 0 1 16 0"
+      })]
+    }),
+    shield: /*#__PURE__*/_jsx("path", {
       d: "M12 3 5 6v5c0 4.6 3 8 7 10 4-2 7-5.4 7-10V6l-7-3Z"
     }),
-    logout: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M10 5H5v14h5M14 8l4 4-4 4M8 12h10"
-    })),
-    chevron: /*#__PURE__*/React.createElement("path", {
+    logout: /*#__PURE__*/_jsx(_Fragment, {
+      children: /*#__PURE__*/_jsx("path", {
+        d: "M10 5H5v14h5M14 8l4 4-4 4M8 12h10"
+      })
+    }),
+    chevron: /*#__PURE__*/_jsx("path", {
       d: "m9 18 6-6-6-6"
     }),
-    close: /*#__PURE__*/React.createElement("path", {
+    close: /*#__PURE__*/_jsx("path", {
       d: "m6 6 12 12M18 6 6 18"
     }),
-    users: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-    }), /*#__PURE__*/React.createElement("circle", {
-      cx: "9",
-      cy: "7",
-      r: "4"
-    }), /*#__PURE__*/React.createElement("path", {
-      d: "M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"
-    })),
-    chart: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("path", {
-      d: "M4 20V10M10 20V4M16 20v-7M22 20H2"
-    })),
-    plus: /*#__PURE__*/React.createElement("path", {
+    users: /*#__PURE__*/_jsxs(_Fragment, {
+      children: [/*#__PURE__*/_jsx("path", {
+        d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+      }), /*#__PURE__*/_jsx("circle", {
+        cx: "9",
+        cy: "7",
+        r: "4"
+      }), /*#__PURE__*/_jsx("path", {
+        d: "M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"
+      })]
+    }),
+    chart: /*#__PURE__*/_jsx(_Fragment, {
+      children: /*#__PURE__*/_jsx("path", {
+        d: "M4 20V10M10 20V4M16 20v-7M22 20H2"
+      })
+    }),
+    plus: /*#__PURE__*/_jsx("path", {
       d: "M12 5v14M5 12h14"
     }),
-    play: /*#__PURE__*/React.createElement("path", {
+    play: /*#__PURE__*/_jsx("path", {
       d: "m8 5 11 7-11 7V5Z"
     })
   };
-  return /*#__PURE__*/React.createElement("svg", {
+  return /*#__PURE__*/_jsx("svg", {
     className: className,
     width: size,
     height: size,
@@ -127,8 +154,9 @@ const Icon = ({
     strokeWidth: "2",
     strokeLinecap: "round",
     strokeLinejoin: "round",
-    "aria-hidden": "true"
-  }, paths[name]);
+    "aria-hidden": "true",
+    children: paths[name]
+  });
 };
 const PILOT_STORE = "Imperatriz";
 const onlyDigits = value => String(value ?? "").replace(/\D/g, "");
@@ -893,21 +921,81 @@ const getStoreSummaries = (rankingRows, predictionEntries = [], readEntries = []
     topSeller
   };
 }).sort((a, b) => b.points - a.points || b.predictionCount - a.predictionCount || a.store.localeCompare(b.store));
+const getPredictionEngagement = (users = [], predictionEntries = []) => {
+  const eligibleUsers = users.filter(user => user.profile !== "Administrador" && fixedStores.includes(user.store));
+  const predictionMap = predictionEntries.reduce((acc, entry) => {
+    const cpf = onlyDigits(entry.cpf);
+    if (!cpf) return acc;
+    const current = acc[cpf] || {
+      count: 0,
+      matches: new Set(),
+      latest: ""
+    };
+    current.count += 1;
+    current.matches.add(entry.match_id || entry.matchId);
+    if (!current.latest || new Date(entry.submitted_at || entry.submittedAt) > new Date(current.latest)) current.latest = entry.submitted_at || entry.submittedAt;
+    acc[cpf] = current;
+    return acc;
+  }, {});
+  const totals = {
+    eligible: eligibleUsers.length,
+    participated: eligibleUsers.filter(user => predictionMap[onlyDigits(user.cpf)]).length
+  };
+  totals.missing = totals.eligible - totals.participated;
+  totals.adherence = totals.eligible ? Math.round(totals.participated / totals.eligible * 100) : 0;
+  const stores = fixedStores.map(store => {
+    const people = eligibleUsers.filter(user => user.store === store);
+    const participatedPeople = people.filter(user => predictionMap[onlyDigits(user.cpf)]);
+    const missingPeople = people.filter(user => !predictionMap[onlyDigits(user.cpf)]).sort((a, b) => a.name.localeCompare(b.name));
+    const sellers = people.filter(user => user.profile === "Vendedor");
+    const leaders = people.filter(user => user.profile === "Liderança");
+    const sellerParticipated = participatedPeople.filter(user => user.profile === "Vendedor").length;
+    const leaderParticipated = participatedPeople.filter(user => user.profile === "Liderança").length;
+    const guesses = participatedPeople.reduce((sum, user) => sum + (predictionMap[onlyDigits(user.cpf)]?.matches.size || 0), 0);
+    const adherence = people.length ? Math.round(participatedPeople.length / people.length * 100) : 0;
+    return {
+      store,
+      people,
+      total: people.length,
+      participated: participatedPeople.length,
+      missing: missingPeople.length,
+      adherence,
+      sellers: sellers.length,
+      leaders: leaders.length,
+      sellerParticipated,
+      leaderParticipated,
+      guesses,
+      missingPeople
+    };
+  });
+  return {
+    totals,
+    stores,
+    bestStores: [...stores].sort((a, b) => b.adherence - a.adherence || b.participated - a.participated || a.store.localeCompare(b.store)),
+    worstStores: [...stores].sort((a, b) => a.adherence - b.adherence || b.missing - a.missing || a.store.localeCompare(b.store))
+  };
+};
 function Brand({
   compact = false
 }) {
-  return /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: `${compact ? "h-10 w-10" : "h-12 w-12"} grid place-items-center rounded-2xl bg-potiguar-lime text-potiguar-950 shadow-lg shadow-black/10`
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "trophy",
-    size: compact ? 22 : 26
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: `${compact ? "text-[10px]" : "text-xs"} font-extrabold uppercase tracking-[0.22em] text-potiguar-lime`
-  }, "Copa Potiguar"), /*#__PURE__*/React.createElement("p", {
-    className: `${compact ? "text-lg" : "text-xl"} font-display font-extrabold leading-none text-white`
-  }, "2026")));
+  return /*#__PURE__*/_jsxs("div", {
+    className: "flex items-center gap-3",
+    children: [/*#__PURE__*/_jsx("div", {
+      className: `${compact ? "h-10 w-10" : "h-12 w-12"} grid place-items-center rounded-2xl bg-potiguar-lime text-potiguar-950 shadow-lg shadow-black/10`,
+      children: /*#__PURE__*/_jsx(Icon, {
+        name: "trophy",
+        size: compact ? 22 : 26
+      })
+    }), /*#__PURE__*/_jsxs("div", {
+      children: [/*#__PURE__*/_jsx("p", {
+        className: `${compact ? "text-[10px]" : "text-xs"} font-extrabold uppercase tracking-[0.22em] text-potiguar-lime`,
+        children: "Copa Potiguar"
+      }), /*#__PURE__*/_jsx("p", {
+        className: `${compact ? "text-lg" : "text-xl"} font-display font-extrabold leading-none text-white`,
+        children: "2026"
+      })]
+    })]
+  });
 }
 function LoginScreen({
   onLogin,
@@ -935,72 +1023,94 @@ function LoginScreen({
     if (!result?.ok) setError(result?.error || "CPF ou senha inválidos.");
     setIsSubmitting(false);
   };
-  return /*#__PURE__*/React.createElement("div", {
-    className: "login-bg min-h-screen p-4 sm:grid sm:place-items-center sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-hidden rounded-[30px] bg-white shadow-2xl shadow-potiguar-950/20 sm:min-h-0 lg:grid-cols-[1.05fr_.95fr]"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines hidden p-10 text-white lg:flex lg:flex-col"
-  }, /*#__PURE__*/React.createElement(Brand, null), /*#__PURE__*/React.createElement("div", {
-    className: "my-auto max-w-md"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "inline-flex rounded-full bg-potiguar-lime/15 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
-  }, "Piloto comercial 2026"), /*#__PURE__*/React.createElement("h1", {
-    className: "mt-6 font-display text-5xl font-extrabold leading-[1.02]"
-  }, "Leu.", /*#__PURE__*/React.createElement("br", null), "Palpitou.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    className: "text-potiguar-lime"
-  }, "Vendeu.")), /*#__PURE__*/React.createElement("p", {
-    className: "mt-5 text-sm leading-6 text-white/60"
-  }, "Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja.")), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-white/35"
-  }, "Acesso controlado • Piloto multi-lojas")), /*#__PURE__*/React.createElement("section", {
-    className: "flex flex-col justify-center p-6 sm:p-10 lg:p-14"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-9 lg:hidden"
-  }, /*#__PURE__*/React.createElement(Brand, {
-    compact: true
-  })), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold uppercase tracking-[.16em] text-potiguar-700"
-  }, "Bem-vindo"), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-2 font-display text-3xl font-extrabold text-potiguar-950"
-  }, "Entre na Copa Potiguar"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm text-slate-400"
-  }, "Use seu CPF. No primeiro acesso, a senha temporária é o próprio CPF."), /*#__PURE__*/React.createElement("form", {
-    onSubmit: submit,
-    className: "mt-8 space-y-4"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "CPF"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "CPF",
-    inputMode: "numeric",
-    autoComplete: "username",
-    value: cpf,
-    onChange: e => setCpf(formatCpf(e.target.value)),
-    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
-  })), /*#__PURE__*/React.createElement("label", {
-    className: "block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Senha"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Senha",
-    type: "password",
-    value: password,
-    onChange: e => setPassword(e.target.value),
-    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
-  })), error && /*#__PURE__*/React.createElement("p", {
-    className: "rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600"
-  }, error), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    disabled: isSubmitting,
-    className: "flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "lock",
-    size: 17
-  }), " ", isSubmitting ? "Entrando..." : "Entrar")), /*#__PURE__*/React.createElement("p", {
-    className: "mt-4 text-center text-xs font-semibold text-slate-400"
-  }, "Esqueceu a senha? Solicite a redefinição ao administrador."))));
+  return /*#__PURE__*/_jsx("div", {
+    className: "login-bg min-h-screen p-4 sm:grid sm:place-items-center sm:p-8",
+    children: /*#__PURE__*/_jsxs("div", {
+      className: "mx-auto grid min-h-[calc(100vh-2rem)] w-full max-w-5xl overflow-hidden rounded-[30px] bg-white shadow-2xl shadow-potiguar-950/20 sm:min-h-0 lg:grid-cols-[1.05fr_.95fr]",
+      children: [/*#__PURE__*/_jsxs("section", {
+        className: "hero-pattern pitch-lines hidden p-10 text-white lg:flex lg:flex-col",
+        children: [/*#__PURE__*/_jsx(Brand, {}), /*#__PURE__*/_jsxs("div", {
+          className: "my-auto max-w-md",
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "inline-flex rounded-full bg-potiguar-lime/15 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime",
+            children: "Piloto comercial 2026"
+          }), /*#__PURE__*/_jsxs("h1", {
+            className: "mt-6 font-display text-5xl font-extrabold leading-[1.02]",
+            children: ["Leu.", /*#__PURE__*/_jsx("br", {}), "Palpitou.", /*#__PURE__*/_jsx("br", {}), /*#__PURE__*/_jsx("span", {
+              className: "text-potiguar-lime",
+              children: "Vendeu."
+            })]
+          }), /*#__PURE__*/_jsx("p", {
+            className: "mt-5 text-sm leading-6 text-white/60",
+            children: "Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja."
+          })]
+        }), /*#__PURE__*/_jsx("p", {
+          className: "text-xs text-white/35",
+          children: "Acesso controlado • Piloto multi-lojas"
+        })]
+      }), /*#__PURE__*/_jsxs("section", {
+        className: "flex flex-col justify-center p-6 sm:p-10 lg:p-14",
+        children: [/*#__PURE__*/_jsx("div", {
+          className: "mb-9 lg:hidden",
+          children: /*#__PURE__*/_jsx(Brand, {
+            compact: true
+          })
+        }), /*#__PURE__*/_jsx("p", {
+          className: "text-xs font-extrabold uppercase tracking-[.16em] text-potiguar-700",
+          children: "Bem-vindo"
+        }), /*#__PURE__*/_jsx("h2", {
+          className: "mt-2 font-display text-3xl font-extrabold text-potiguar-950",
+          children: "Entre na Copa Potiguar"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-2 text-sm text-slate-400",
+          children: "Use seu CPF. No primeiro acesso, a senha temporária é o próprio CPF."
+        }), /*#__PURE__*/_jsxs("form", {
+          onSubmit: submit,
+          className: "mt-8 space-y-4",
+          children: [/*#__PURE__*/_jsxs("label", {
+            className: "block",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "CPF"
+            }), /*#__PURE__*/_jsx("input", {
+              "aria-label": "CPF",
+              inputMode: "numeric",
+              autoComplete: "username",
+              value: cpf,
+              onChange: e => setCpf(formatCpf(e.target.value)),
+              className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
+            })]
+          }), /*#__PURE__*/_jsxs("label", {
+            className: "block",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Senha"
+            }), /*#__PURE__*/_jsx("input", {
+              "aria-label": "Senha",
+              type: "password",
+              value: password,
+              onChange: e => setPassword(e.target.value),
+              className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
+            })]
+          }), error && /*#__PURE__*/_jsx("p", {
+            className: "rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600",
+            children: error
+          }), /*#__PURE__*/_jsxs("button", {
+            type: "submit",
+            disabled: isSubmitting,
+            className: "flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60",
+            children: [/*#__PURE__*/_jsx(Icon, {
+              name: "lock",
+              size: 17
+            }), " ", isSubmitting ? "Entrando..." : "Entrar"]
+          })]
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-4 text-center text-xs font-semibold text-slate-400",
+          children: "Esqueceu a senha? Solicite a redefinição ao administrador."
+        })]
+      })]
+    })
+  });
 }
 function ChangePasswordScreen({
   user,
@@ -1032,59 +1142,73 @@ function ChangePasswordScreen({
     if (!result?.ok) setError(result?.error || "Não foi possível alterar a senha.");
     setIsSubmitting(false);
   };
-  return /*#__PURE__*/React.createElement("div", {
-    className: "login-bg min-h-screen p-4 sm:grid sm:place-items-center sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl shadow-potiguar-950/20 sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-8 rounded-3xl bg-potiguar-950 p-5 text-white"
-  }, /*#__PURE__*/React.createElement(Brand, {
-    compact: true
-  }), /*#__PURE__*/React.createElement("p", {
-    className: "mt-6 text-[10px] font-extrabold uppercase tracking-[.16em] text-potiguar-lime"
-  }, "Primeiro acesso"), /*#__PURE__*/React.createElement("h1", {
-    className: "mt-2 font-display text-2xl font-extrabold"
-  }, "Crie sua senha"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm text-white/60"
-  }, user.name, ", por segurança você precisa trocar a senha temporária antes de continuar.")), /*#__PURE__*/React.createElement("form", {
-    onSubmit: submit,
-    className: "space-y-4"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Nova senha"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Nova senha",
-    type: "password",
-    autoComplete: "new-password",
-    value: newPassword,
-    onChange: e => setNewPassword(e.target.value),
-    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
-  })), /*#__PURE__*/React.createElement("label", {
-    className: "block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Confirmar nova senha"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Confirmar nova senha",
-    type: "password",
-    autoComplete: "new-password",
-    value: confirmPassword,
-    onChange: e => setConfirmPassword(e.target.value),
-    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
-  })), error && /*#__PURE__*/React.createElement("p", {
-    className: "rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600"
-  }, error), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    disabled: isSubmitting,
-    className: "flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "lock",
-    size: 17
-  }), " ", isSubmitting ? "Salvando..." : "Salvar nova senha"), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: onCancel,
-    className: "w-full rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400"
-  }, "Voltar ao login"))));
+  return /*#__PURE__*/_jsx("div", {
+    className: "login-bg min-h-screen p-4 sm:grid sm:place-items-center sm:p-8",
+    children: /*#__PURE__*/_jsxs("div", {
+      className: "mx-auto w-full max-w-md rounded-[30px] bg-white p-6 shadow-2xl shadow-potiguar-950/20 sm:p-8",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "mb-8 rounded-3xl bg-potiguar-950 p-5 text-white",
+        children: [/*#__PURE__*/_jsx(Brand, {
+          compact: true
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-6 text-[10px] font-extrabold uppercase tracking-[.16em] text-potiguar-lime",
+          children: "Primeiro acesso"
+        }), /*#__PURE__*/_jsx("h1", {
+          className: "mt-2 font-display text-2xl font-extrabold",
+          children: "Crie sua senha"
+        }), /*#__PURE__*/_jsxs("p", {
+          className: "mt-2 text-sm text-white/60",
+          children: [user.name, ", por segurança você precisa trocar a senha temporária antes de continuar."]
+        })]
+      }), /*#__PURE__*/_jsxs("form", {
+        onSubmit: submit,
+        className: "space-y-4",
+        children: [/*#__PURE__*/_jsxs("label", {
+          className: "block",
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Nova senha"
+          }), /*#__PURE__*/_jsx("input", {
+            "aria-label": "Nova senha",
+            type: "password",
+            autoComplete: "new-password",
+            value: newPassword,
+            onChange: e => setNewPassword(e.target.value),
+            className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          className: "block",
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Confirmar nova senha"
+          }), /*#__PURE__*/_jsx("input", {
+            "aria-label": "Confirmar nova senha",
+            type: "password",
+            autoComplete: "new-password",
+            value: confirmPassword,
+            onChange: e => setConfirmPassword(e.target.value),
+            className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm outline-none transition focus:border-potiguar-500 focus:bg-white"
+          })]
+        }), error && /*#__PURE__*/_jsx("p", {
+          className: "rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600",
+          children: error
+        }), /*#__PURE__*/_jsxs("button", {
+          type: "submit",
+          disabled: isSubmitting,
+          className: "flex w-full items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-5 py-4 text-sm font-extrabold text-white shadow-lg shadow-potiguar-900/15 disabled:opacity-60",
+          children: [/*#__PURE__*/_jsx(Icon, {
+            name: "lock",
+            size: 17
+          }), " ", isSubmitting ? "Salvando..." : "Salvar nova senha"]
+        }), /*#__PURE__*/_jsx("button", {
+          type: "button",
+          onClick: onCancel,
+          className: "w-full rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400",
+          children: "Voltar ao login"
+        })]
+      })]
+    })
+  });
 }
 function Sidebar({
   page,
@@ -1095,37 +1219,45 @@ function Sidebar({
 }) {
   const isAdmin = user.accessRole === "admin";
   const items = isAdmin ? [["shield", "Painel admin", "admin"]] : [["home", "Início", "home"], ["ball", "Palpites", "guesses"], ["ranking", "Ranking", "ranking"], ["store", "Minha loja", "store"]];
-  return /*#__PURE__*/React.createElement("aside", {
-    className: "desktop-nav fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col bg-potiguar-950 p-6 lg:flex"
-  }, /*#__PURE__*/React.createElement(Brand, null), /*#__PURE__*/React.createElement("nav", {
-    className: "mt-12 space-y-2"
-  }, items.map(([icon, label, value]) => /*#__PURE__*/React.createElement("button", {
-    key: value,
-    onClick: () => setPage(value),
-    className: `nav-item ${page === value ? "active bg-potiguar-lime text-potiguar-950 shadow-lg shadow-potiguar-lime/10" : "text-white/65 hover:bg-white/8 hover:text-white"} flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-left text-sm font-extrabold`
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: icon
-  }), label))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-auto"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 border-t border-white/10 pt-5"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.initials,
-    photoUrl: profilePhotos[onlyDigits(user.cpf)]
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-sm font-bold text-white"
-  }, user.name), /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-[11px] text-white/50"
-  }, user.accessRole === "seller" ? "Vendedor" : user.originalRole, " • ", user.store)), /*#__PURE__*/React.createElement("button", {
-    onClick: onLogout,
-    "aria-label": "Sair"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "logout",
-    className: "text-white/35",
-    size: 18
-  })))));
+  return /*#__PURE__*/_jsxs("aside", {
+    className: "desktop-nav fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col bg-potiguar-950 p-6 lg:flex",
+    children: [/*#__PURE__*/_jsx(Brand, {}), /*#__PURE__*/_jsx("nav", {
+      className: "mt-12 space-y-2",
+      children: items.map(([icon, label, value]) => /*#__PURE__*/_jsxs("button", {
+        onClick: () => setPage(value),
+        className: `nav-item ${page === value ? "active bg-potiguar-lime text-potiguar-950 shadow-lg shadow-potiguar-lime/10" : "text-white/65 hover:bg-white/8 hover:text-white"} flex w-full items-center gap-4 rounded-2xl px-4 py-3.5 text-left text-sm font-extrabold`,
+        children: [/*#__PURE__*/_jsx(Icon, {
+          name: icon
+        }), label]
+      }, value))
+    }), /*#__PURE__*/_jsx("div", {
+      className: "mt-auto",
+      children: /*#__PURE__*/_jsxs("div", {
+        className: "flex items-center gap-3 border-t border-white/10 pt-5",
+        children: [/*#__PURE__*/_jsx(Avatar, {
+          initials: user.initials,
+          photoUrl: profilePhotos[onlyDigits(user.cpf)]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "min-w-0 flex-1",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "truncate text-sm font-bold text-white",
+            children: user.name
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "truncate text-[11px] text-white/50",
+            children: [user.accessRole === "seller" ? "Vendedor" : user.originalRole, " • ", user.store]
+          })]
+        }), /*#__PURE__*/_jsx("button", {
+          onClick: onLogout,
+          "aria-label": "Sair",
+          children: /*#__PURE__*/_jsx(Icon, {
+            name: "logout",
+            className: "text-white/35",
+            size: 18
+          })
+        })]
+      })
+    })]
+  });
 }
 function MobileNav({
   page,
@@ -1134,16 +1266,17 @@ function MobileNav({
 }) {
   if (user.accessRole === "admin") return null;
   const items = [["home", "Início", "home"], ["ball", "Palpites", "guesses"], ["ranking", "Ranking", "ranking"], ["store", "Loja", "store"]];
-  return /*#__PURE__*/React.createElement("nav", {
-    className: "fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-black/5 bg-white/95 px-2 py-2 shadow-2xl shadow-potiguar-950/20 backdrop-blur lg:hidden"
-  }, items.map(([icon, label, value]) => /*#__PURE__*/React.createElement("button", {
-    key: value,
-    onClick: () => setPage(value),
-    className: `nav-item ${page === value ? "active text-potiguar-900" : "text-slate-400"} flex min-w-[66px] flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-extrabold`
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: icon,
-    size: 20
-  }), label)));
+  return /*#__PURE__*/_jsx("nav", {
+    className: "fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-black/5 bg-white/95 px-2 py-2 shadow-2xl shadow-potiguar-950/20 backdrop-blur lg:hidden",
+    children: items.map(([icon, label, value]) => /*#__PURE__*/_jsxs("button", {
+      onClick: () => setPage(value),
+      className: `nav-item ${page === value ? "active text-potiguar-900" : "text-slate-400"} flex min-w-[66px] flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-extrabold`,
+      children: [/*#__PURE__*/_jsx(Icon, {
+        name: icon,
+        size: 20
+      }), label]
+    }, value))
+  });
 }
 function Avatar({
   initials,
@@ -1152,17 +1285,20 @@ function Avatar({
   photoUrl
 }) {
   const cls = size === "large" ? "h-14 w-14 text-base" : "h-10 w-10 text-xs";
-  return /*#__PURE__*/React.createElement("div", {
-    className: "relative shrink-0"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: `${cls} grid place-items-center overflow-hidden rounded-full border-2 border-white/70 bg-gradient-to-br from-potiguar-lime to-potiguar-yellow font-extrabold text-potiguar-950 shadow-sm`
-  }, photoUrl ? /*#__PURE__*/React.createElement("img", {
-    src: photoUrl,
-    alt: "",
-    className: "h-full w-full object-cover"
-  }) : initials), rank && /*#__PURE__*/React.createElement("span", {
-    className: "absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-potiguar-900 text-[9px] font-extrabold text-white"
-  }, rank));
+  return /*#__PURE__*/_jsxs("div", {
+    className: "relative shrink-0",
+    children: [/*#__PURE__*/_jsx("div", {
+      className: `${cls} grid place-items-center overflow-hidden rounded-full border-2 border-white/70 bg-gradient-to-br from-potiguar-lime to-potiguar-yellow font-extrabold text-potiguar-950 shadow-sm`,
+      children: photoUrl ? /*#__PURE__*/_jsx("img", {
+        src: photoUrl,
+        alt: "",
+        className: "h-full w-full object-cover"
+      }) : initials
+    }), rank && /*#__PURE__*/_jsx("span", {
+      className: "absolute -bottom-1 -right-1 grid h-5 w-5 place-items-center rounded-full border-2 border-white bg-potiguar-900 text-[9px] font-extrabold text-white",
+      children: rank
+    })]
+  });
 }
 function ProfilePhotoUploader({
   user,
@@ -1213,18 +1349,19 @@ function ProfilePhotoUploader({
       setSaving(false);
     }
   };
-  return /*#__PURE__*/React.createElement("label", {
-    className: "inline-flex cursor-pointer items-center gap-2 rounded-full bg-potiguar-900 px-3 py-2 text-[10px] font-extrabold text-white shadow-sm"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: photoUrl ? "check" : "users",
-    size: 13
-  }), saving ? "Enviando..." : photoUrl ? "Trocar foto" : "Colocar foto", /*#__PURE__*/React.createElement("input", {
-    type: "file",
-    accept: "image/*",
-    onChange: handleFile,
-    disabled: saving,
-    className: "hidden"
-  }));
+  return /*#__PURE__*/_jsxs("label", {
+    className: "inline-flex cursor-pointer items-center gap-2 rounded-full bg-potiguar-900 px-3 py-2 text-[10px] font-extrabold text-white shadow-sm",
+    children: [/*#__PURE__*/_jsx(Icon, {
+      name: photoUrl ? "check" : "users",
+      size: 13
+    }), saving ? "Enviando..." : photoUrl ? "Trocar foto" : "Colocar foto", /*#__PURE__*/_jsx("input", {
+      type: "file",
+      accept: "image/*",
+      onChange: handleFile,
+      disabled: saving,
+      className: "hidden"
+    })]
+  });
 }
 function Topbar({
   page,
@@ -1241,44 +1378,58 @@ function Topbar({
     store: "Minha loja",
     admin: "Painel administrativo"
   };
-  return /*#__PURE__*/React.createElement("header", {
-    className: "sticky top-0 z-20 flex h-[72px] items-center justify-between border-b border-black/5 bg-[#f4f7f4]/90 px-5 backdrop-blur-xl sm:px-8 lg:px-10"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lg:hidden"
-  }, /*#__PURE__*/React.createElement(Brand, {
-    compact: true
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "hidden lg:block"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-semibold text-slate-400"
-  }, "Copa Potiguar 2026"), /*#__PURE__*/React.createElement("h1", {
-    className: "font-display text-xl font-bold text-potiguar-950"
-  }, labels[page])), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3"
-  }, isImpersonating && /*#__PURE__*/React.createElement("button", {
-    onClick: onStopImpersonation,
-    className: "hidden rounded-full bg-potiguar-lime px-4 py-2 text-xs font-extrabold text-potiguar-950 shadow-sm sm:inline-flex"
-  }, "Voltar ao admin"), /*#__PURE__*/React.createElement("div", {
-    className: "hidden items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-potiguar-800 shadow-sm sm:flex"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
-  }), "Dados ao vivo"), /*#__PURE__*/React.createElement("button", {
-    onClick: onLogout,
-    className: "grid h-10 w-10 place-items-center rounded-full bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 lg:hidden",
-    "aria-label": "Sair"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "logout",
-    size: 19
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "hidden items-center gap-3 lg:flex"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.initials,
-    photoUrl: profilePhotos[onlyDigits(user.cpf)]
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm font-extrabold text-potiguar-950"
-  }, user.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[11px] text-slate-400"
-  }, user.accessRole === "seller" ? "Vendedor" : user.originalRole, " • ", user.store)))));
+  return /*#__PURE__*/_jsxs("header", {
+    className: "sticky top-0 z-20 flex h-[72px] items-center justify-between border-b border-black/5 bg-[#f4f7f4]/90 px-5 backdrop-blur-xl sm:px-8 lg:px-10",
+    children: [/*#__PURE__*/_jsx("div", {
+      className: "lg:hidden",
+      children: /*#__PURE__*/_jsx(Brand, {
+        compact: true
+      })
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "hidden lg:block",
+      children: [/*#__PURE__*/_jsx("p", {
+        className: "text-xs font-semibold text-slate-400",
+        children: "Copa Potiguar 2026"
+      }), /*#__PURE__*/_jsx("h1", {
+        className: "font-display text-xl font-bold text-potiguar-950",
+        children: labels[page]
+      })]
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "flex items-center gap-3",
+      children: [isImpersonating && /*#__PURE__*/_jsx("button", {
+        onClick: onStopImpersonation,
+        className: "hidden rounded-full bg-potiguar-lime px-4 py-2 text-xs font-extrabold text-potiguar-950 shadow-sm sm:inline-flex",
+        children: "Voltar ao admin"
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "hidden items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-potiguar-800 shadow-sm sm:flex",
+        children: [/*#__PURE__*/_jsx("span", {
+          className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
+        }), "Dados ao vivo"]
+      }), /*#__PURE__*/_jsx("button", {
+        onClick: onLogout,
+        className: "grid h-10 w-10 place-items-center rounded-full bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 lg:hidden",
+        "aria-label": "Sair",
+        children: /*#__PURE__*/_jsx(Icon, {
+          name: "logout",
+          size: 19
+        })
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "hidden items-center gap-3 lg:flex",
+        children: [/*#__PURE__*/_jsx(Avatar, {
+          initials: user.initials,
+          photoUrl: profilePhotos[onlyDigits(user.cpf)]
+        }), /*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-sm font-extrabold text-potiguar-950",
+            children: user.name
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "text-[11px] text-slate-400",
+            children: [user.accessRole === "seller" ? "Vendedor" : user.originalRole, " • ", user.store]
+          })]
+        })]
+      })]
+    })]
+  });
 }
 function StatCard({
   icon,
@@ -1292,21 +1443,29 @@ function StatCard({
     lime: "bg-potiguar-lime text-potiguar-950",
     white: "bg-white text-potiguar-950"
   };
-  return /*#__PURE__*/React.createElement("div", {
-    className: `${themes[accent]} lift rounded-2xl p-5 shadow-sm`
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-start justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: `text-xs font-bold ${accent === "green" ? "text-white/55" : "text-potiguar-900/55"}`
-  }, label), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 font-display text-3xl font-extrabold"
-  }, value), /*#__PURE__*/React.createElement("p", {
-    className: `mt-1 text-[11px] font-semibold ${accent === "green" ? "text-potiguar-lime" : "text-potiguar-700"}`
-  }, detail)), /*#__PURE__*/React.createElement("div", {
-    className: `grid h-10 w-10 place-items-center rounded-xl ${accent === "green" ? "bg-white/10" : "bg-potiguar-900/10"}`
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: icon
-  }))));
+  return /*#__PURE__*/_jsx("div", {
+    className: `${themes[accent]} lift rounded-2xl p-5 shadow-sm`,
+    children: /*#__PURE__*/_jsxs("div", {
+      className: "flex items-start justify-between",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: `text-xs font-bold ${accent === "green" ? "text-white/55" : "text-potiguar-900/55"}`,
+          children: label
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-2 font-display text-3xl font-extrabold",
+          children: value
+        }), /*#__PURE__*/_jsx("p", {
+          className: `mt-1 text-[11px] font-semibold ${accent === "green" ? "text-potiguar-lime" : "text-potiguar-700"}`,
+          children: detail
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: `grid h-10 w-10 place-items-center rounded-xl ${accent === "green" ? "bg-white/10" : "bg-potiguar-900/10"}`,
+        children: /*#__PURE__*/_jsx(Icon, {
+          name: icon
+        })
+      })]
+    })
+  });
 }
 function ProductCard({
   user,
@@ -1320,57 +1479,76 @@ function ProductCard({
   const width = `${Math.min(percent, 100)}%`;
   const unit = focus.product.unit || "un.";
   const topSeller = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor" && person.soldQuantity > 0).sort((a, b) => b.soldQuantity - a.soldQuantity || b.points - a.points)[0];
-  return /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-7 sm:flex-row sm:items-center sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "max-w-md"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "fire",
-    size: 16
-  }), " ", leadership ? "Resultado dos vendedores" : "Desafio da Semana"), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl"
-  }, focus.product.name), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm text-white/60"
-  }, leadership ? `Desempenho consolidado da equipe ${user.store}` : `Todos os vendedores competem em igualdade • SKU ${focus.product.sku} • Marca ${focus.product.brand}`), /*#__PURE__*/React.createElement("div", {
-    className: "mt-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-2 flex items-end justify-between"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold text-white/55"
-  }, "Meta da ", user.store), /*#__PURE__*/React.createElement("span", {
-    className: "font-display text-xl font-extrabold"
-  }, totalSold, " ", /*#__PURE__*/React.createElement("small", {
-    className: "text-xs font-semibold text-white/55"
-  }, "/ ", focus.goal, " ", unit))), /*#__PURE__*/React.createElement("div", {
-    className: "h-2.5 overflow-hidden rounded-full bg-black/20"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "h-full rounded-full bg-potiguar-lime",
-    style: {
-      width
-    }
-  })), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-xs font-bold text-potiguar-lime"
-  }, leadership ? `Meta da equipe: ${percent}% atingida.` : remaining > 0 ? `Faltam só ${remaining} ${unit} para bater a meta!` : "Meta batida! Agora é ampliar a vantagem."), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 flex flex-wrap gap-2 text-[10px] font-extrabold"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-white/10 px-3 py-1.5 text-white/75"
-  }, percent, "% atingido"), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-white/10 px-3 py-1.5 text-white/75"
-  }, topSeller ? `Destaque: ${topSeller.name.split(" ")[0]} • ${topSeller.soldQuantity} ${unit}` : "Aguardando vendas")))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "relative"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -inset-6 rounded-full bg-potiguar-lime/10 blur-xl"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "paint-can"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -right-5 -top-5 grid h-14 w-14 rotate-6 place-items-center rounded-2xl bg-potiguar-yellow font-display text-lg font-extrabold text-potiguar-950 shadow-xl"
-  }, leadership ? "+4" : "+5")))));
+  return /*#__PURE__*/_jsx("section", {
+    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8",
+    children: /*#__PURE__*/_jsxs("div", {
+      className: "flex flex-col gap-7 sm:flex-row sm:items-center sm:justify-between",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "max-w-md",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] text-potiguar-lime",
+          children: [/*#__PURE__*/_jsx(Icon, {
+            name: "fire",
+            size: 16
+          }), " ", leadership ? "Resultado dos vendedores" : "Desafio da Semana"]
+        }), /*#__PURE__*/_jsx("h2", {
+          className: "mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl",
+          children: focus.product.name
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-2 text-sm text-white/60",
+          children: leadership ? `Desempenho consolidado da equipe ${user.store}` : `Todos os vendedores competem em igualdade • SKU ${focus.product.sku} • Marca ${focus.product.brand}`
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-6",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "mb-2 flex items-end justify-between",
+            children: [/*#__PURE__*/_jsxs("span", {
+              className: "text-xs font-bold text-white/55",
+              children: ["Meta da ", user.store]
+            }), /*#__PURE__*/_jsxs("span", {
+              className: "font-display text-xl font-extrabold",
+              children: [totalSold, " ", /*#__PURE__*/_jsxs("small", {
+                className: "text-xs font-semibold text-white/55",
+                children: ["/ ", focus.goal, " ", unit]
+              })]
+            })]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "h-2.5 overflow-hidden rounded-full bg-black/20",
+            children: /*#__PURE__*/_jsx("div", {
+              className: "h-full rounded-full bg-potiguar-lime",
+              style: {
+                width
+              }
+            })
+          }), /*#__PURE__*/_jsx("p", {
+            className: "mt-2 text-xs font-bold text-potiguar-lime",
+            children: leadership ? `Meta da equipe: ${percent}% atingida.` : remaining > 0 ? `Faltam só ${remaining} ${unit} para bater a meta!` : "Meta batida! Agora é ampliar a vantagem."
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "mt-4 flex flex-wrap gap-2 text-[10px] font-extrabold",
+            children: [/*#__PURE__*/_jsxs("span", {
+              className: "rounded-full bg-white/10 px-3 py-1.5 text-white/75",
+              children: [percent, "% atingido"]
+            }), /*#__PURE__*/_jsx("span", {
+              className: "rounded-full bg-white/10 px-3 py-1.5 text-white/75",
+              children: topSeller ? `Destaque: ${topSeller.name.split(" ")[0]} • ${topSeller.soldQuantity} ${unit}` : "Aguardando vendas"
+            })]
+          })]
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "flex items-center justify-center",
+        children: /*#__PURE__*/_jsxs("div", {
+          className: "relative",
+          children: [/*#__PURE__*/_jsx("div", {
+            className: "absolute -inset-6 rounded-full bg-potiguar-lime/10 blur-xl"
+          }), /*#__PURE__*/_jsx("div", {
+            className: "paint-can"
+          }), /*#__PURE__*/_jsx("div", {
+            className: "absolute -right-5 -top-5 grid h-14 w-14 rotate-6 place-items-center rounded-2xl bg-potiguar-yellow font-display text-lg font-extrabold text-potiguar-950 shadow-xl",
+            children: leadership ? "+4" : "+5"
+          })]
+        })
+      })]
+    })
+  });
 }
 function Announcement({
   acknowledged,
@@ -1395,131 +1573,174 @@ function Announcement({
     const ok = await onAcknowledge(user, secondsViewed);
     if (ok) setToast("+1 ponto! Comunicado registrado.");
   };
-  return /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-start gap-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-potiguar-yellow/30 text-amber-700"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "megaphone"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap items-center justify-between gap-2"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600"
-  }, "Comunicado obrigatório"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, activeAnnouncement.title)), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500"
-  }, activeAnnouncement.publishedAt || "ATIVO")), /*#__PURE__*/React.createElement("p", {
-    className: "mt-3 text-sm leading-6 text-slate-500"
-  }, activeAnnouncement.body), attachments.length > 0 && /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "block text-xs font-extrabold text-potiguar-950"
-  }, "Arquivos do comunicado"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 grid gap-2 sm:grid-cols-2"
-  }, attachments.map(file => /*#__PURE__*/React.createElement("a", {
-    key: file.id || file.name,
-    href: file.dataUrl || file.url,
-    download: file.name,
-    target: "_blank",
-    rel: "noreferrer",
-    className: "flex items-center justify-between gap-3 rounded-xl bg-white p-3 text-xs font-bold text-potiguar-800 transition hover:bg-potiguar-lime/10"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "truncate"
-  }, file.name), /*#__PURE__*/React.createElement(Icon, {
-    name: "chevron",
-    size: 14
-  }))))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "block font-extrabold"
-  }, "Como participar hoje"), "Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe o ranking da rodada."), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-potiguar-950 p-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-3 flex items-center justify-between gap-3 px-1"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
-  }, "Vídeo da campanha"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-0.5 text-xs font-semibold text-white/65"
-  }, "Clique em iniciar para começar a validação")), /*#__PURE__*/React.createElement("span", {
-    className: "flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white/70"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "play",
-    size: 11
-  }), " ", acknowledged ? "Concluído" : readyToConfirm ? "Liberado" : videoStarted ? `${remainingSeconds}s` : "Aguardando")), !videoStarted && !acknowledged ? /*#__PURE__*/React.createElement("button", {
-    onClick: () => setVideoStarted(true),
-    className: "mx-auto grid aspect-[9/16] w-full max-w-[260px] place-items-center overflow-hidden rounded-xl bg-black text-center text-white shadow-xl"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "grid h-16 w-16 place-items-center rounded-full bg-potiguar-lime text-potiguar-950"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "play",
-    size: 30
-  })), /*#__PURE__*/React.createElement("span", {
-    className: "-mt-20 px-6 text-xs font-extrabold text-white/75"
-  }, "Iniciar vídeo e validação de ", activeAnnouncement.minimumSeconds || 30, " segundos")) : /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl"
-  }, /*#__PURE__*/React.createElement("iframe", {
-    className: "h-full w-full",
-    src: youtubeEmbedUrl(activeAnnouncement.videoUrl),
-    title: "Vídeo da Copa Potiguar 2026",
-    allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
-    allowFullScreen: true
-  })), /*#__PURE__*/React.createElement("a", {
-    href: activeAnnouncement.videoUrl || defaultAnnouncement.videoUrl,
-    target: "_blank",
-    rel: "noreferrer",
-    className: "mt-3 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-[11px] font-extrabold text-white transition hover:bg-white/15"
-  }, "Abrir vídeo no YouTube ", /*#__PURE__*/React.createElement(Icon, {
-    name: "chevron",
-    size: 14
-  }))), !acknowledged && /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-500"
-  }, !videoStarted ? "Clique em “Iniciar vídeo” para começar a contar o tempo mínimo." : readyToConfirm ? "Pronto: agora você pode confirmar ciência e liberar o palpite." : `Assista/permaneça no vídeo por mais ${remainingSeconds} segundo(s) para liberar o botão.`), /*#__PURE__*/React.createElement("button", {
-    disabled: acknowledged || !readyToConfirm,
-    onClick: confirmRead,
-    className: `mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:w-auto ${acknowledged ? "bg-emerald-50 text-potiguar-700" : readyToConfirm ? "bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 hover:bg-potiguar-800" : "cursor-not-allowed bg-slate-100 text-slate-400"}`
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: acknowledged ? "check" : "megaphone",
-    size: 17
-  }), acknowledged ? "Lido e registrado" : readyToConfirm ? "Li e estou ciente" : `Liberando em ${remainingSeconds}s`))));
+  return /*#__PURE__*/_jsx("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6",
+    children: /*#__PURE__*/_jsxs("div", {
+      className: "flex items-start gap-4",
+      children: [/*#__PURE__*/_jsx("div", {
+        className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-potiguar-yellow/30 text-amber-700",
+        children: /*#__PURE__*/_jsx(Icon, {
+          name: "megaphone"
+        })
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "min-w-0 flex-1",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex flex-wrap items-center justify-between gap-2",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[0.16em] text-amber-600",
+              children: "Comunicado obrigatório"
+            }), /*#__PURE__*/_jsx("h3", {
+              className: "mt-1 font-display text-lg font-extrabold text-potiguar-950",
+              children: activeAnnouncement.title
+            })]
+          }), /*#__PURE__*/_jsx("span", {
+            className: "rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-500",
+            children: activeAnnouncement.publishedAt || "ATIVO"
+          })]
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-3 text-sm leading-6 text-slate-500",
+          children: activeAnnouncement.body
+        }), attachments.length > 0 && /*#__PURE__*/_jsxs("div", {
+          className: "mt-4 rounded-xl border border-slate-100 bg-slate-50 p-3",
+          children: [/*#__PURE__*/_jsx("strong", {
+            className: "block text-xs font-extrabold text-potiguar-950",
+            children: "Arquivos do comunicado"
+          }), /*#__PURE__*/_jsx("div", {
+            className: "mt-3 grid gap-2 sm:grid-cols-2",
+            children: attachments.map(file => /*#__PURE__*/_jsxs("a", {
+              href: file.dataUrl || file.url,
+              download: file.name,
+              target: "_blank",
+              rel: "noreferrer",
+              className: "flex items-center justify-between gap-3 rounded-xl bg-white p-3 text-xs font-bold text-potiguar-800 transition hover:bg-potiguar-lime/10",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "truncate",
+                children: file.name
+              }), /*#__PURE__*/_jsx(Icon, {
+                name: "chevron",
+                size: 14
+              })]
+            }, file.id || file.name))
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800",
+          children: [/*#__PURE__*/_jsx("strong", {
+            className: "block font-extrabold",
+            children: "Como participar hoje"
+          }), "Assista ao vídeo → confirme a leitura da rodada → envie seu palpite até 10 minutos antes do jogo → acompanhe o ranking da rodada."]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-5 overflow-hidden rounded-2xl border border-slate-100 bg-potiguar-950 p-3",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "mb-3 flex items-center justify-between gap-3 px-1",
+            children: [/*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime",
+                children: "Vídeo da campanha"
+              }), /*#__PURE__*/_jsx("p", {
+                className: "mt-0.5 text-xs font-semibold text-white/65",
+                children: "Clique em iniciar para começar a validação"
+              })]
+            }), /*#__PURE__*/_jsxs("span", {
+              className: "flex shrink-0 items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-bold text-white/70",
+              children: [/*#__PURE__*/_jsx(Icon, {
+                name: "play",
+                size: 11
+              }), " ", acknowledged ? "Concluído" : readyToConfirm ? "Liberado" : videoStarted ? `${remainingSeconds}s` : "Aguardando"]
+            })]
+          }), !videoStarted && !acknowledged ? /*#__PURE__*/_jsxs("button", {
+            onClick: () => setVideoStarted(true),
+            className: "mx-auto grid aspect-[9/16] w-full max-w-[260px] place-items-center overflow-hidden rounded-xl bg-black text-center text-white shadow-xl",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "grid h-16 w-16 place-items-center rounded-full bg-potiguar-lime text-potiguar-950",
+              children: /*#__PURE__*/_jsx(Icon, {
+                name: "play",
+                size: 30
+              })
+            }), /*#__PURE__*/_jsxs("span", {
+              className: "-mt-20 px-6 text-xs font-extrabold text-white/75",
+              children: ["Iniciar vídeo e validação de ", activeAnnouncement.minimumSeconds || 30, " segundos"]
+            })]
+          }) : /*#__PURE__*/_jsx("div", {
+            className: "mx-auto aspect-[9/16] w-full max-w-[260px] overflow-hidden rounded-xl bg-black shadow-xl",
+            children: /*#__PURE__*/_jsx("iframe", {
+              className: "h-full w-full",
+              src: youtubeEmbedUrl(activeAnnouncement.videoUrl),
+              title: "Vídeo da Copa Potiguar 2026",
+              allow: "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+              allowFullScreen: true
+            })
+          }), /*#__PURE__*/_jsxs("a", {
+            href: activeAnnouncement.videoUrl || defaultAnnouncement.videoUrl,
+            target: "_blank",
+            rel: "noreferrer",
+            className: "mt-3 flex items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-[11px] font-extrabold text-white transition hover:bg-white/15",
+            children: ["Abrir vídeo no YouTube ", /*#__PURE__*/_jsx(Icon, {
+              name: "chevron",
+              size: 14
+            })]
+          })]
+        }), !acknowledged && /*#__PURE__*/_jsx("div", {
+          className: "mt-4 rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-500",
+          children: !videoStarted ? "Clique em “Iniciar vídeo” para começar a contar o tempo mínimo." : readyToConfirm ? "Pronto: agora você pode confirmar ciência e liberar o palpite." : `Assista/permaneça no vídeo por mais ${remainingSeconds} segundo(s) para liberar o botão.`
+        }), /*#__PURE__*/_jsxs("button", {
+          disabled: acknowledged || !readyToConfirm,
+          onClick: confirmRead,
+          className: `mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:w-auto ${acknowledged ? "bg-emerald-50 text-potiguar-700" : readyToConfirm ? "bg-potiguar-900 text-white shadow-lg shadow-potiguar-900/15 hover:bg-potiguar-800" : "cursor-not-allowed bg-slate-100 text-slate-400"}`,
+          children: [/*#__PURE__*/_jsx(Icon, {
+            name: acknowledged ? "check" : "megaphone",
+            size: 17
+          }), acknowledged ? "Lido e registrado" : readyToConfirm ? "Li e estou ciente" : `Liberando em ${remainingSeconds}s`]
+        })]
+      })]
+    })
+  });
 }
 function MiniRanking({
   pilotRanking
 }) {
-  return /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Disputa geral"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, "Pódio da rodada")), /*#__PURE__*/React.createElement(Icon, {
-    name: "trophy",
-    className: "text-amber-500"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 space-y-4"
-  }, pilotRanking.slice(0, 3).map((person, idx) => /*#__PURE__*/React.createElement("div", {
-    key: person.name,
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `grid h-7 w-7 place-items-center rounded-lg text-xs font-extrabold ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-500" : "bg-orange-100 text-orange-700"}`
-  }, idx + 1), /*#__PURE__*/React.createElement(Avatar, {
-    initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-    photoUrl: person.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-sm font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, person.store)), /*#__PURE__*/React.createElement("strong", {
-    className: "font-display text-lg text-potiguar-900"
-  }, person.points)))));
+  return /*#__PURE__*/_jsxs("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6",
+    children: [/*#__PURE__*/_jsxs("div", {
+      className: "flex items-center justify-between",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: "Disputa geral"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-lg font-extrabold text-potiguar-950",
+          children: "Pódio da rodada"
+        })]
+      }), /*#__PURE__*/_jsx(Icon, {
+        name: "trophy",
+        className: "text-amber-500"
+      })]
+    }), /*#__PURE__*/_jsx("div", {
+      className: "mt-5 space-y-4",
+      children: pilotRanking.slice(0, 3).map((person, idx) => /*#__PURE__*/_jsxs("div", {
+        className: "flex items-center gap-3",
+        children: [/*#__PURE__*/_jsx("span", {
+          className: `grid h-7 w-7 place-items-center rounded-lg text-xs font-extrabold ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-500" : "bg-orange-100 text-orange-700"}`,
+          children: idx + 1
+        }), /*#__PURE__*/_jsx(Avatar, {
+          initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+          photoUrl: person.photoUrl
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "min-w-0 flex-1",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "truncate text-sm font-extrabold text-potiguar-950",
+            children: person.name
+          }), /*#__PURE__*/_jsx("p", {
+            className: "text-[10px] text-slate-400",
+            children: person.store
+          })]
+        }), /*#__PURE__*/_jsx("strong", {
+          className: "font-display text-lg text-potiguar-900",
+          children: person.points
+        })]
+      }, person.name))
+    })]
+  });
 }
 function StoreMiniRanking({
   user,
@@ -1528,40 +1749,54 @@ function StoreMiniRanking({
   const localRanking = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").slice(0, 4);
   const myPosition = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").findIndex(person => person.name === user.name) + 1;
   const unit = getStoreFocus(user.store).product.unit || "un.";
-  return /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Minha loja • ", user.store), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, "Ranking dos vendedores")), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, "VOCÊ: ", myPosition || "—", "º")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 space-y-3"
-  }, localRanking.map((person, idx) => {
-    const isMe = person.name === user.name;
-    return /*#__PURE__*/React.createElement("div", {
-      key: person.name,
-      className: `flex items-center gap-3 rounded-xl p-3 ${isMe ? "bg-potiguar-lime/15" : "bg-slate-50"}`
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "w-5 text-center text-xs font-extrabold text-slate-400"
-    }, idx === 0 ? "🥇" : idx + 1), /*#__PURE__*/React.createElement(Avatar, {
-      initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-      photoUrl: person.photoUrl
-    }), /*#__PURE__*/React.createElement("div", {
-      className: "min-w-0 flex-1"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "truncate text-sm font-extrabold text-potiguar-950"
-    }, person.name, isMe && /*#__PURE__*/React.createElement("span", {
-      className: "ml-1 text-[9px] text-potiguar-700"
-    }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
-      className: "text-[10px] text-slate-400"
-    }, person.soldQuantity, " ", unit, " • ", person.predictionHits, " acerto(s)", person.isTopSeller ? " • destaque" : "")), /*#__PURE__*/React.createElement("strong", {
-      className: "font-display text-lg text-potiguar-900"
-    }, person.points));
-  })));
+  return /*#__PURE__*/_jsxs("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6",
+    children: [/*#__PURE__*/_jsxs("div", {
+      className: "flex items-center justify-between",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsxs("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: ["Minha loja • ", user.store]
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-lg font-extrabold text-potiguar-950",
+          children: "Ranking dos vendedores"
+        })]
+      }), /*#__PURE__*/_jsxs("span", {
+        className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800",
+        children: ["VOCÊ: ", myPosition || "—", "º"]
+      })]
+    }), /*#__PURE__*/_jsx("div", {
+      className: "mt-5 space-y-3",
+      children: localRanking.map((person, idx) => {
+        const isMe = person.name === user.name;
+        return /*#__PURE__*/_jsxs("div", {
+          className: `flex items-center gap-3 rounded-xl p-3 ${isMe ? "bg-potiguar-lime/15" : "bg-slate-50"}`,
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "w-5 text-center text-xs font-extrabold text-slate-400",
+            children: idx === 0 ? "🥇" : idx + 1
+          }), /*#__PURE__*/_jsx(Avatar, {
+            initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+            photoUrl: person.photoUrl
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "min-w-0 flex-1",
+            children: [/*#__PURE__*/_jsxs("p", {
+              className: "truncate text-sm font-extrabold text-potiguar-950",
+              children: [person.name, isMe && /*#__PURE__*/_jsx("span", {
+                className: "ml-1 text-[9px] text-potiguar-700",
+                children: "(VOCÊ)"
+              })]
+            }), /*#__PURE__*/_jsxs("p", {
+              className: "text-[10px] text-slate-400",
+              children: [person.soldQuantity, " ", unit, " • ", person.predictionHits, " acerto(s)", person.isTopSeller ? " • destaque" : ""]
+            })]
+          }), /*#__PURE__*/_jsx("strong", {
+            className: "font-display text-lg text-potiguar-900",
+            children: person.points
+          })]
+        }, person.name);
+      })
+    })]
+  });
 }
 function LeaderPrizeRanking({
   user,
@@ -1570,38 +1805,51 @@ function LeaderPrizeRanking({
 }) {
   const leaders = pilotRanking.filter(person => person.role === "Liderança").slice(0, 2);
   const myLeaderPosition = pilotRanking.filter(person => person.role === "Liderança").findIndex(person => person.cpf === onlyDigits(user.cpf)) + 1;
-  return /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between gap-3"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Premiação liderança"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, "Top 2 líderes geral"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Sua posição: ", myLeaderPosition || "—", "º entre líderes • prêmio: ", award.leadershipPrize)), /*#__PURE__*/React.createElement(Icon, {
-    name: "trophy",
-    className: "text-potiguar-red"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 space-y-3"
-  }, leaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
-    key: person.cpf,
-    className: `flex items-center gap-3 rounded-xl p-3 ${person.cpf === onlyDigits(user.cpf) ? "bg-potiguar-lime/15" : "bg-slate-50"}`
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-7 text-center text-xs"
-  }, index === 0 ? "🥇" : "🥈"), /*#__PURE__*/React.createElement(Avatar, {
-    initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
-    photoUrl: person.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-sm font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, person.store, " • ", person.predictionHits, " acerto(s)")), /*#__PURE__*/React.createElement("strong", {
-    className: "font-display text-lg text-potiguar-900"
-  }, person.points)))));
+  return /*#__PURE__*/_jsxs("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6",
+    children: [/*#__PURE__*/_jsxs("div", {
+      className: "flex items-center justify-between gap-3",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: "Premiação liderança"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-lg font-extrabold text-potiguar-950",
+          children: "Top 2 líderes geral"
+        }), /*#__PURE__*/_jsxs("p", {
+          className: "mt-1 text-xs text-slate-400",
+          children: ["Sua posição: ", myLeaderPosition || "—", "º entre líderes • prêmio: ", award.leadershipPrize]
+        })]
+      }), /*#__PURE__*/_jsx(Icon, {
+        name: "trophy",
+        className: "text-potiguar-red"
+      })]
+    }), /*#__PURE__*/_jsx("div", {
+      className: "mt-5 space-y-3",
+      children: leaders.map((person, index) => /*#__PURE__*/_jsxs("div", {
+        className: `flex items-center gap-3 rounded-xl p-3 ${person.cpf === onlyDigits(user.cpf) ? "bg-potiguar-lime/15" : "bg-slate-50"}`,
+        children: [/*#__PURE__*/_jsx("span", {
+          className: "w-7 text-center text-xs",
+          children: index === 0 ? "🥇" : "🥈"
+        }), /*#__PURE__*/_jsx(Avatar, {
+          initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
+          photoUrl: person.photoUrl
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "min-w-0 flex-1",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "truncate text-sm font-extrabold text-potiguar-950",
+            children: person.name
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "text-[10px] text-slate-400",
+            children: [person.store, " • ", person.predictionHits, " acerto(s)"]
+          })]
+        }), /*#__PURE__*/_jsx("strong", {
+          className: "font-display text-lg text-potiguar-900",
+          children: person.points
+        })]
+      }, person.cpf))
+    })]
+  });
 }
 function Home({
   acknowledged,
@@ -1637,145 +1885,186 @@ function Home({
   const award = settings.award || defaultAward;
   const greeting = getGreeting(now);
   const announcementActive = isAnnouncementActive(settings.announcement || defaultAnnouncement, now);
-  return /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm font-semibold text-slate-400"
-  }, round.name, " • ", firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-1 font-display text-3xl font-extrabold text-potiguar-950"
-  }, greeting, ", ", user.firstName, "! ", /*#__PURE__*/React.createElement("span", {
-    className: "inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]"
-  }, "👋")), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-sm text-slate-500"
-  }, leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? productFocusEnabled ? "Palpites encerrados. Agora vamos acompanhar as vendas do desafio da semana." : "Palpites encerrados. Acompanhe o ranking da rodada." : "A janela de palpites está aberta para os jogos disponíveis.")), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.initials,
-    size: "large",
-    rank: user.position,
-    photoUrl: userPhotoUrl
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-semibold text-slate-400"
-  }, user.accessRole === "seller" ? "Vendedor" : user.originalRole), /*#__PURE__*/React.createElement("p", {
-    className: "text-sm font-extrabold text-potiguar-950"
-  }, user.store, " • ", leadership ? "Liderança" : `${userPosition || "—"}º geral`), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2"
-  }, /*#__PURE__*/React.createElement(ProfilePhotoUploader, {
-    user: user,
-    photoUrl: userPhotoUrl,
-    onSaveProfilePhoto: onSaveProfilePhoto,
-    setToast: setToast
-  }))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-3 xl:grid-cols-4"
-  }, /*#__PURE__*/React.createElement(StatCard, {
-    icon: "bolt",
-    label: leadership ? "Pontos da liderança" : "Seus pontos",
-    value: userRanking?.points || 0,
-    detail: productFocusEnabled ? leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0}`,
-    accent: "green"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "ranking",
-    label: "Posição geral",
-    value: `${userPosition || "—"}º`,
-    detail: userRanking?.isTopSeller ? "Destaque do desafio da semana" : "Ranking atualizado automaticamente",
-    accent: "lime"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "target",
-    label: leadership && productFocusEnabled ? "Vendedores com venda" : "Palpites certos",
-    value: leadership && productFocusEnabled ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0,
-    detail: leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`,
-    accent: "white"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: productFocusEnabled ? "fire" : "ball",
-    label: productFocusEnabled ? "Meta da loja" : "Fase teste",
-    value: productFocusEnabled ? `${storePercent}%` : "16 avos",
-    detail: productFocusEnabled ? `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}` : "Somente palpites nesta etapa",
-    accent: "white"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
-  }, productFocusEnabled ? /*#__PURE__*/React.createElement(ProductCard, {
-    user: user,
-    totalSold: totalSold,
-    pilotRanking: pilotRanking
-  }) : /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "ball",
-    size: 16
-  }), " Fase teste"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-3 font-display text-3xl font-extrabold"
-  }, "16 avos sem desafio da semana"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm leading-6 text-white/65"
-  }, "Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Desafio da semana e metas comerciais entram a partir das oitavas.")), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement(MiniRanking, {
-    pilotRanking: pilotRanking
-  }), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600"
-  }, "Prêmio da rodada"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, award.name), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-xs leading-5 text-slate-500"
-  }, award.criterion, " • ", award.description), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-2"
-  }, /*#__PURE__*/React.createElement("a", {
-    href: award.storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl,
-    target: "_blank",
-    rel: "noreferrer",
-    className: "rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15"
-  }, "1º vendedor por loja: ", award.storeSellerPrize || defaultAward.storeSellerPrize), /*#__PURE__*/React.createElement("a", {
-    href: award.mainPrizeUrl || defaultAward.mainPrizeUrl,
-    target: "_blank",
-    rel: "noreferrer",
-    className: "rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15"
-  }, "1º vendedor geral e Top 2 líderes: ", award.overallSellerPrize || defaultAward.overallSellerPrize))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
-  }, announcementActive ? /*#__PURE__*/React.createElement(Announcement, {
-    acknowledged: acknowledged,
-    setToast: setToast,
-    user: user,
-    onAcknowledge: onAcknowledge,
-    announcement: settings.announcement
-  }) : /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Endomarketing"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Nenhum comunicado ativo agora"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm leading-6 text-slate-500"
-  }, "Quando o RH liberar o próximo comunicado dentro do horário agendado, ele aparecerá aqui para leitura e confirmação.")), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setPage(predictionsClosed && productFocusEnabled ? "store" : "guesses"),
-    className: "group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex h-full items-center justify-between gap-5"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 text-xs font-bold text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: predictionsClosed ? "lock" : acknowledged ? "ball" : "lock",
-    size: 16
-  }), " ", predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-2 font-display text-xl font-extrabold"
-  }, predictionsClosed ? productFocusEnabled ? "Acompanhar desafio da semana" : "Ver jogos da rodada" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-white/55"
-  }, nextAccess?.reason || "Aguardando jogos da rodada.")), /*#__PURE__*/React.createElement("span", {
-    className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "chevron"
-  }))))), leadership && /*#__PURE__*/React.createElement(LeaderPrizeRanking, {
-    user: user,
-    pilotRanking: pilotRanking,
-    award: award
-  }), user.accessRole !== "admin" && /*#__PURE__*/React.createElement(StoreMiniRanking, {
-    user: user,
-    pilotRanking: pilotRanking
-  }));
+  return /*#__PURE__*/_jsxs("div", {
+    className: "space-y-6",
+    children: [/*#__PURE__*/_jsxs("section", {
+      className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsxs("p", {
+          className: "text-sm font-semibold text-slate-400",
+          children: [round.name, " • ", firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"]
+        }), /*#__PURE__*/_jsxs("h2", {
+          className: "mt-1 font-display text-3xl font-extrabold text-potiguar-950",
+          children: [greeting, ", ", user.firstName, "! ", /*#__PURE__*/_jsx("span", {
+            className: "inline-block origin-bottom-right animate-[wave_1.6s_ease-in-out_infinite]",
+            children: "👋"
+          })]
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-1 text-sm text-slate-500",
+          children: leadership ? "Acompanhe o desempenho dos vendedores da sua loja." : predictionsClosed ? productFocusEnabled ? "Palpites encerrados. Agora vamos acompanhar as vendas do desafio da semana." : "Palpites encerrados. Acompanhe o ranking da rodada." : "A janela de palpites está aberta para os jogos disponíveis."
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "flex items-center gap-3 rounded-2xl bg-white p-3 pr-5 shadow-sm",
+        children: [/*#__PURE__*/_jsx(Avatar, {
+          initials: user.initials,
+          size: "large",
+          rank: user.position,
+          photoUrl: userPhotoUrl
+        }), /*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-xs font-semibold text-slate-400",
+            children: user.accessRole === "seller" ? "Vendedor" : user.originalRole
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "text-sm font-extrabold text-potiguar-950",
+            children: [user.store, " • ", leadership ? "Liderança" : `${userPosition || "—"}º geral`]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "mt-2",
+            children: /*#__PURE__*/_jsx(ProfilePhotoUploader, {
+              user: user,
+              photoUrl: userPhotoUrl,
+              onSaveProfilePhoto: onSaveProfilePhoto,
+              setToast: setToast
+            })
+          })]
+        })]
+      })]
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "grid grid-cols-2 gap-3 xl:grid-cols-4",
+      children: [/*#__PURE__*/_jsx(StatCard, {
+        icon: "bolt",
+        label: leadership ? "Pontos da liderança" : "Seus pontos",
+        value: userRanking?.points || 0,
+        detail: productFocusEnabled ? leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0}`,
+        accent: "green"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: "ranking",
+        label: "Posição geral",
+        value: `${userPosition || "—"}º`,
+        detail: userRanking?.isTopSeller ? "Destaque do desafio da semana" : "Ranking atualizado automaticamente",
+        accent: "lime"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: "target",
+        label: leadership && productFocusEnabled ? "Vendedores com venda" : "Palpites certos",
+        value: leadership && productFocusEnabled ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0,
+        detail: leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`,
+        accent: "white"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: productFocusEnabled ? "fire" : "ball",
+        label: productFocusEnabled ? "Meta da loja" : "Fase teste",
+        value: productFocusEnabled ? `${storePercent}%` : "16 avos",
+        detail: productFocusEnabled ? `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}` : "Somente palpites nesta etapa",
+        accent: "white"
+      })]
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]",
+      children: [productFocusEnabled ? /*#__PURE__*/_jsx(ProductCard, {
+        user: user,
+        totalSold: totalSold,
+        pilotRanking: pilotRanking
+      }) : /*#__PURE__*/_jsxs("section", {
+        className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-lime",
+          children: [/*#__PURE__*/_jsx(Icon, {
+            name: "ball",
+            size: 16
+          }), " Fase teste"]
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-3 font-display text-3xl font-extrabold",
+          children: "16 avos sem desafio da semana"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-2 text-sm leading-6 text-white/65",
+          children: "Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Desafio da semana e metas comerciais entram a partir das oitavas."
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "space-y-6",
+        children: [/*#__PURE__*/_jsx(MiniRanking, {
+          pilotRanking: pilotRanking
+        }), /*#__PURE__*/_jsxs("section", {
+          className: "soft-card rounded-2xl p-5 sm:p-6",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600",
+            children: "Prêmio da rodada"
+          }), /*#__PURE__*/_jsx("h3", {
+            className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+            children: award.name
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "mt-2 text-xs leading-5 text-slate-500",
+            children: [award.criterion, " • ", award.description]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "mt-4 grid gap-2",
+            children: [/*#__PURE__*/_jsxs("a", {
+              href: award.storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl,
+              target: "_blank",
+              rel: "noreferrer",
+              className: "rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15",
+              children: ["1º vendedor por loja: ", award.storeSellerPrize || defaultAward.storeSellerPrize]
+            }), /*#__PURE__*/_jsxs("a", {
+              href: award.mainPrizeUrl || defaultAward.mainPrizeUrl,
+              target: "_blank",
+              rel: "noreferrer",
+              className: "rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15",
+              children: ["1º vendedor geral e Top 2 líderes: ", award.overallSellerPrize || defaultAward.overallSellerPrize]
+            })]
+          })]
+        })]
+      })]
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]",
+      children: [announcementActive ? /*#__PURE__*/_jsx(Announcement, {
+        acknowledged: acknowledged,
+        setToast: setToast,
+        user: user,
+        onAcknowledge: onAcknowledge,
+        announcement: settings.announcement
+      }) : /*#__PURE__*/_jsxs("section", {
+        className: "soft-card rounded-2xl p-5 sm:p-6",
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: "Endomarketing"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+          children: "Nenhum comunicado ativo agora"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-2 text-sm leading-6 text-slate-500",
+          children: "Quando o RH liberar o próximo comunicado dentro do horário agendado, ele aparecerá aqui para leitura e confirmação."
+        })]
+      }), /*#__PURE__*/_jsx("button", {
+        onClick: () => setPage(predictionsClosed && productFocusEnabled ? "store" : "guesses"),
+        className: "group hero-pattern rounded-2xl p-5 text-left text-white shadow-lg sm:p-6",
+        children: /*#__PURE__*/_jsxs("div", {
+          className: "flex h-full items-center justify-between gap-5",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsxs("div", {
+              className: "flex items-center gap-2 text-xs font-bold text-potiguar-lime",
+              children: [/*#__PURE__*/_jsx(Icon, {
+                name: predictionsClosed ? "lock" : acknowledged ? "ball" : "lock",
+                size: 16
+              }), " ", predictionsClosed ? "Palpites encerrados" : acknowledged ? "Área liberada" : "Ação necessária"]
+            }), /*#__PURE__*/_jsx("h3", {
+              className: "mt-2 font-display text-xl font-extrabold",
+              children: predictionsClosed ? productFocusEnabled ? "Acompanhar desafio da semana" : "Ver jogos da rodada" : acknowledged ? "Faça seus palpites" : "Leia para desbloquear"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-xs text-white/55",
+              children: nextAccess?.reason || "Aguardando jogos da rodada."
+            })]
+          }), /*#__PURE__*/_jsx("span", {
+            className: "grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-white/10 transition group-hover:translate-x-1",
+            children: /*#__PURE__*/_jsx(Icon, {
+              name: "chevron"
+            })
+          })]
+        })
+      })]
+    }), leadership && /*#__PURE__*/_jsx(LeaderPrizeRanking, {
+      user: user,
+      pilotRanking: pilotRanking,
+      award: award
+    }), user.accessRole !== "admin" && /*#__PURE__*/_jsx(StoreMiniRanking, {
+      user: user,
+      pilotRanking: pilotRanking
+    })]
+  });
 }
 function Guesses({
   acknowledged,
@@ -1825,172 +2114,228 @@ function Guesses({
       setSaved(false);
     }
   };
-  if (!acknowledged && !predictionsClosed) return /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto max-w-2xl py-8 sm:py-16"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "soft-card overflow-hidden rounded-[28px] text-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "hero-pattern pitch-lines px-6 py-12 text-white"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "lock",
-    size: 38
-  })), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-6 font-display text-3xl font-extrabold"
-  }, "Palpites bloqueados"), /*#__PURE__*/React.createElement("p", {
-    className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60"
-  }, "Para acessar os jogos, você precisa ler e confirmar a informação de endomarketing desta rodada.")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "block"
-  }, "Regra da rodada"), firstOpenAccess?.reason || nextGameAccess?.reason || "Nenhum jogo aberto para palpite nesta rodada."), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setPage("home"),
-    className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
-  }, "Voltar e confirmar a rodada"))));
-  if (predictionsClosed && !upcomingGames.length) return /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto max-w-2xl py-8 sm:py-16"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "soft-card overflow-hidden rounded-[28px] text-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "hero-pattern pitch-lines px-6 py-12 text-white"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "lock",
-    size: 38
-  })), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-6 font-display text-3xl font-extrabold"
-  }, "Palpites encerrados"), /*#__PURE__*/React.createElement("p", {
-    className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60"
-  }, nextGameAccess?.reason || "Não há jogos abertos para palpite nesta rodada.")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "block"
-  }, "Regra de horário"), predictionRules.join(" • ")), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setPage("store"),
-    className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white"
-  }, "Ver ranking da loja"))));
-  return /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto max-w-4xl space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
-  }), " ", round.official ? "Rodada oficial" : "Rodada teste", " • ", round.phase), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-3 font-display text-3xl font-extrabold"
-  }, round.name), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm text-white/60"
-  }, "Digite o placar nos campos vermelhos. Placar exato vale 6 pontos no total; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.")), /*#__PURE__*/React.createElement("div", {
-    className: "glass flex items-center gap-3 rounded-2xl px-4 py-3"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "clock",
-    className: "text-potiguar-lime"
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
-  }, "Janela de palpites"), /*#__PURE__*/React.createElement("p", {
-    className: "font-display text-lg font-extrabold"
-  }, firstOpenAccess ? `até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto"))))), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-3 sm:p-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-2"
-  }, [["open", "Para palpitar", openGames.length], ["upcoming", "Próximos", upcomingGames.length], ["closed", "Realizados", closedGames.length]].map(([value, label, count]) => /*#__PURE__*/React.createElement("button", {
-    key: value,
-    type: "button",
-    onClick: () => setFilter(value),
-    className: `rounded-xl px-2 py-3 text-center text-[11px] font-extrabold transition ${filter === value ? "bg-potiguar-900 text-white" : "bg-slate-50 text-slate-400"}`
-  }, label, /*#__PURE__*/React.createElement("span", {
-    className: `ml-1 rounded-full px-1.5 py-0.5 text-[9px] ${filter === value ? "bg-white/15 text-white" : "bg-white text-slate-400"}`
-  }, count))))), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-4"
-  }, filteredGames.length === 0 && /*#__PURE__*/React.createElement("div", {
-    className: "soft-card rounded-2xl p-6 text-center text-sm font-semibold text-slate-400"
-  }, "Nenhum jogo nesta aba agora."), filteredGames.map(game => {
-    const access = gameAccess[game.id];
-    const closed = !access?.open;
-    const finished = game.status === "finished" || Number.isInteger(game.homeScore) && Number.isInteger(game.awayScore);
-    return /*#__PURE__*/React.createElement("article", {
-      key: game.id,
-      className: "soft-card rounded-2xl p-4 sm:p-6"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "mb-5 flex items-center justify-between"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "rounded-full bg-potiguar-900/5 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-    }, game.group), /*#__PURE__*/React.createElement("div", {
-      className: "text-right"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "flex items-center justify-end gap-1.5 text-xs font-bold text-slate-500"
-    }, /*#__PURE__*/React.createElement(Icon, {
-      name: "clock",
-      size: 14
-    }), " ", game.time), /*#__PURE__*/React.createElement("span", {
-      className: "mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300"
-    }, finished ? `FINAL ${game.homeScore} × ${game.awayScore}` : closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`, " • ", game.venue))), /*#__PURE__*/React.createElement("div", {
-      className: "grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-col items-center gap-2 sm:flex-row sm:justify-end"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-3xl"
-    }, game.homeFlag), /*#__PURE__*/React.createElement("strong", {
-      className: "text-center text-sm text-potiguar-950 sm:text-base"
-    }, game.home)), /*#__PURE__*/React.createElement("div", {
-      className: "rounded-2xl border-2 border-potiguar-red/25 bg-potiguar-red/5 p-2 text-center shadow-lg shadow-red-500/10"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "mb-1 text-[9px] font-extrabold uppercase tracking-wider text-potiguar-red"
-    }, "Digite seu palpite"), /*#__PURE__*/React.createElement("div", {
-      className: "flex items-center gap-2"
-    }, /*#__PURE__*/React.createElement("input", {
-      "aria-label": `Gols ${game.home}`,
-      disabled: closed,
-      placeholder: "0",
-      className: "score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16",
-      type: "number",
-      min: "0",
-      max: "9",
-      value: (scores[game.id] || ["", ""])[0],
-      onChange: e => updateScore(game.id, 0, e.target.value)
-    }), /*#__PURE__*/React.createElement("span", {
-      className: "font-extrabold text-potiguar-red"
-    }, "×"), /*#__PURE__*/React.createElement("input", {
-      "aria-label": `Gols ${game.away}`,
-      disabled: closed,
-      placeholder: "0",
-      className: "score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16",
-      type: "number",
-      min: "0",
-      max: "9",
-      value: (scores[game.id] || ["", ""])[1],
-      onChange: e => updateScore(game.id, 1, e.target.value)
-    }))), /*#__PURE__*/React.createElement("div", {
-      className: "flex flex-col items-center gap-2 sm:flex-row"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "text-3xl sm:order-2"
-    }, game.awayFlag), /*#__PURE__*/React.createElement("strong", {
-      className: "text-center text-sm text-potiguar-950 sm:text-base"
-    }, game.away))));
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5"
-  }, /*#__PURE__*/React.createElement("button", {
-    disabled: !complete || saved,
-    onClick: async () => {
-      const ok = await onSavePrediction(user, scores, openGames);
-      if (ok) {
-        setSaved(true);
-        setToast("Palpites salvos e enviados para o admin.");
-      }
-    },
-    className: `flex w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-extrabold transition ${complete && !saved ? "bg-potiguar-900 text-white hover:bg-potiguar-800" : saved ? "bg-emerald-50 text-potiguar-700" : "cursor-not-allowed bg-slate-100 text-slate-400"}`
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: saved ? "check" : "ball"
-  }), saved ? "Palpites salvos" : complete ? "Salvar palpites" : "Preencha todos os placares")));
+  if (!acknowledged && !predictionsClosed) return /*#__PURE__*/_jsx("div", {
+    className: "mx-auto max-w-2xl py-8 sm:py-16",
+    children: /*#__PURE__*/_jsxs("div", {
+      className: "soft-card overflow-hidden rounded-[28px] text-center",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "hero-pattern pitch-lines px-6 py-12 text-white",
+        children: [/*#__PURE__*/_jsx("div", {
+          className: "mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime",
+          children: /*#__PURE__*/_jsx(Icon, {
+            name: "lock",
+            size: 38
+          })
+        }), /*#__PURE__*/_jsx("h2", {
+          className: "mt-6 font-display text-3xl font-extrabold",
+          children: "Palpites bloqueados"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60",
+          children: "Para acessar os jogos, você precisa ler e confirmar a informação de endomarketing desta rodada."
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "p-6 sm:p-8",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "rounded-2xl bg-amber-50 p-4 text-left text-sm text-amber-800",
+          children: [/*#__PURE__*/_jsx("strong", {
+            className: "block",
+            children: "Regra da rodada"
+          }), firstOpenAccess?.reason || nextGameAccess?.reason || "Nenhum jogo aberto para palpite nesta rodada."]
+        }), /*#__PURE__*/_jsx("button", {
+          onClick: () => setPage("home"),
+          className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white",
+          children: "Voltar e confirmar a rodada"
+        })]
+      })]
+    })
+  });
+  if (predictionsClosed && !upcomingGames.length) return /*#__PURE__*/_jsx("div", {
+    className: "mx-auto max-w-2xl py-8 sm:py-16",
+    children: /*#__PURE__*/_jsxs("div", {
+      className: "soft-card overflow-hidden rounded-[28px] text-center",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "hero-pattern pitch-lines px-6 py-12 text-white",
+        children: [/*#__PURE__*/_jsx("div", {
+          className: "mx-auto grid h-20 w-20 place-items-center rounded-3xl bg-white/10 text-potiguar-lime",
+          children: /*#__PURE__*/_jsx(Icon, {
+            name: "lock",
+            size: 38
+          })
+        }), /*#__PURE__*/_jsx("h2", {
+          className: "mt-6 font-display text-3xl font-extrabold",
+          children: "Palpites encerrados"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mx-auto mt-3 max-w-md text-sm leading-6 text-white/60",
+          children: nextGameAccess?.reason || "Não há jogos abertos para palpite nesta rodada."
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "p-6 sm:p-8",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "rounded-2xl bg-potiguar-lime/15 p-4 text-left text-sm text-potiguar-900",
+          children: [/*#__PURE__*/_jsx("strong", {
+            className: "block",
+            children: "Regra de horário"
+          }), predictionRules.join(" • ")]
+        }), /*#__PURE__*/_jsx("button", {
+          onClick: () => setPage("store"),
+          className: "mt-6 w-full rounded-xl bg-potiguar-900 px-5 py-3.5 text-sm font-extrabold text-white",
+          children: "Ver ranking da loja"
+        })]
+      })]
+    })
+  });
+  return /*#__PURE__*/_jsxs("div", {
+    className: "mx-auto max-w-4xl space-y-6",
+    children: [/*#__PURE__*/_jsx("section", {
+      className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8",
+      children: /*#__PURE__*/_jsxs("div", {
+        className: "flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
+            }), " ", round.official ? "Rodada oficial" : "Rodada teste", " • ", round.phase]
+          }), /*#__PURE__*/_jsx("h2", {
+            className: "mt-3 font-display text-3xl font-extrabold",
+            children: round.name
+          }), /*#__PURE__*/_jsx("p", {
+            className: "mt-2 text-sm text-white/60",
+            children: "Digite o placar nos campos vermelhos. Placar exato vale 6 pontos no total; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar."
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "glass flex items-center gap-3 rounded-2xl px-4 py-3",
+          children: [/*#__PURE__*/_jsx(Icon, {
+            name: "clock",
+            className: "text-potiguar-lime"
+          }), /*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-bold uppercase tracking-wider text-white/45",
+              children: "Janela de palpites"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "font-display text-lg font-extrabold",
+              children: firstOpenAccess ? `até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto"
+            })]
+          })]
+        })]
+      })
+    }), /*#__PURE__*/_jsx("section", {
+      className: "soft-card rounded-2xl p-3 sm:p-4",
+      children: /*#__PURE__*/_jsx("div", {
+        className: "grid grid-cols-3 gap-2",
+        children: [["open", "Para palpitar", openGames.length], ["upcoming", "Próximos", upcomingGames.length], ["closed", "Realizados", closedGames.length]].map(([value, label, count]) => /*#__PURE__*/_jsxs("button", {
+          type: "button",
+          onClick: () => setFilter(value),
+          className: `rounded-xl px-2 py-3 text-center text-[11px] font-extrabold transition ${filter === value ? "bg-potiguar-900 text-white" : "bg-slate-50 text-slate-400"}`,
+          children: [label, /*#__PURE__*/_jsx("span", {
+            className: `ml-1 rounded-full px-1.5 py-0.5 text-[9px] ${filter === value ? "bg-white/15 text-white" : "bg-white text-slate-400"}`,
+            children: count
+          })]
+        }, value))
+      })
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "space-y-4",
+      children: [filteredGames.length === 0 && /*#__PURE__*/_jsx("div", {
+        className: "soft-card rounded-2xl p-6 text-center text-sm font-semibold text-slate-400",
+        children: "Nenhum jogo nesta aba agora."
+      }), filteredGames.map(game => {
+        const access = gameAccess[game.id];
+        const closed = !access?.open;
+        const finished = game.status === "finished" || Number.isInteger(game.homeScore) && Number.isInteger(game.awayScore);
+        return /*#__PURE__*/_jsxs("article", {
+          className: "soft-card rounded-2xl p-4 sm:p-6",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "mb-5 flex items-center justify-between",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "rounded-full bg-potiguar-900/5 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: game.group
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "text-right",
+              children: [/*#__PURE__*/_jsxs("span", {
+                className: "flex items-center justify-end gap-1.5 text-xs font-bold text-slate-500",
+                children: [/*#__PURE__*/_jsx(Icon, {
+                  name: "clock",
+                  size: 14
+                }), " ", game.time]
+              }), /*#__PURE__*/_jsxs("span", {
+                className: "mt-1 block text-[9px] font-semibold uppercase tracking-wide text-slate-300",
+                children: [finished ? `FINAL ${game.homeScore} × ${game.awayScore}` : closed ? "PALPITE FECHADO" : `FECHA ${formatDateTime(access.closeAt)}`, " • ", game.venue]
+              })]
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-6",
+            children: [/*#__PURE__*/_jsxs("div", {
+              className: "flex flex-col items-center gap-2 sm:flex-row sm:justify-end",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "text-3xl",
+                children: game.homeFlag
+              }), /*#__PURE__*/_jsx("strong", {
+                className: "text-center text-sm text-potiguar-950 sm:text-base",
+                children: game.home
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "rounded-2xl border-2 border-potiguar-red/25 bg-potiguar-red/5 p-2 text-center shadow-lg shadow-red-500/10",
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "mb-1 text-[9px] font-extrabold uppercase tracking-wider text-potiguar-red",
+                children: "Digite seu palpite"
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "flex items-center gap-2",
+                children: [/*#__PURE__*/_jsx("input", {
+                  "aria-label": `Gols ${game.home}`,
+                  disabled: closed,
+                  placeholder: "0",
+                  className: "score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16",
+                  type: "number",
+                  min: "0",
+                  max: "9",
+                  value: (scores[game.id] || ["", ""])[0],
+                  onChange: e => updateScore(game.id, 0, e.target.value)
+                }), /*#__PURE__*/_jsx("span", {
+                  className: "font-extrabold text-potiguar-red",
+                  children: "×"
+                }), /*#__PURE__*/_jsx("input", {
+                  "aria-label": `Gols ${game.away}`,
+                  disabled: closed,
+                  placeholder: "0",
+                  className: "score-input h-14 w-14 rounded-xl border-2 border-potiguar-red bg-white text-center font-display text-2xl font-extrabold text-potiguar-950 outline-none transition focus:border-potiguar-lime focus:ring-4 focus:ring-potiguar-lime/30 disabled:border-slate-200 disabled:opacity-40 sm:h-16 sm:w-16",
+                  type: "number",
+                  min: "0",
+                  max: "9",
+                  value: (scores[game.id] || ["", ""])[1],
+                  onChange: e => updateScore(game.id, 1, e.target.value)
+                })]
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "flex flex-col items-center gap-2 sm:flex-row",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "text-3xl sm:order-2",
+                children: game.awayFlag
+              }), /*#__PURE__*/_jsx("strong", {
+                className: "text-center text-sm text-potiguar-950 sm:text-base",
+                children: game.away
+              })]
+            })]
+          })]
+        }, game.id);
+      })]
+    }), /*#__PURE__*/_jsx("div", {
+      className: "sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5",
+      children: /*#__PURE__*/_jsxs("button", {
+        disabled: !complete || saved,
+        onClick: async () => {
+          const ok = await onSavePrediction(user, scores, openGames);
+          if (ok) {
+            setSaved(true);
+            setToast("Palpites salvos e enviados para o admin.");
+          }
+        },
+        className: `flex w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-extrabold transition ${complete && !saved ? "bg-potiguar-900 text-white hover:bg-potiguar-800" : saved ? "bg-emerald-50 text-potiguar-700" : "cursor-not-allowed bg-slate-100 text-slate-400"}`,
+        children: [/*#__PURE__*/_jsx(Icon, {
+          name: saved ? "check" : "ball"
+        }), saved ? "Palpites salvos" : complete ? "Salvar palpites" : "Preencha todos os placares"]
+      })
+    })]
+  });
 }
 function RankingPage({
   user,
@@ -2000,75 +2345,100 @@ function RankingPage({
   const localRanking = pilotRanking.filter(person => person.store === user.store);
   const data = tab === "geral" ? pilotRanking : localRanking;
   const podium = [pilotRanking[1], pilotRanking[0], pilotRanking[2]].filter(Boolean);
-  return /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-6 md:flex-row md:items-center md:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
-  }, "Temporada 2026"), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-2 font-display text-3xl font-extrabold"
-  }, "Quem está voando?"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm text-white/60"
-  }, tab === "geral" ? "Classificação geral do piloto comercial." : `Classificação apenas da loja ${user.store}.`)), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-end justify-center gap-3"
-  }, podium.map((p, i) => {
-    const rank = [2, 1, 3][i];
-    return /*#__PURE__*/React.createElement("div", {
-      key: p.name,
-      className: `text-center ${rank === 1 ? "-translate-y-3" : ""}`
-    }, /*#__PURE__*/React.createElement(Avatar, {
-      initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-      size: rank === 1 ? "large" : "normal",
-      rank: rank,
-      photoUrl: p.photoUrl
-    }), /*#__PURE__*/React.createElement("p", {
-      className: "mt-2 max-w-[82px] truncate text-[10px] font-bold"
-    }, p.name.split(" ")[0]), /*#__PURE__*/React.createElement("p", {
-      className: "text-xs font-extrabold text-potiguar-lime"
-    }, p.points, " pts"));
-  })))), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card overflow-hidden rounded-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2 border-b border-slate-100 p-4 sm:p-5"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setTab("geral"),
-    className: `rounded-xl px-4 py-2.5 text-xs font-extrabold transition ${tab === "geral" ? "bg-potiguar-900 text-white" : "text-slate-400 hover:bg-slate-50"}`
-  }, "Top 10 geral"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setTab("loja"),
-    className: `rounded-xl px-4 py-2.5 text-xs font-extrabold transition ${tab === "loja" ? "bg-potiguar-900 text-white" : "text-slate-400 hover:bg-slate-50"}`
-  }, "Minha loja: ", user.store)), /*#__PURE__*/React.createElement("div", {
-    className: "divide-y divide-slate-100"
-  }, data.map((person, idx) => {
-    const isMe = person.name === user.name;
-    return /*#__PURE__*/React.createElement("div", {
-      key: person.name,
-      className: `flex items-center gap-3 p-4 sm:gap-4 sm:px-6 ${isMe ? "bg-potiguar-lime/10" : ""}`
-    }, /*#__PURE__*/React.createElement("span", {
-      className: `grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-extrabold ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-500" : idx === 2 ? "bg-orange-100 text-orange-700" : "text-slate-400"}`
-    }, idx < 3 ? ["🥇", "🥈", "🥉"][idx] : idx + 1), /*#__PURE__*/React.createElement(Avatar, {
-      initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-      photoUrl: person.photoUrl
-    }), /*#__PURE__*/React.createElement("div", {
-      className: "min-w-0 flex-1"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "truncate text-sm font-extrabold text-potiguar-950"
-    }, person.name, " ", isMe && /*#__PURE__*/React.createElement("span", {
-      className: "ml-1 text-[9px] text-potiguar-700"
-    }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
-      className: "truncate text-[10px] text-slate-400"
-    }, person.role, " • ", person.store || user.store, " • Comunicado ", person.announcementPoints, " • Palpite ", person.predictionPoints, " pts", person.salesPoints + person.topSellerPoints || person.storeGoalPoints ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : "")), person.trend && /*#__PURE__*/React.createElement("span", {
-      className: `hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`
-    }, person.trend), /*#__PURE__*/React.createElement("div", {
-      className: "text-right"
-    }, /*#__PURE__*/React.createElement("strong", {
-      className: "font-display text-lg text-potiguar-900"
-    }, person.points), /*#__PURE__*/React.createElement("p", {
-      className: "text-[9px] font-bold text-slate-300"
-    }, "PONTOS")));
-  }))));
+  return /*#__PURE__*/_jsxs("div", {
+    className: "space-y-6",
+    children: [/*#__PURE__*/_jsx("section", {
+      className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8",
+      children: /*#__PURE__*/_jsxs("div", {
+        className: "flex flex-col gap-6 md:flex-row md:items-center md:justify-between",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime",
+            children: "Temporada 2026"
+          }), /*#__PURE__*/_jsx("h2", {
+            className: "mt-2 font-display text-3xl font-extrabold",
+            children: "Quem está voando?"
+          }), /*#__PURE__*/_jsx("p", {
+            className: "mt-2 text-sm text-white/60",
+            children: tab === "geral" ? "Classificação geral do piloto comercial." : `Classificação apenas da loja ${user.store}.`
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "flex items-end justify-center gap-3",
+          children: podium.map((p, i) => {
+            const rank = [2, 1, 3][i];
+            return /*#__PURE__*/_jsxs("div", {
+              className: `text-center ${rank === 1 ? "-translate-y-3" : ""}`,
+              children: [/*#__PURE__*/_jsx(Avatar, {
+                initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+                size: rank === 1 ? "large" : "normal",
+                rank: rank,
+                photoUrl: p.photoUrl
+              }), /*#__PURE__*/_jsx("p", {
+                className: "mt-2 max-w-[82px] truncate text-[10px] font-bold",
+                children: p.name.split(" ")[0]
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "text-xs font-extrabold text-potiguar-lime",
+                children: [p.points, " pts"]
+              })]
+            }, p.name);
+          })
+        })]
+      })
+    }), /*#__PURE__*/_jsxs("section", {
+      className: "soft-card overflow-hidden rounded-2xl",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "flex gap-2 border-b border-slate-100 p-4 sm:p-5",
+        children: [/*#__PURE__*/_jsx("button", {
+          onClick: () => setTab("geral"),
+          className: `rounded-xl px-4 py-2.5 text-xs font-extrabold transition ${tab === "geral" ? "bg-potiguar-900 text-white" : "text-slate-400 hover:bg-slate-50"}`,
+          children: "Top 10 geral"
+        }), /*#__PURE__*/_jsxs("button", {
+          onClick: () => setTab("loja"),
+          className: `rounded-xl px-4 py-2.5 text-xs font-extrabold transition ${tab === "loja" ? "bg-potiguar-900 text-white" : "text-slate-400 hover:bg-slate-50"}`,
+          children: ["Minha loja: ", user.store]
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "divide-y divide-slate-100",
+        children: data.map((person, idx) => {
+          const isMe = person.name === user.name;
+          return /*#__PURE__*/_jsxs("div", {
+            className: `flex items-center gap-3 p-4 sm:gap-4 sm:px-6 ${isMe ? "bg-potiguar-lime/10" : ""}`,
+            children: [/*#__PURE__*/_jsx("span", {
+              className: `grid h-8 w-8 shrink-0 place-items-center rounded-lg text-xs font-extrabold ${idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-500" : idx === 2 ? "bg-orange-100 text-orange-700" : "text-slate-400"}`,
+              children: idx < 3 ? ["🥇", "🥈", "🥉"][idx] : idx + 1
+            }), /*#__PURE__*/_jsx(Avatar, {
+              initials: person.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+              photoUrl: person.photoUrl
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "min-w-0 flex-1",
+              children: [/*#__PURE__*/_jsxs("p", {
+                className: "truncate text-sm font-extrabold text-potiguar-950",
+                children: [person.name, " ", isMe && /*#__PURE__*/_jsx("span", {
+                  className: "ml-1 text-[9px] text-potiguar-700",
+                  children: "(VOCÊ)"
+                })]
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "truncate text-[10px] text-slate-400",
+                children: [person.role, " • ", person.store || user.store, " • Comunicado ", person.announcementPoints, " • Palpite ", person.predictionPoints, " pts", person.salesPoints + person.topSellerPoints || person.storeGoalPoints ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : ""]
+              })]
+            }), person.trend && /*#__PURE__*/_jsx("span", {
+              className: `hidden text-[10px] font-bold sm:block ${person.trend.startsWith("+") ? "text-emerald-600" : person.trend.startsWith("-") ? "text-red-400" : "text-slate-300"}`,
+              children: person.trend
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "text-right",
+              children: [/*#__PURE__*/_jsx("strong", {
+                className: "font-display text-lg text-potiguar-900",
+                children: person.points
+              }), /*#__PURE__*/_jsx("p", {
+                className: "text-[9px] font-bold text-slate-300",
+                children: "PONTOS"
+              })]
+            })]
+          }, person.name);
+        })
+      })]
+    })]
+  });
 }
 function StorePage({
   user,
@@ -2095,175 +2465,245 @@ function StorePage({
     goal: storeGoal
   }).sort((a, b) => b.sold / b.goal - a.sold / a.goal);
   const dayChampion = networkRanking[0];
-  if (!productFocusEnabled) return /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "store",
-    size: 16
-  }), " Loja ", user.store), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-3 font-display text-3xl font-extrabold"
-  }, "Fase teste: foco nos palpites"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm leading-6 text-white/65"
-  }, "Nesta etapa não teremos desafio da semana nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.")), user.accessRole === "leadership" && /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-3 gap-3"
-  }, /*#__PURE__*/React.createElement(StatCard, {
-    icon: "users",
-    label: "Equipe",
-    value: localRanking.length,
-    detail: "Participantes da loja",
-    accent: "green"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "megaphone",
-    label: "Leituras",
-    value: localReads,
-    detail: "Endomarketing confirmado",
-    accent: "lime"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "ranking",
-    label: "Pontos da loja",
-    value: localPoints,
-    detail: `${localHits} acerto(s) em palpites`,
-    accent: "white"
-  })), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Nosso time"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Ranking ", user.store)), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, localRanking.length, " PARTICIPANTES")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 space-y-3"
-  }, localRanking.map((p, i) => /*#__PURE__*/React.createElement("div", {
-    key: p.name,
-    className: `flex items-center gap-3 rounded-xl p-3 ${p.name === user.name ? "bg-potiguar-lime/15" : "bg-slate-50"}`
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-5 text-center text-xs font-extrabold text-slate-400"
-  }, i === 0 ? "🥇" : i + 1), /*#__PURE__*/React.createElement(Avatar, {
-    initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-    photoUrl: p.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-sm font-extrabold text-potiguar-950"
-  }, p.name, p.name === user.name && /*#__PURE__*/React.createElement("span", {
-    className: "ml-1 text-[9px] text-potiguar-700"
-  }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-[10px] text-slate-400"
-  }, p.role, " • ", p.predictionHits, " acerto(s)")), /*#__PURE__*/React.createElement("strong", {
-    className: "font-display text-lg text-potiguar-900"
-  }, p.points))))));
-  return /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "store",
-    size: 16
-  }), " Loja ", user.store), /*#__PURE__*/React.createElement("h2", {
-    className: "mt-3 font-display text-3xl font-extrabold"
-  }, "Juntos até a meta!"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm text-white/60"
-  }, "Piloto ativo em ", user.store, " • ranking atualizado pelas vendas reais")), /*#__PURE__*/React.createElement("div", {
-    className: "glass rounded-2xl px-5 py-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
-  }, "Atingimento hoje"), /*#__PURE__*/React.createElement("p", {
-    className: "font-display text-4xl font-extrabold text-potiguar-lime"
-  }, storePercent, "%"))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-7"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-2 flex justify-between text-xs font-bold"
-  }, /*#__PURE__*/React.createElement("span", null, totalSold, " ", storeUnit, " vendidos"), /*#__PURE__*/React.createElement("span", null, "Meta: ", storeGoal, " ", storeUnit)), /*#__PURE__*/React.createElement("div", {
-    className: "h-3 overflow-hidden rounded-full bg-black/20"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "h-full rounded-full bg-potiguar-lime",
-    style: {
-      width: `${Math.min(storePercent, 100)}%`
-    }
-  })))), /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-6 xl:grid-cols-[1fr_.82fr]"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Nosso time"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Ranking ", user.store)), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, localRanking.length, " PARTICIPANTES")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 space-y-3"
-  }, localRanking.map((p, i) => /*#__PURE__*/React.createElement("div", {
-    key: p.name,
-    className: `flex items-center gap-3 rounded-xl p-3 ${p.name === user.name ? "bg-potiguar-lime/15" : "bg-slate-50"}`
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-5 text-center text-xs font-extrabold text-slate-400"
-  }, i === 0 ? "🥇" : i + 1), /*#__PURE__*/React.createElement(Avatar, {
-    initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-    photoUrl: p.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-sm font-extrabold text-potiguar-950"
-  }, p.name, p.name === user.name && /*#__PURE__*/React.createElement("span", {
-    className: "ml-1 text-[9px] text-potiguar-700"
-  }, "(VOCÊ)")), /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-[10px] text-slate-400"
-  }, p.role, " • ", p.soldQuantity, " ", storeUnit, " • ", p.predictionHits, " acerto(s)", p.isTopSeller ? " • destaque" : "")), /*#__PURE__*/React.createElement("strong", {
-    className: "font-display text-lg text-potiguar-900"
-  }, p.points))))), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid h-14 w-14 place-items-center rounded-2xl bg-amber-100 text-3xl"
-  }, "🏆"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600"
-  }, "Loja campeã do dia"), /*#__PURE__*/React.createElement("h3", {
-    className: "font-display text-xl font-extrabold text-potiguar-950"
-  }, dayChampion.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, Math.round(dayChampion.sold / dayChampion.goal * 100), "% da meta • ", dayChampion.sold, " ", storeUnit)))), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-display text-lg font-extrabold text-potiguar-950"
-  }, "Ranking da rede"), /*#__PURE__*/React.createElement(Icon, {
-    name: "ranking",
-    className: "text-potiguar-700"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 space-y-4"
-  }, networkRanking.slice(0, 4).map((s, i) => /*#__PURE__*/React.createElement("div", {
-    key: s.name
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "mb-1.5 flex justify-between text-xs"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-potiguar-950"
-  }, i + 1, ". ", s.name), /*#__PURE__*/React.createElement("span", {
-    className: "font-extrabold text-potiguar-700"
-  }, Math.round(s.sold / s.goal * 100), "%")), /*#__PURE__*/React.createElement("div", {
-    className: "progress-track h-2 rounded-full"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "progress-fill h-full rounded-full",
-    style: {
-      width: `${Math.min(s.sold / s.goal * 100, 100)}%`
-    }
-  })))))))));
+  if (!productFocusEnabled) return /*#__PURE__*/_jsxs("div", {
+    className: "space-y-6",
+    children: [/*#__PURE__*/_jsxs("section", {
+      className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime",
+        children: [/*#__PURE__*/_jsx(Icon, {
+          name: "store",
+          size: 16
+        }), " Loja ", user.store]
+      }), /*#__PURE__*/_jsx("h2", {
+        className: "mt-3 font-display text-3xl font-extrabold",
+        children: "Fase teste: foco nos palpites"
+      }), /*#__PURE__*/_jsx("p", {
+        className: "mt-2 text-sm leading-6 text-white/65",
+        children: "Nesta etapa não teremos desafio da semana nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja."
+      })]
+    }), user.accessRole === "leadership" && /*#__PURE__*/_jsxs("div", {
+      className: "grid grid-cols-3 gap-3",
+      children: [/*#__PURE__*/_jsx(StatCard, {
+        icon: "users",
+        label: "Equipe",
+        value: localRanking.length,
+        detail: "Participantes da loja",
+        accent: "green"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: "megaphone",
+        label: "Leituras",
+        value: localReads,
+        detail: "Endomarketing confirmado",
+        accent: "lime"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: "ranking",
+        label: "Pontos da loja",
+        value: localPoints,
+        detail: `${localHits} acerto(s) em palpites`,
+        accent: "white"
+      })]
+    }), /*#__PURE__*/_jsxs("section", {
+      className: "soft-card rounded-2xl p-5 sm:p-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "flex items-center justify-between",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: "Nosso time"
+          }), /*#__PURE__*/_jsxs("h3", {
+            className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+            children: ["Ranking ", user.store]
+          })]
+        }), /*#__PURE__*/_jsxs("span", {
+          className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800",
+          children: [localRanking.length, " PARTICIPANTES"]
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "mt-5 space-y-3",
+        children: localRanking.map((p, i) => /*#__PURE__*/_jsxs("div", {
+          className: `flex items-center gap-3 rounded-xl p-3 ${p.name === user.name ? "bg-potiguar-lime/15" : "bg-slate-50"}`,
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "w-5 text-center text-xs font-extrabold text-slate-400",
+            children: i === 0 ? "🥇" : i + 1
+          }), /*#__PURE__*/_jsx(Avatar, {
+            initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+            photoUrl: p.photoUrl
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "min-w-0 flex-1",
+            children: [/*#__PURE__*/_jsxs("p", {
+              className: "truncate text-sm font-extrabold text-potiguar-950",
+              children: [p.name, p.name === user.name && /*#__PURE__*/_jsx("span", {
+                className: "ml-1 text-[9px] text-potiguar-700",
+                children: "(VOCÊ)"
+              })]
+            }), /*#__PURE__*/_jsxs("p", {
+              className: "truncate text-[10px] text-slate-400",
+              children: [p.role, " • ", p.predictionHits, " acerto(s)"]
+            })]
+          }), /*#__PURE__*/_jsx("strong", {
+            className: "font-display text-lg text-potiguar-900",
+            children: p.points
+          })]
+        }, p.name))
+      })]
+    })]
+  });
+  return /*#__PURE__*/_jsxs("div", {
+    className: "space-y-6",
+    children: [/*#__PURE__*/_jsxs("section", {
+      className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime",
+            children: [/*#__PURE__*/_jsx(Icon, {
+              name: "store",
+              size: 16
+            }), " Loja ", user.store]
+          }), /*#__PURE__*/_jsx("h2", {
+            className: "mt-3 font-display text-3xl font-extrabold",
+            children: "Juntos até a meta!"
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "mt-2 text-sm text-white/60",
+            children: ["Piloto ativo em ", user.store, " • ranking atualizado pelas vendas reais"]
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "glass rounded-2xl px-5 py-4",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-bold uppercase tracking-wider text-white/45",
+            children: "Atingimento hoje"
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "font-display text-4xl font-extrabold text-potiguar-lime",
+            children: [storePercent, "%"]
+          })]
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "mt-7",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "mb-2 flex justify-between text-xs font-bold",
+          children: [/*#__PURE__*/_jsxs("span", {
+            children: [totalSold, " ", storeUnit, " vendidos"]
+          }), /*#__PURE__*/_jsxs("span", {
+            children: ["Meta: ", storeGoal, " ", storeUnit]
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "h-3 overflow-hidden rounded-full bg-black/20",
+          children: /*#__PURE__*/_jsx("div", {
+            className: "h-full rounded-full bg-potiguar-lime",
+            style: {
+              width: `${Math.min(storePercent, 100)}%`
+            }
+          })
+        })]
+      })]
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "grid gap-6 xl:grid-cols-[1fr_.82fr]",
+      children: [/*#__PURE__*/_jsxs("section", {
+        className: "soft-card rounded-2xl p-5 sm:p-6",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex items-center justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "Nosso time"
+            }), /*#__PURE__*/_jsxs("h3", {
+              className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+              children: ["Ranking ", user.store]
+            })]
+          }), /*#__PURE__*/_jsxs("span", {
+            className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800",
+            children: [localRanking.length, " PARTICIPANTES"]
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "mt-5 space-y-3",
+          children: localRanking.map((p, i) => /*#__PURE__*/_jsxs("div", {
+            className: `flex items-center gap-3 rounded-xl p-3 ${p.name === user.name ? "bg-potiguar-lime/15" : "bg-slate-50"}`,
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "w-5 text-center text-xs font-extrabold text-slate-400",
+              children: i === 0 ? "🥇" : i + 1
+            }), /*#__PURE__*/_jsx(Avatar, {
+              initials: p.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+              photoUrl: p.photoUrl
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "min-w-0 flex-1",
+              children: [/*#__PURE__*/_jsxs("p", {
+                className: "truncate text-sm font-extrabold text-potiguar-950",
+                children: [p.name, p.name === user.name && /*#__PURE__*/_jsx("span", {
+                  className: "ml-1 text-[9px] text-potiguar-700",
+                  children: "(VOCÊ)"
+                })]
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "truncate text-[10px] text-slate-400",
+                children: [p.role, " • ", p.soldQuantity, " ", storeUnit, " • ", p.predictionHits, " acerto(s)", p.isTopSeller ? " • destaque" : ""]
+              })]
+            }), /*#__PURE__*/_jsx("strong", {
+              className: "font-display text-lg text-potiguar-900",
+              children: p.points
+            })]
+          }, p.name))
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "space-y-6",
+        children: [/*#__PURE__*/_jsx("section", {
+          className: "soft-card rounded-2xl p-5 sm:p-6",
+          children: /*#__PURE__*/_jsxs("div", {
+            className: "flex items-center gap-4",
+            children: [/*#__PURE__*/_jsx("div", {
+              className: "grid h-14 w-14 place-items-center rounded-2xl bg-amber-100 text-3xl",
+              children: "🏆"
+            }), /*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600",
+                children: "Loja campeã do dia"
+              }), /*#__PURE__*/_jsx("h3", {
+                className: "font-display text-xl font-extrabold text-potiguar-950",
+                children: dayChampion.name
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "text-xs text-slate-400",
+                children: [Math.round(dayChampion.sold / dayChampion.goal * 100), "% da meta • ", dayChampion.sold, " ", storeUnit]
+              })]
+            })]
+          })
+        }), /*#__PURE__*/_jsxs("section", {
+          className: "soft-card rounded-2xl p-5 sm:p-6",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/_jsx("h3", {
+              className: "font-display text-lg font-extrabold text-potiguar-950",
+              children: "Ranking da rede"
+            }), /*#__PURE__*/_jsx(Icon, {
+              name: "ranking",
+              className: "text-potiguar-700"
+            })]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "mt-5 space-y-4",
+            children: networkRanking.slice(0, 4).map((s, i) => /*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsxs("div", {
+                className: "mb-1.5 flex justify-between text-xs",
+                children: [/*#__PURE__*/_jsxs("span", {
+                  className: "font-bold text-potiguar-950",
+                  children: [i + 1, ". ", s.name]
+                }), /*#__PURE__*/_jsxs("span", {
+                  className: "font-extrabold text-potiguar-700",
+                  children: [Math.round(s.sold / s.goal * 100), "%"]
+                })]
+              }), /*#__PURE__*/_jsx("div", {
+                className: "progress-track h-2 rounded-full",
+                children: /*#__PURE__*/_jsx("div", {
+                  className: "progress-fill h-full rounded-full",
+                  style: {
+                    width: `${Math.min(s.sold / s.goal * 100, 100)}%`
+                  }
+                })
+              })]
+            }, s.name))
+          })]
+        })]
+      })]
+    })]
+  });
 }
 function AdminPage({
   adminUser,
@@ -2345,7 +2785,7 @@ function AdminPage({
       awayScore: String(result.awayScore)
     });
   }, [allUsers, settings, currentAdminGame.id]);
-  const actions = [["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Desafios", "Cadastrar desafio da semana", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["bolt", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
+  const actions = [["bolt", "Aderência", "Quem participou e quem falta", "engagement"], ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Desafios", "Cadastrar desafio da semana", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["chart", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
   const formModule = null;
   const visibleUsers = users.filter(user => {
     const search = userSearch.trim().toLowerCase();
@@ -2373,6 +2813,7 @@ function AdminPage({
   const roundClosingSummary = getRoundClosingSummary(pilotRanking);
   const productFocusEnabled = isProductFocusEnabled(settings);
   const storeSummaries = getStoreSummaries(pilotRanking, predictionEntries, readEntries);
+  const predictionEngagement = getPredictionEngagement(users, predictionEntries);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const startEditUser = user => {
     const cpf = onlyDigits(user.cpf);
@@ -2672,1465 +3113,2284 @@ function AdminPage({
     URL.revokeObjectURL(url);
     setToast("Relatório CSV exportado.");
   };
-  return /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-sm font-semibold text-slate-400"
-  }, "Piloto comercial • acesso administrativo"), /*#__PURE__*/React.createElement("h2", {
-    className: "font-display text-3xl font-extrabold text-potiguar-950"
-  }, "Central de administração")), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-2"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      onRefreshData();
-      setToast("Dados atualizados.");
-    },
-    className: "flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "clock",
-    size: 17
-  }), " Atualizar"), /*#__PURE__*/React.createElement("button", {
-    onClick: exportReport,
-    className: "flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "chart",
-    size: 17
-  }), " Exportar relatório"))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-2 gap-3 xl:grid-cols-4"
-  }, /*#__PURE__*/React.createElement(StatCard, {
-    icon: "users",
-    label: "Participantes do piloto",
-    value: participantCount,
-    detail: `${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`,
-    accent: "green"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "megaphone",
-    label: "Leituras",
-    value: readEntries.length,
-    detail: readEntries.length ? "Comunicados confirmados" : "Aguardando confirmações",
-    accent: "lime"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: "ball",
-    label: "Palpites",
-    value: predictionEntries.length,
-    detail: predictionEntries.length ? "Enviados para apuração" : "Aguardando envio",
-    accent: "white"
-  }), /*#__PURE__*/React.createElement(StatCard, {
-    icon: productFocusEnabled ? "store" : "trophy",
-    label: productFocusEnabled ? "Meta da rede" : "Fase teste",
-    value: productFocusEnabled ? `${Math.round(totalSold / storeGoal * 100)}%` : "16 avos",
-    detail: productFocusEnabled ? `${totalSold} de ${storeGoal}` : "Somente endomarketing e palpites",
-    accent: "white"
-  })), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Ações rápidas"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "O que vamos movimentar?")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
-  }, actions.map(([icon, title, desc, value]) => /*#__PURE__*/React.createElement("button", {
-    key: title,
-    onClick: () => setModule(value),
-    className: `lift rounded-2xl border p-4 text-left ${module === value ? "border-potiguar-500 bg-potiguar-lime/10" : "border-slate-100 bg-slate-50"}`
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "grid h-10 w-10 place-items-center rounded-xl bg-potiguar-900 text-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: icon,
-    size: 19
-  })), /*#__PURE__*/React.createElement("strong", {
-    className: "mt-4 block text-sm text-potiguar-950"
-  }, title), /*#__PURE__*/React.createElement("span", {
-    className: "mt-1 block text-[10px] leading-4 text-slate-400"
-  }, desc))))), module === "announcements" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card overflow-hidden rounded-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "hero-pattern pitch-lines p-6 text-white"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
-  }, "RH • Endomarketing"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-2 font-display text-2xl font-extrabold"
-  }, "Central de comunicados"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 max-w-2xl text-sm leading-6 text-white/65"
-  }, "Cadastre o comunicado da rodada, inclua vídeo/anexos e agende quando ele deve aparecer para os participantes.")), /*#__PURE__*/React.createElement("form", {
-    onSubmit: saveAnnouncement,
-    className: "grid gap-5 p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-potiguar-lime/10 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "1. Conteúdo principal"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-4 md:grid-cols-[1fr_.45fr]"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Título que aparecerá para o colaborador"), /*#__PURE__*/React.createElement("input", {
-    value: announcementForm.title || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      title: e.target.value
-    }),
-    placeholder: "Ex.: Vídeo obrigatório da rodada",
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Tempo mínimo do vídeo"), /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    min: "0",
-    value: announcementForm.minimumSeconds || 30,
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      minimumSeconds: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  }))), /*#__PURE__*/React.createElement("label", {
-    className: "mt-4 block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Texto do comunicado"), /*#__PURE__*/React.createElement("textarea", {
-    rows: "5",
-    value: announcementForm.body || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      body: e.target.value
-    }),
-    placeholder: "Escreva aqui a orientação que o colaborador precisa ler antes de palpitar.",
-    className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-5 lg:grid-cols-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-slate-50 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "2. Vídeo e arquivos"), /*#__PURE__*/React.createElement("label", {
-    className: "mt-4 block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "URL do vídeo"), /*#__PURE__*/React.createElement("input", {
-    value: announcementForm.videoUrl || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      videoUrl: e.target.value
-    }),
-    placeholder: "Cole o link do YouTube",
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", {
-    className: "mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-potiguar-700/25 bg-white p-5 text-center transition hover:border-potiguar-lime"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "plus",
-    className: "text-potiguar-700"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "mt-2 text-xs font-extrabold text-potiguar-950"
-  }, "Adicionar arquivos"), /*#__PURE__*/React.createElement("span", {
-    className: "mt-1 text-[10px] text-slate-400"
-  }, "PDF, imagem ou documento • até 5 arquivos • 900 KB cada"), /*#__PURE__*/React.createElement("input", {
-    type: "file",
-    multiple: true,
-    onChange: attachAnnouncementFiles,
-    className: "hidden"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 space-y-2"
-  }, (announcementForm.attachments || []).map(file => /*#__PURE__*/React.createElement("div", {
-    key: file.id,
-    className: "flex items-center justify-between gap-3 rounded-xl bg-white p-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, file.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, Math.round((file.size || 0) / 1024), " KB")), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: () => removeAnnouncementAttachment(file.id),
-    className: "rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red"
-  }, "Remover"))), !(announcementForm.attachments || []).length && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, "Nenhum arquivo anexado."))), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-slate-50 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "3. Agendamento"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-4 sm:grid-cols-2"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Iniciar em"), /*#__PURE__*/React.createElement("input", {
-    type: "datetime-local",
-    value: formatDateTimeInput(announcementForm.startsAt),
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      startsAt: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Finalizar em"), /*#__PURE__*/React.createElement("input", {
-    type: "datetime-local",
-    value: formatDateTimeInput(announcementForm.endsAt),
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      endsAt: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  }))), /*#__PURE__*/React.createElement("label", {
-    className: "mt-4 block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Status visível"), /*#__PURE__*/React.createElement("input", {
-    value: announcementForm.publishedAt || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      publishedAt: e.target.value
-    }),
-    placeholder: "Ex.: ATIVO, Programado, Rodada 16 avos",
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", {
-    className: "mt-4 block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "ID interno"), /*#__PURE__*/React.createElement("input", {
-    value: announcementForm.id || "",
-    onChange: e => setAnnouncementForm({
-      ...announcementForm,
-      id: e.target.value
-    }),
-    placeholder: "Pode deixar automático",
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500"
-  }, "Dica para o RH: ao mudar o ID do comunicado, a leitura será exigida novamente para a rodada."))), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-3 sm:flex-row sm:justify-end"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: () => setAnnouncementForm(settings.announcement || defaultAnnouncement),
-    className: "rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400"
-  }, "Desfazer alterações"), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "rounded-xl bg-potiguar-900 px-6 py-3 text-xs font-extrabold text-white"
-  }, "Salvar comunicado")))), module === "awards" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600"
-  }, "Premiação"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Prêmio da rodada"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Este prêmio aparece na Home dos participantes.")), /*#__PURE__*/React.createElement("form", {
-    onSubmit: saveAward,
-    className: "mt-5 grid gap-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-4 md:grid-cols-2"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Prêmio"), /*#__PURE__*/React.createElement("input", {
-    value: awardForm.name || "",
-    onChange: e => setAwardForm({
-      ...awardForm,
-      name: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Critério"), /*#__PURE__*/React.createElement("input", {
-    value: awardForm.criterion || "",
-    onChange: e => setAwardForm({
-      ...awardForm,
-      criterion: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  }))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Descrição"), /*#__PURE__*/React.createElement("textarea", {
-    rows: "3",
-    value: awardForm.description || "",
-    onChange: e => setAwardForm({
-      ...awardForm,
-      description: e.target.value
-    }),
-    className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-end"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, "Salvar premiação")))), module === "rounds" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Rodada"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Controle da rodada e resultado"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Use o status para comunicar o momento da rodada. O resultado recalcula os pontos de palpite.")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 rounded-2xl border border-potiguar-500/15 bg-potiguar-lime/5 p-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Calendário automático"), /*#__PURE__*/React.createElement("h4", {
-    className: "font-display text-lg font-extrabold text-potiguar-950"
-  }, "Fases finais da Copa"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-500"
-  }, "16 avos em modo teste; a partir das oitavas, rodadas oficiais. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes do jogo.")), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-2 sm:items-end"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, "Até 10 min antes"), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: syncWorldCupMatches,
-    className: "rounded-xl bg-potiguar-900 px-4 py-2.5 text-[10px] font-extrabold text-white"
-  }, "Sincronizar Copa"))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 rounded-2xl border border-white bg-white/80 p-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between gap-3"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "football-data.org"), /*#__PURE__*/React.createElement("h5", {
-    className: "text-sm font-extrabold text-potiguar-950"
-  }, "Jogos sincronizados")), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, worldCupMatches.length, " jogos")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3"
-  }, (activeGames || []).slice(0, 6).map(match => {
-    const access = getGamePredictionAccess(match);
-    return /*#__PURE__*/React.createElement("div", {
-      key: match.id,
-      className: "rounded-xl bg-slate-50 p-3"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-    }, match.group), /*#__PURE__*/React.createElement("p", {
-      className: "mt-1 truncate text-xs font-extrabold text-potiguar-950"
-    }, match.home, " x ", match.away), /*#__PURE__*/React.createElement("p", {
-      className: "mt-1 text-[10px] text-slate-400"
-    }, formatDateTime(match.kickoffAt), " • fecha ", formatDateTime(access.closeAt)));
-  }), worldCupMatches.length === 0 && /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, "Nenhum jogo sincronizado ainda. Configure a API key e clique em Sincronizar Copa."))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3"
-  }, knockoutRounds.map(round => {
-    const access = getPredictionAccess(round);
-    return /*#__PURE__*/React.createElement("button", {
-      key: round.id,
-      type: "button",
-      onClick: () => applyCalendarRound(round),
-      className: `rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md ${round.official ? "border-potiguar-500/20 bg-white" : "border-amber-200 bg-amber-50"}`
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-start justify-between gap-3"
-    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-      className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-    }, round.phase), /*#__PURE__*/React.createElement("p", {
-      className: "mt-1 text-sm font-extrabold text-potiguar-950"
-    }, round.name)), /*#__PURE__*/React.createElement("span", {
-      className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${round.official ? "bg-potiguar-lime/25 text-potiguar-800" : "bg-amber-100 text-amber-700"}`
-    }, round.official ? "OFICIAL" : "TESTE")), /*#__PURE__*/React.createElement("p", {
-      className: "mt-3 text-[10px] leading-4 text-slate-500"
-    }, "Jogo: ", formatDateTime(round.kickoffAt), " • Palpites até ", formatDateTime(access.closeAt)), /*#__PURE__*/React.createElement("p", {
-      className: "mt-1 text-[10px] font-bold text-potiguar-700"
-    }, "Abertura sugerida: ", formatDateTime(access.openAt)));
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-potiguar-950"
-  }, "Regra dos palpites:"), " ", predictionRules.join(" • "))), /*#__PURE__*/React.createElement("form", {
-    onSubmit: saveRound,
-    className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_.8fr_auto] md:items-end"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Nome da rodada"), /*#__PURE__*/React.createElement("input", {
-    value: roundForm.name || "",
-    onChange: e => setRoundForm({
-      ...roundForm,
-      name: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Status"), /*#__PURE__*/React.createElement("select", {
-    value: roundForm.status || "open",
-    onChange: e => setRoundForm({
-      ...roundForm,
-      status: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: "open"
-  }, "Aberta"), /*#__PURE__*/React.createElement("option", {
-    value: "predictions_closed"
-  }, "Palpites encerrados"), /*#__PURE__*/React.createElement("option", {
-    value: "results"
-  }, "Resultado lançado"), /*#__PURE__*/React.createElement("option", {
-    value: "closed"
-  }, "Rodada encerrada"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Horário do jogo"), /*#__PURE__*/React.createElement("input", {
-    type: "datetime-local",
-    value: (roundForm.kickoffAt || "").slice(0, 16),
-    onChange: e => setRoundForm({
-      ...roundForm,
-      kickoffAt: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Fecha automaticamente"), /*#__PURE__*/React.createElement("input", {
-    type: "text",
-    readOnly: true,
-    value: formatDateTime(roundWindow.closeAt),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-potiguar-800 outline-none"
-  })), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, "Salvar rodada")), /*#__PURE__*/React.createElement("form", {
-    onSubmit: saveResult,
-    className: "mt-5 grid gap-4 rounded-2xl bg-potiguar-950 p-4 text-white md:grid-cols-[1fr_.4fr_.4fr_auto] md:items-end"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
-  }, "Resultado do jogo"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-sm font-extrabold"
-  }, currentAdminGame.home, " x ", currentAdminGame.away)), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-white/70"
-  }, currentAdminGame.home), /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    min: "0",
-    value: resultForm.homeScore,
-    onChange: e => setResultForm({
-      ...resultForm,
-      homeScore: e.target.value
-    }),
-    className: "w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-white/70"
-  }, currentAdminGame.away), /*#__PURE__*/React.createElement("input", {
-    type: "number",
-    min: "0",
-    value: resultForm.awayScore,
-    onChange: e => setResultForm({
-      ...resultForm,
-      awayScore: e.target.value
-    }),
-    className: "w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"
-  })), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "rounded-xl bg-potiguar-lime px-5 py-3 text-xs font-extrabold text-potiguar-950"
-  }, "Salvar resultado")), /*#__PURE__*/React.createElement("section", {
-    className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-700"
-  }, "Fechamento da rodada"), /*#__PURE__*/React.createElement("h4", {
-    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, "Ganhadores da ", roundForm.phase || "rodada"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs leading-5 text-slate-500"
-  }, productFocusEnabled ? "Ao encerrar, o sistema registra o 1º vendedor geral, o 1º vendedor de cada loja e os 2 primeiros líderes geral." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites.")), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: closeRound,
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, "Encerrar e registrar ganhadores")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-3 lg:grid-cols-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-xl bg-white p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Top 3 geral"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 space-y-2"
-  }, roundClosingSummary.topOverall.length ? roundClosingSummary.topOverall.map((person, index) => /*#__PURE__*/React.createElement("div", {
-    key: person.cpf,
-    className: "flex items-center gap-2 rounded-xl bg-slate-50 p-2"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-6 text-center text-xs"
-  }, ["🥇", "🥈", "🥉"][index]), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, person.store, " • ", person.role)), /*#__PURE__*/React.createElement("strong", {
-    className: "text-xs text-potiguar-900"
-  }, person.points))) : /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, "Sem pontuação registrada ainda."))), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-xl bg-white p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Top 2 líderes"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 space-y-2"
-  }, roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
-    key: person.cpf,
-    className: "flex items-center gap-2 rounded-xl bg-slate-50 p-2"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-6 text-center text-xs"
-  }, ["🥇", "🥈", "🥉"][index]), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, person.store)), /*#__PURE__*/React.createElement("strong", {
-    className: "text-xs text-potiguar-900"
-  }, person.points))) : /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, "Sem líderes pontuados ainda."))), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-xl bg-white p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Vendedor por loja"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 grid gap-2 sm:grid-cols-2"
-  }, roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => /*#__PURE__*/React.createElement("div", {
-    key: item.store,
-    className: "rounded-xl bg-slate-50 p-3"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold text-potiguar-800"
-  }, item.store), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 truncate text-xs font-extrabold text-potiguar-950"
-  }, item.winner.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, item.winner.points, " pts • ", item.winner.role))) : /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, "Sem lojas com pontuação registrada ainda.")))))), module === "rankings" && /*#__PURE__*/React.createElement("section", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
-  }, "Classificação consolidada"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
-    className: "font-display text-3xl font-extrabold"
-  }, "Rankings do piloto"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-2 text-sm text-white/60"
-  }, "Ranking calculado com dados gravados no banco: leituras, palpites e vendas. Atualização automática a cada 15 segundos.")), /*#__PURE__*/React.createElement("div", {
-    className: "glass rounded-2xl px-5 py-3"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-bold uppercase text-white/45"
-  }, "Atualização"), /*#__PURE__*/React.createElement("p", {
-    className: "font-display text-lg font-extrabold"
-  }, "Automática")))), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Premiação Oitavas"), /*#__PURE__*/React.createElement("h4", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Ganhadores previstos da rodada"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Acompanhamento ao vivo: 1º vendedor geral, 1º vendedor de cada loja e os 2 primeiros líderes geral.")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-3 md:grid-cols-2"
-  }, /*#__PURE__*/React.createElement("a", {
-    href: (settings.award || defaultAward).storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl,
-    target: "_blank",
-    rel: "noreferrer",
-    className: "rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Prêmio por loja"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-sm font-extrabold text-potiguar-950"
-  }, (settings.award || defaultAward).storeSellerPrize || defaultAward.storeSellerPrize), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-[10px] text-slate-400"
-  }, "Para o 1º vendedor de cada loja")), /*#__PURE__*/React.createElement("a", {
-    href: (settings.award || defaultAward).mainPrizeUrl || defaultAward.mainPrizeUrl,
-    target: "_blank",
-    rel: "noreferrer",
-    className: "rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Prêmio geral/liderança"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-sm font-extrabold text-potiguar-950"
-  }, (settings.award || defaultAward).overallSellerPrize || defaultAward.overallSellerPrize), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-[10px] text-slate-400"
-  }, "Para 1º vendedor geral e top 2 líderes"))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 grid gap-4 xl:grid-cols-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-potiguar-lime/15 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "1º vendedor geral"), roundClosingSummary.topSellerOverall ? /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: roundClosingSummary.topSellerOverall.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
-    photoUrl: roundClosingSummary.topSellerOverall.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-sm font-extrabold text-potiguar-950"
-  }, roundClosingSummary.topSellerOverall.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-500"
-  }, roundClosingSummary.topSellerOverall.store)), /*#__PURE__*/React.createElement("strong", {
-    className: "font-display text-lg text-potiguar-900"
-  }, roundClosingSummary.topSellerOverall.points)) : /*#__PURE__*/React.createElement("p", {
-    className: "mt-3 text-xs text-slate-400"
-  }, "Aguardando pontuação.")), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-slate-50 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Top 2 líderes geral"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 space-y-2"
-  }, roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
-    key: person.cpf,
-    className: "flex items-center gap-2 rounded-xl bg-white p-2"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-6 text-center text-xs"
-  }, ["🥇", "🥈"][index]), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, person.store)), /*#__PURE__*/React.createElement("strong", {
-    className: "text-xs text-potiguar-900"
-  }, person.points))) : /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, "Aguardando líderes pontuarem."))), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-2xl bg-slate-50 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "1º vendedor por loja"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1"
-  }, roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => /*#__PURE__*/React.createElement("div", {
-    key: item.store,
-    className: "rounded-xl bg-white p-2"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold text-potiguar-800"
-  }, item.store), /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, item.winner?.name || "—"))) : /*#__PURE__*/React.createElement("p", {
-    className: "text-xs text-slate-400"
-  }, "Aguardando lojas pontuarem."))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-6 xl:grid-cols-2"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "soft-card overflow-hidden rounded-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "border-b border-slate-100 p-5"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Pontuação geral"), /*#__PURE__*/React.createElement("h4", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Ranking geral de participantes"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Fonte: leituras, palpites e vendas registradas no servidor.")), /*#__PURE__*/React.createElement("div", {
-    className: "divide-y divide-slate-100"
-  }, pilotRanking.slice(0, 10).map((person, index) => /*#__PURE__*/React.createElement("div", {
-    key: person.name,
-    className: "flex items-center gap-3 px-5 py-3"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `grid h-8 w-8 place-items-center rounded-lg text-xs font-extrabold ${index < 3 ? "bg-potiguar-lime/20 text-potiguar-800" : "text-slate-400"}`
-  }, index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1), /*#__PURE__*/React.createElement(Avatar, {
-    initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
-    photoUrl: person.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, person.store, " • ", person.role, " • Comunicado ", person.announcementPoints, " pt • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s)", person.salesPoints + person.topSellerPoints || person.storeGoalPoints ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts/${person.soldQuantity} m²${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : "")), /*#__PURE__*/React.createElement("strong", {
-    className: "font-display text-lg text-potiguar-900"
-  }, person.points, " pts"))))), productFocusEnabled && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card overflow-hidden rounded-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "border-b border-slate-100 p-5"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Desafio da semana"), /*#__PURE__*/React.createElement("h4", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Quantidade por vendedor")), /*#__PURE__*/React.createElement("div", {
-    className: "divide-y divide-slate-100"
-  }, salesRanking.map((person, index) => /*#__PURE__*/React.createElement("div", {
-    key: person.name,
-    className: "flex items-center gap-3 px-5 py-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "w-7 text-center text-xs font-extrabold text-slate-400"
-  }, index + 1), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, person.store)), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-xl bg-potiguar-lime/20 px-3 py-2 font-display text-lg font-extrabold text-potiguar-800"
-  }, person.quantity, " ", productCatalog.find(product => assignments.some(item => item.productId === product.id))?.unit || "un.")))))), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Desempenho acumulado"), /*#__PURE__*/React.createElement("h4", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Ranking das lojas")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 grid gap-3 md:grid-cols-2"
-  }, storeSummaries.map((store, index) => /*#__PURE__*/React.createElement("div", {
-    key: store.store,
-    className: "flex items-center gap-4 rounded-xl bg-slate-50 p-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "grid h-9 w-9 place-items-center rounded-xl bg-white text-xs font-extrabold text-potiguar-900"
-  }, index + 1, "º"), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-between text-xs"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-potiguar-950"
-  }, store.store), /*#__PURE__*/React.createElement("strong", {
-    className: "text-potiguar-700"
-  }, store.points, " pts")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-1 text-[10px] text-slate-400"
-  }, store.readCount, " leituras • ", store.predictionCount, " palpites • ", store.participants, " participantes")))))), /*#__PURE__*/React.createElement("section", {
-    className: "soft-card overflow-hidden rounded-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "border-b border-slate-100 p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Detalhamento por loja"), /*#__PURE__*/React.createElement("h4", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Ranking interno de cada loja"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Mostra a composição dos pontos por colaborador: comunicado, palpites, acertos e vendas/metas quando estiverem ativas.")), /*#__PURE__*/React.createElement("div", {
-    className: "divide-y divide-slate-100"
-  }, storeSummaries.map(summary => /*#__PURE__*/React.createElement("div", {
-    key: summary.store,
-    className: "p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, summary.sellerCount, " vendedores • ", summary.leaderCount, " líderes"), /*#__PURE__*/React.createElement("h5", {
-    className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, summary.store)), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-wrap gap-2 text-[10px] font-extrabold"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-potiguar-lime/20 px-3 py-1 text-potiguar-800"
-  }, summary.points, " pts"), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-slate-100 px-3 py-1 text-slate-500"
-  }, summary.readCount, " leituras"), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-slate-100 px-3 py-1 text-slate-500"
-  }, summary.predictionCount, " palpites"))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 overflow-x-auto"
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "w-full min-w-[840px] text-left"
-  }, /*#__PURE__*/React.createElement("thead", {
-    className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"
-  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "#"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Colaborador"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Perfil"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3 text-center"
-  }, "Comunicado"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3 text-center"
-  }, "Palpite"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3 text-center"
-  }, "Acertos"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3 text-center"
-  }, "Placar exato"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3 text-center"
-  }, "Venda/meta"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3 text-right"
-  }, "Total"))), /*#__PURE__*/React.createElement("tbody", {
-    className: "divide-y divide-slate-100"
-  }, summary.people.map((person, index) => /*#__PURE__*/React.createElement("tr", {
-    key: person.cpf,
-    className: index === 0 ? "bg-potiguar-lime/10" : ""
-  }, /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3 text-xs font-extrabold text-slate-400"
-  }, index === 0 ? "🥇" : index + 1), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
-    photoUrl: person.photoUrl
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "min-w-0"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "truncate text-xs font-extrabold text-potiguar-950"
-  }, person.name), /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-slate-400"
-  }, "CPF ", person.cpf)))), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${person.role === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`
-  }, person.role)), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900"
-  }, person.announcementPoints), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900"
-  }, person.predictionPoints), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900"
-  }, person.predictionHits), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900"
-  }, person.exactPredictions), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900"
-  }, person.salesPoints + person.topSellerPoints + person.storeGoalPoints), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-900"
-  }, person.points))))))))))), module === "predictions" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card overflow-hidden rounded-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Palpites enviados"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Jogos da rodada"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Lista consolidada dos palpites gravados no servidor.")), /*#__PURE__*/React.createElement("span", {
-    className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
-  }, predictionEntries.length, " PALPITES")), predictionEntries.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    className: "p-6 text-sm text-slate-400"
-  }, "Nenhum palpite gravado ainda. Os palpites feitos antes desta atualização não foram armazenados no servidor.") : /*#__PURE__*/React.createElement("div", {
-    className: "overflow-x-auto"
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "w-full min-w-[760px] text-left"
-  }, /*#__PURE__*/React.createElement("thead", {
-    className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"
-  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    className: "px-5 py-3"
-  }, "Vendedor"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Loja"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Jogo"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Palpite"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Resultado"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Pontos"), /*#__PURE__*/React.createElement("th", {
-    className: "px-5 py-3 text-right"
-  }, "Enviado em"))), /*#__PURE__*/React.createElement("tbody", {
-    className: "divide-y divide-slate-100"
-  }, predictionEntries.map(entry => {
-    const result = (settings.matchResults || defaultMatchResults)[entry.match_id];
-    const points = getPredictionPoints(entry, settings.matchResults || defaultMatchResults);
-    return /*#__PURE__*/React.createElement("tr", {
-      key: `${entry.cpf}-${entry.match_id}-${entry.submitted_at}`
-    }, /*#__PURE__*/React.createElement("td", {
-      className: "px-5 py-4"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "text-xs font-extrabold text-potiguar-950"
-    }, entry.full_name), /*#__PURE__*/React.createElement("p", {
-      className: "text-[10px] text-slate-400"
-    }, "CPF ", formatCpf(entry.cpf))), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-4 text-xs font-bold text-potiguar-800"
-    }, entry.store), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-4 text-xs text-slate-500"
-    }, entry.home_team, " x ", entry.away_team), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900"
-    }, entry.home_score, " × ", entry.away_score), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900"
-    }, result ? `${result.homeScore} × ${result.awayScore}` : "—"), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-4"
-    }, /*#__PURE__*/React.createElement("span", {
-      className: `rounded-xl px-3 py-2 text-xs font-extrabold ${points === 4 ? "bg-potiguar-lime/25 text-potiguar-800" : points === 2 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400"}`
-    }, points, " pts")), /*#__PURE__*/React.createElement("td", {
-      className: "px-5 py-4 text-right text-xs text-slate-400"
-    }, new Date(entry.submitted_at).toLocaleString("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short"
-    })));
-  }))))), module === "dashboard" && /*#__PURE__*/React.createElement("section", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-6 xl:grid-cols-[1.25fr_.75fr]"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Evolução do piloto"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Participação em apuração")), /*#__PURE__*/React.createElement(Icon, {
-    name: "chart",
-    className: "text-potiguar-700"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-8 flex h-48 items-end justify-between gap-3 border-b border-slate-100 px-2"
-  }, [0, 0, 0, 0, 0, 0, 0].map((value, index) => /*#__PURE__*/React.createElement("div", {
-    key: index,
-    className: "flex h-full flex-1 flex-col justify-end gap-2 text-center"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-[9px] font-bold text-potiguar-700"
-  }, value, "%"), /*#__PURE__*/React.createElement("div", {
-    className: "mx-auto w-full max-w-10 rounded-t-lg bg-gradient-to-t from-potiguar-900 to-potiguar-lime",
-    style: {
-      height: `${Math.max(value, 4)}%`
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-[9px] font-bold text-slate-400"
-  }, ["S", "T", "Q", "Q", "S", "S", "D"][index]))))), /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-2xl p-6 text-white"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
-  }, "Resumo comercial"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold"
-  }, "Desafios da semana"), /*#__PURE__*/React.createElement("div", {
-    className: "mt-6 space-y-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "rounded-xl bg-white/10 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-white/45"
-  }, "Desafios ativos"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 font-display text-3xl font-extrabold"
-  }, assignments.length)), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-xl bg-white/10 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-white/45"
-  }, "Quantidade lançada"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 font-display text-3xl font-extrabold"
-  }, salesEntries.reduce((sum, item) => sum + Number(item.quantity), 0))), /*#__PURE__*/React.createElement("div", {
-    className: "rounded-xl bg-white/10 p-4"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] text-white/45"
-  }, "Lojas com produto configurado"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 font-display text-3xl font-extrabold"
-  }, new Set(assignments.map(item => item.store)).size, "/", fixedStores.length)))))), module === "products" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Configuração comercial"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Cadastro e desafios da semana"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, "Informe o código/SKU usado pela Potiguar para preencher os dados do produto pelo site.")), /*#__PURE__*/React.createElement("form", {
-    onSubmit: createProduct,
-    className: "mt-5 rounded-2xl border border-potiguar-500/15 bg-potiguar-lime/5 p-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-4 xl:flex-row xl:items-end"
-  }, /*#__PURE__*/React.createElement("label", {
-    className: "xl:w-44"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Código/SKU"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Código SKU do produto",
-    value: newProduct.sku,
-    onChange: e => setNewProduct({
-      ...newProduct,
-      sku: e.target.value.replace(/\D/g, "")
-    }),
-    placeholder: "Ex.: 219134",
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: lookupProduct,
-    className: "rounded-xl border border-potiguar-900/15 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-800"
-  }, "Buscar no site"), /*#__PURE__*/React.createElement("label", {
-    className: "min-w-0 flex-1"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Nome do produto"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Nome do produto",
-    value: newProduct.name,
-    onChange: e => setNewProduct({
-      ...newProduct,
-      name: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", {
-    className: "xl:w-40"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Marca"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Marca do produto",
-    value: newProduct.brand,
-    onChange: e => setNewProduct({
-      ...newProduct,
-      brand: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", {
-    className: "xl:w-36"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Preço"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Preço do produto",
-    value: newProduct.price,
-    onChange: e => setNewProduct({
-      ...newProduct,
-      price: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, "Cadastrar produto")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-4 grid gap-4 md:grid-cols-[120px_1fr]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid aspect-square place-items-center overflow-hidden rounded-xl border border-slate-100 bg-white"
-  }, newProduct.imageUrl ? /*#__PURE__*/React.createElement("img", {
-    src: newProduct.imageUrl,
-    alt: newProduct.name,
-    className: "h-full w-full object-contain p-2"
-  }) : /*#__PURE__*/React.createElement(Icon, {
-    name: "fire",
-    className: "text-slate-200",
-    size: 32
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Descrição"), /*#__PURE__*/React.createElement("textarea", {
-    "aria-label": "Descrição do produto",
-    value: newProduct.description,
-    onChange: e => setNewProduct({
-      ...newProduct,
-      description: e.target.value
-    }),
-    rows: "4",
-    className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
-  }))), /*#__PURE__*/React.createElement("p", {
-    className: "mt-3 text-[10px] text-slate-400"
-  }, "Teste da consulta: informe o SKU ", /*#__PURE__*/React.createElement("strong", null, "219134"), ". Preço e disponibilidade devem ser atualizados sempre no momento da consulta.")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold text-potiguar-950"
-  }, "Vincular desafio à loja")), /*#__PURE__*/React.createElement("form", {
-    onSubmit: assignProduct,
-    className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.5fr_.7fr_auto] md:items-end"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Loja"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Loja do desafio da semana",
-    value: newAssignment.store,
-    onChange: e => setNewAssignment({
-      ...newAssignment,
-      store: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, [...fixedStores, "Rede Potiguar"].map(store => /*#__PURE__*/React.createElement("option", {
-    key: store
-  }, store)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Produto"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Desafio da semana",
-    value: newAssignment.productId,
-    onChange: e => setNewAssignment({
-      ...newAssignment,
-      productId: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, productCatalog.map(product => /*#__PURE__*/React.createElement("option", {
-    key: product.id,
-    value: product.id
-  }, product.sku, " • ", product.name)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Meta"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Meta do desafio da semana",
-    type: "number",
-    min: "1",
-    value: newAssignment.goal,
-    onChange: e => setNewAssignment({
-      ...newAssignment,
-      goal: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  })), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, "Vincular produto")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3"
-  }, assignments.map((item, index) => {
-    const product = productCatalog.find(product => product.id === item.productId);
-    return /*#__PURE__*/React.createElement("div", {
-      key: `${item.store}-${item.productId}-${index}`,
-      className: "rounded-2xl border border-slate-100 p-4"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-start justify-between gap-3"
-    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-      className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-    }, item.store), /*#__PURE__*/React.createElement("p", {
-      className: "mt-1 text-sm font-extrabold text-potiguar-950"
-    }, product?.name), /*#__PURE__*/React.createElement("p", {
-      className: "mt-1 text-[10px] text-slate-400"
-    }, "SKU ", product?.sku, " • ", product?.brand, " • ", product?.price)), /*#__PURE__*/React.createElement("span", {
-      className: "rounded-lg bg-potiguar-lime/20 px-2.5 py-1 text-[10px] font-extrabold text-potiguar-800"
-    }, "META ", item.goal)));
-  }))), module === "sales" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Apuração do desafio da semana"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Vendas do desafio por vendedor"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas.")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800"
-  }, "Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de desafio da semana agora."), productFocusEnabled && /*#__PURE__*/React.createElement("form", {
-    onSubmit: addSale,
-    className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.2fr_1.6fr_.7fr_auto] md:items-end"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Loja"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Loja da venda",
-    value: newSale.store,
-    onChange: e => {
-      const store = e.target.value;
-      const sellers = users.filter(user => user.profile === "Vendedor" && user.store === store);
-      const products = assignments.filter(item => item.store === store);
-      setNewSale({
-        ...newSale,
-        store,
-        seller: sellers[0]?.name || "",
-        productId: products[0]?.productId || ""
-      });
-    },
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, fixedStores.map(store => /*#__PURE__*/React.createElement("option", {
-    key: store
-  }, store)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Vendedor"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Vendedor da venda",
-    value: newSale.seller,
-    onChange: e => setNewSale({
-      ...newSale,
-      seller: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "Selecione"), sellersForSale.map(user => /*#__PURE__*/React.createElement("option", {
-    key: user.cpf
-  }, user.name)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Desafio da semana"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Desafio vendido",
-    value: newSale.productId,
-    onChange: e => setNewSale({
-      ...newSale,
-      productId: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, /*#__PURE__*/React.createElement("option", {
-    value: ""
-  }, "Selecione"), productsForSale.map(item => {
-    const product = productCatalog.find(product => product.id === item.productId);
-    return /*#__PURE__*/React.createElement("option", {
-      key: item.productId,
-      value: item.productId
-    }, product?.sku, " • ", product?.name);
-  }))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Quantidade"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Quantidade vendida",
-    type: "number",
-    min: "0.01",
-    step: "0.01",
-    value: newSale.quantity,
-    onChange: e => setNewSale({
-      ...newSale,
-      quantity: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  })), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, "Registrar venda")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 overflow-x-auto"
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "w-full min-w-[650px] text-left"
-  }, /*#__PURE__*/React.createElement("thead", {
-    className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"
-  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Vendedor"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Loja"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Produto"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3 text-right"
-  }, "Quantidade"))), /*#__PURE__*/React.createElement("tbody", {
-    className: "divide-y divide-slate-100"
-  }, salesEntries.map(entry => {
-    const product = productCatalog.find(product => product.id === entry.productId);
-    return /*#__PURE__*/React.createElement("tr", {
-      key: entry.id
-    }, /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-3 text-xs font-extrabold text-potiguar-950"
-    }, entry.seller), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-3 text-xs text-slate-500"
-    }, entry.store), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-3 text-xs text-slate-500"
-    }, entry.productSku || product?.sku, " • ", entry.productName || product?.name), /*#__PURE__*/React.createElement("td", {
-      className: "px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800"
-    }, entry.quantity));
-  }))))), module === "users" && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card overflow-hidden rounded-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "border-b border-slate-100 p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Controle de acesso"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Usuários cadastrados"), /*#__PURE__*/React.createElement("p", {
-    className: "mt-1 text-xs text-slate-400"
-  }, users.length, " usuários • ", fixedStores.length, " lojas fixas")), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-3 sm:flex-row"
-  }, /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "sr-only"
-  }, "Pesquisar usuários"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Pesquisar usuários",
-    value: userSearch,
-    onChange: event => setUserSearch(event.target.value),
-    placeholder: "Buscar nome ou CPF",
-    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs outline-none focus:border-potiguar-500 sm:w-60"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "sr-only"
-  }, "Filtrar por loja"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Filtrar por loja",
-    value: storeFilter,
-    onChange: event => setStoreFilter(event.target.value),
-    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-potiguar-900 outline-none focus:border-potiguar-500 sm:w-48"
-  }, /*#__PURE__*/React.createElement("option", null, "Todas"), fixedStores.map(store => /*#__PURE__*/React.createElement("option", {
-    key: store
-  }, store)), /*#__PURE__*/React.createElement("option", null, "Rede Potiguar"))), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      if (showUserForm) cancelUserForm();else setShowUserForm(true);
-    },
-    className: "flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "plus",
-    size: 15
-  }), " Novo usuário")))), showUserForm && /*#__PURE__*/React.createElement("form", {
-    onSubmit: createUser,
-    className: "grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-5"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "sm:col-span-2 xl:col-span-5"
-  }, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, editingCpf ? "Editando colaborador" : "Novo colaborador")), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Nome completo"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "Nome do novo colaborador",
-    value: newUser.name,
-    onChange: e => setNewUser({
-      ...newUser,
-      name: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "CPF"), /*#__PURE__*/React.createElement("input", {
-    "aria-label": "CPF do novo colaborador",
-    inputMode: "numeric",
-    value: newUser.cpf,
-    onChange: e => setNewUser({
-      ...newUser,
-      cpf: formatCpf(e.target.value)
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
-  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Cargo"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Cargo do novo colaborador",
-    value: newUser.job,
-    onChange: e => {
-      const job = e.target.value;
-      setNewUser({
-        ...newUser,
-        job,
-        profile: job === "Administrador" ? "Administrador" : job === "Líder de loja" ? "Liderança" : "Vendedor",
-        store: job === "Administrador" ? "Rede Potiguar" : newUser.store
-      });
-    },
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, /*#__PURE__*/React.createElement("option", null, "Vendedor"), /*#__PURE__*/React.createElement("option", null, "Líder de loja"), /*#__PURE__*/React.createElement("option", null, "Administrador"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, "Loja"), /*#__PURE__*/React.createElement("select", {
-    "aria-label": "Loja do novo colaborador",
-    value: newUser.store,
-    onChange: e => setNewUser({
-      ...newUser,
-      store: e.target.value
-    }),
-    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, [...fixedStores, "Rede Potiguar"].map(store => /*#__PURE__*/React.createElement("option", {
-    key: store
-  }, store)))), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-end gap-2"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    onClick: cancelUserForm,
-    className: "rounded-xl px-4 py-3 text-xs font-bold text-slate-400"
-  }, "Cancelar"), /*#__PURE__*/React.createElement("button", {
-    type: "submit",
-    className: "flex-1 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
-  }, editingCpf ? "Salvar" : "Cadastrar"))), /*#__PURE__*/React.createElement("div", {
-    className: "overflow-x-auto"
-  }, /*#__PURE__*/React.createElement("table", {
-    className: "w-full min-w-[820px] text-left"
-  }, /*#__PURE__*/React.createElement("thead", {
-    className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"
-  }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
-    className: "px-6 py-3"
-  }, "Colaborador"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Cargo original"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Perfil no piloto"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Loja"), /*#__PURE__*/React.createElement("th", {
-    className: "px-4 py-3"
-  }, "Status"), /*#__PURE__*/React.createElement("th", {
-    className: "px-6 py-3 text-right"
-  }, "Ações"))), /*#__PURE__*/React.createElement("tbody", {
-    className: "divide-y divide-slate-100"
-  }, visibleUsers.map(user => /*#__PURE__*/React.createElement("tr", {
-    key: user.cpf,
-    className: "hover:bg-potiguar-lime/5"
-  }, /*#__PURE__*/React.createElement("td", {
-    className: "px-6 py-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-    photoUrl: profilePhotos[onlyDigits(user.cpf)]
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold text-potiguar-950"
-  }, user.name), /*#__PURE__*/React.createElement("p", {
-    className: "mt-0.5 text-[10px] font-semibold text-slate-400"
-  }, "CPF ", user.cpf)))), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4 text-xs font-semibold text-slate-500"
-  }, user.job), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`
-  }, user.profile)), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4 text-xs font-bold text-potiguar-800"
-  }, user.store), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "h-1.5 w-1.5 rounded-full bg-emerald-500"
-  }), user.status)), /*#__PURE__*/React.createElement("td", {
-    className: "px-6 py-4 text-right"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-end gap-2"
-  }, user.profile !== "Administrador" && /*#__PURE__*/React.createElement("button", {
-    onClick: () => onAccessAs(user),
-    className: "rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950"
-  }, "Acessar como"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => resetUserPassword(user),
-    className: "rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700"
-  }, "Resetar senha"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => startEditUser(user),
-    className: "rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500"
-  }, "Editar"))))))), visibleUsers.length === 0 && /*#__PURE__*/React.createElement("div", {
-    className: "p-10 text-center text-sm font-semibold text-slate-400"
-  }, "Nenhum usuário encontrado."))), formModule && /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Cadastro e manutenção"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, formModule.title)), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setModule("dashboard"),
-    className: "grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-500"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "close",
-    size: 16
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 grid gap-4 md:grid-cols-3"
-  }, formModule.fields.map((field, index) => /*#__PURE__*/React.createElement("label", {
-    key: field,
-    className: "block"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
-  }, field), /*#__PURE__*/React.createElement("input", {
-    "aria-label": field,
-    type: field.includes("Data") || field.includes("Abertura") || field.includes("Encerramento") ? "datetime-local" : field.includes("Meta") ? "number" : "text",
-    placeholder: index === 0 ? "Preencha aqui" : "",
-    className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-potiguar-500 focus:bg-white"
-  })))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end"
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => setModule("dashboard"),
-    className: "rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400"
-  }, "Cancelar"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setToast(`${formModule.button}: registro preparado. A persistência será feita no PostgreSQL.`),
-    className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
-  }, formModule.button))), module === "dashboard" && /*#__PURE__*/React.createElement("div", {
-    className: "grid gap-6 xl:grid-cols-[1.25fr_.75fr]"
-  }, /*#__PURE__*/React.createElement("section", {
-    className: "soft-card rounded-2xl p-5 sm:p-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, productFocusEnabled ? "Desempenho por loja" : "Fase teste"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
-  }, "Acompanhamento das lojas")), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold text-slate-400"
-  }, "Atualização automática")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-6 grid gap-3 md:grid-cols-2"
-  }, storeSummaries.map((summary, index) => {
-    const maxPoints = Math.max(1, ...storeSummaries.map(item => item.points));
-    return /*#__PURE__*/React.createElement("div", {
-      key: summary.store,
-      className: "rounded-2xl border border-slate-100 bg-slate-50 p-4"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "flex items-start justify-between gap-3"
-    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-      className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-    }, index + 1, "º lugar"), /*#__PURE__*/React.createElement("h4", {
-      className: "mt-1 text-sm font-extrabold text-potiguar-950"
-    }, summary.store), /*#__PURE__*/React.createElement("p", {
-      className: "mt-1 text-[10px] text-slate-400"
-    }, summary.sellerCount, " vendedores • ", summary.leaderCount, " líderes")), /*#__PURE__*/React.createElement("strong", {
-      className: "font-display text-xl text-potiguar-900"
-    }, summary.points, " pts")), /*#__PURE__*/React.createElement("div", {
-      className: "mt-3 progress-track h-2.5 rounded-full"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "progress-fill h-full rounded-full",
-      style: {
-        width: `${Math.min(summary.points / maxPoints * 100, 100)}%`
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      className: "mt-3 grid grid-cols-3 gap-2 text-center"
-    }, /*#__PURE__*/React.createElement("div", {
-      className: "rounded-xl bg-white p-2"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "text-[9px] font-bold text-slate-400"
-    }, "Leituras"), /*#__PURE__*/React.createElement("p", {
-      className: "text-sm font-extrabold text-potiguar-800"
-    }, summary.readCount)), /*#__PURE__*/React.createElement("div", {
-      className: "rounded-xl bg-white p-2"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "text-[9px] font-bold text-slate-400"
-    }, "Palpites"), /*#__PURE__*/React.createElement("p", {
-      className: "text-sm font-extrabold text-potiguar-800"
-    }, summary.predictionCount)), /*#__PURE__*/React.createElement("div", {
-      className: "rounded-xl bg-white p-2"
-    }, /*#__PURE__*/React.createElement("p", {
-      className: "text-[9px] font-bold text-slate-400"
-    }, "Top vendedor"), /*#__PURE__*/React.createElement("p", {
-      className: "truncate text-[10px] font-extrabold text-potiguar-800"
-    }, summary.topSeller?.name?.split(" ")[0] || "—"))));
-  }))), /*#__PURE__*/React.createElement("section", {
-    className: "hero-pattern pitch-lines rounded-2xl p-6 text-white"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime"
-  }, "Rodada atual"), /*#__PURE__*/React.createElement("h3", {
-    className: "mt-1 font-display text-xl font-extrabold"
-  }, "Status operacional")), /*#__PURE__*/React.createElement(Icon, {
-    name: "shield",
-    className: "text-potiguar-lime"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "mt-6 space-y-4"
-  }, [["Comunicado publicado", true], [productFocusEnabled ? "Desafio da semana ativo" : "Desafio da semana nas oitavas", productFocusEnabled], [productFocusEnabled ? "Metas configuradas" : "Metas comerciais pausadas", productFocusEnabled], ["Resultados dos jogos", false]].map(([label, ok]) => /*#__PURE__*/React.createElement("div", {
-    key: label,
-    className: "flex items-center justify-between rounded-xl bg-white/7 p-3"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-xs font-bold"
-  }, label), /*#__PURE__*/React.createElement("span", {
-    className: `grid h-6 w-6 place-items-center rounded-full ${ok ? "bg-potiguar-lime text-potiguar-950" : "bg-white/10 text-white/40"}`
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: ok ? "check" : "clock",
-    size: 13
-  }))))), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setToast("Encerramento simulado. Em produção, a ação será auditada e impedirá novos palpites."),
-    className: "mt-6 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-xs font-extrabold hover:bg-white/15"
-  }, "Encerrar rodada"))));
+  return /*#__PURE__*/_jsxs("div", {
+    className: "space-y-6",
+    children: [/*#__PURE__*/_jsxs("section", {
+      className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-sm font-semibold text-slate-400",
+          children: "Piloto comercial • acesso administrativo"
+        }), /*#__PURE__*/_jsx("h2", {
+          className: "font-display text-3xl font-extrabold text-potiguar-950",
+          children: "Central de administração"
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "flex gap-2",
+        children: [/*#__PURE__*/_jsxs("button", {
+          onClick: () => {
+            onRefreshData();
+            setToast("Dados atualizados.");
+          },
+          className: "flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900",
+          children: [/*#__PURE__*/_jsx(Icon, {
+            name: "clock",
+            size: 17
+          }), " Atualizar"]
+        }), /*#__PURE__*/_jsxs("button", {
+          onClick: exportReport,
+          className: "flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white",
+          children: [/*#__PURE__*/_jsx(Icon, {
+            name: "chart",
+            size: 17
+          }), " Exportar relatório"]
+        })]
+      })]
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "grid grid-cols-2 gap-3 xl:grid-cols-4",
+      children: [/*#__PURE__*/_jsx(StatCard, {
+        icon: "users",
+        label: "Participantes do piloto",
+        value: participantCount,
+        detail: `${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`,
+        accent: "green"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: "megaphone",
+        label: "Leituras",
+        value: readEntries.length,
+        detail: readEntries.length ? "Comunicados confirmados" : "Aguardando confirmações",
+        accent: "lime"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: "ball",
+        label: "Aderência aos palpites",
+        value: `${predictionEngagement.totals.adherence}%`,
+        detail: `${predictionEngagement.totals.participated}/${predictionEngagement.totals.eligible} participaram • faltam ${predictionEngagement.totals.missing}`,
+        accent: "white"
+      }), /*#__PURE__*/_jsx(StatCard, {
+        icon: productFocusEnabled ? "store" : "trophy",
+        label: productFocusEnabled ? "Meta da rede" : "Fase teste",
+        value: productFocusEnabled ? `${Math.round(totalSold / storeGoal * 100)}%` : "16 avos",
+        detail: productFocusEnabled ? `${totalSold} de ${storeGoal}` : "Somente endomarketing e palpites",
+        accent: "white"
+      })]
+    }), /*#__PURE__*/_jsxs("section", {
+      className: "soft-card rounded-2xl p-5 sm:p-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: "Ações rápidas"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+          children: "O que vamos movimentar?"
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4",
+        children: actions.map(([icon, title, desc, value]) => /*#__PURE__*/_jsxs("button", {
+          onClick: () => setModule(value),
+          className: `lift rounded-2xl border p-4 text-left ${module === value ? "border-potiguar-500 bg-potiguar-lime/10" : "border-slate-100 bg-slate-50"}`,
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "grid h-10 w-10 place-items-center rounded-xl bg-potiguar-900 text-potiguar-lime",
+            children: /*#__PURE__*/_jsx(Icon, {
+              name: icon,
+              size: 19
+            })
+          }), /*#__PURE__*/_jsx("strong", {
+            className: "mt-4 block text-sm text-potiguar-950",
+            children: title
+          }), /*#__PURE__*/_jsx("span", {
+            className: "mt-1 block text-[10px] leading-4 text-slate-400",
+            children: desc
+          })]
+        }, title))
+      })]
+    }), module === "engagement" && /*#__PURE__*/_jsxs("section", {
+      className: "space-y-6",
+      children: [/*#__PURE__*/_jsx("div", {
+        className: "hero-pattern pitch-lines overflow-hidden rounded-3xl p-6 text-white sm:p-8",
+        children: /*#__PURE__*/_jsxs("div", {
+          className: "flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.22em] text-potiguar-lime",
+              children: "Aderência em tempo real"
+            }), /*#__PURE__*/_jsx("h3", {
+              className: "mt-2 font-display text-3xl font-extrabold",
+              children: "Quem já entrou no jogo?"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-2 max-w-2xl text-sm leading-6 text-white/65",
+              children: "Acompanhe por loja quem já enviou palpite e quem ainda precisa ser acionado pelo líder."
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "grid grid-cols-3 gap-3 text-center",
+            children: [/*#__PURE__*/_jsxs("div", {
+              className: "rounded-2xl bg-white/10 p-4",
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] text-white/45",
+                children: "Aderência"
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "font-display text-3xl font-extrabold text-potiguar-lime",
+                children: [predictionEngagement.totals.adherence, "%"]
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "rounded-2xl bg-white/10 p-4",
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] text-white/45",
+                children: "Participaram"
+              }), /*#__PURE__*/_jsx("p", {
+                className: "font-display text-3xl font-extrabold",
+                children: predictionEngagement.totals.participated
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "rounded-2xl bg-white/10 p-4",
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] text-white/45",
+                children: "Faltam"
+              }), /*#__PURE__*/_jsx("p", {
+                className: "font-display text-3xl font-extrabold text-potiguar-red",
+                children: predictionEngagement.totals.missing
+              })]
+            })]
+          })]
+        })
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "grid gap-6 lg:grid-cols-2",
+        children: [/*#__PURE__*/_jsxs("section", {
+          className: "soft-card rounded-2xl p-5 sm:p-6",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-emerald-600",
+                children: "Melhor aderência"
+              }), /*#__PURE__*/_jsx("h4", {
+                className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+                children: "Lojas mais engajadas"
+              })]
+            }), /*#__PURE__*/_jsx(Icon, {
+              name: "trophy",
+              className: "text-potiguar-700"
+            })]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "mt-5 space-y-3",
+            children: predictionEngagement.bestStores.slice(0, 5).map((store, index) => /*#__PURE__*/_jsxs("div", {
+              className: "rounded-2xl border border-slate-100 bg-slate-50 p-4",
+              children: [/*#__PURE__*/_jsxs("div", {
+                className: "flex items-center justify-between gap-3",
+                children: [/*#__PURE__*/_jsxs("div", {
+                  children: [/*#__PURE__*/_jsxs("p", {
+                    className: "text-xs font-extrabold text-potiguar-950",
+                    children: [index + 1, ". ", store.store]
+                  }), /*#__PURE__*/_jsxs("p", {
+                    className: "mt-1 text-[10px] text-slate-400",
+                    children: [store.participated, "/", store.total, " participantes • ", store.guesses, " palpites"]
+                  })]
+                }), /*#__PURE__*/_jsxs("strong", {
+                  className: "font-display text-2xl text-potiguar-900",
+                  children: [store.adherence, "%"]
+                })]
+              }), /*#__PURE__*/_jsx("div", {
+                className: "mt-3 h-2 rounded-full bg-white",
+                children: /*#__PURE__*/_jsx("div", {
+                  className: "h-full rounded-full bg-potiguar-lime",
+                  style: {
+                    width: `${Math.min(store.adherence, 100)}%`
+                  }
+                })
+              })]
+            }, store.store))
+          })]
+        }), /*#__PURE__*/_jsxs("section", {
+          className: "soft-card rounded-2xl p-5 sm:p-6",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-red",
+                children: "Ponto de atenção"
+              }), /*#__PURE__*/_jsx("h4", {
+                className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+                children: "Lojas para acionar agora"
+              })]
+            }), /*#__PURE__*/_jsx(Icon, {
+              name: "megaphone",
+              className: "text-potiguar-red"
+            })]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "mt-5 space-y-3",
+            children: predictionEngagement.worstStores.slice(0, 5).map((store, index) => /*#__PURE__*/_jsx("button", {
+              onClick: () => setStoreFilter(store.store),
+              className: "w-full rounded-2xl border border-red-100 bg-red-50 p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md",
+              children: /*#__PURE__*/_jsxs("div", {
+                className: "flex items-center justify-between gap-3",
+                children: [/*#__PURE__*/_jsxs("div", {
+                  children: [/*#__PURE__*/_jsxs("p", {
+                    className: "text-xs font-extrabold text-potiguar-950",
+                    children: [index + 1, ". ", store.store]
+                  }), /*#__PURE__*/_jsxs("p", {
+                    className: "mt-1 text-[10px] text-red-500",
+                    children: ["Faltam ", store.missing, " de ", store.total, " • vendedores ", store.sellerParticipated, "/", store.sellers, " • líderes ", store.leaderParticipated, "/", store.leaders]
+                  })]
+                }), /*#__PURE__*/_jsxs("strong", {
+                  className: "font-display text-2xl text-potiguar-red",
+                  children: [store.adherence, "%"]
+                })]
+              })
+            }, store.store))
+          })]
+        })]
+      }), /*#__PURE__*/_jsxs("section", {
+        className: "soft-card overflow-hidden rounded-2xl",
+        children: [/*#__PURE__*/_jsx("div", {
+          className: "border-b border-slate-100 p-5 sm:p-6",
+          children: /*#__PURE__*/_jsxs("div", {
+            className: "flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
+            children: [/*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+                children: "Relação por loja"
+              }), /*#__PURE__*/_jsx("h4", {
+                className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+                children: "Quem falta participar dos palpites"
+              }), /*#__PURE__*/_jsx("p", {
+                className: "mt-1 text-xs text-slate-400",
+                children: "Lista nominal comparando usuários elegíveis com palpites gravados no servidor."
+              })]
+            }), /*#__PURE__*/_jsxs("select", {
+              value: storeFilter,
+              onChange: event => setStoreFilter(event.target.value),
+              className: "rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-potiguar-900 outline-none focus:border-potiguar-500",
+              children: [/*#__PURE__*/_jsx("option", {
+                children: "Todas"
+              }), fixedStores.map(store => /*#__PURE__*/_jsx("option", {
+                children: store
+              }, store))]
+            })]
+          })
+        }), /*#__PURE__*/_jsx("div", {
+          className: "grid gap-4 p-5 sm:p-6 xl:grid-cols-2",
+          children: predictionEngagement.stores.filter(store => storeFilter === "Todas" || store.store === storeFilter).map(store => /*#__PURE__*/_jsxs("div", {
+            className: "rounded-2xl border border-slate-100 bg-slate-50 p-4",
+            children: [/*#__PURE__*/_jsxs("div", {
+              className: "flex items-start justify-between gap-3",
+              children: [/*#__PURE__*/_jsxs("div", {
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+                  children: store.store
+                }), /*#__PURE__*/_jsxs("h5", {
+                  className: "mt-1 font-display text-lg font-extrabold text-potiguar-950",
+                  children: [store.adherence, "% de aderência"]
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "mt-1 text-[10px] text-slate-400",
+                  children: [store.participated, "/", store.total, " participaram • ", store.guesses, " palpites gravados"]
+                })]
+              }), /*#__PURE__*/_jsx("span", {
+                className: `rounded-full px-3 py-1 text-[10px] font-extrabold ${store.missing ? "bg-red-100 text-potiguar-red" : "bg-potiguar-lime/25 text-potiguar-800"}`,
+                children: store.missing ? `${store.missing} faltam` : "100%"
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "mt-4 grid grid-cols-2 gap-2 text-center",
+              children: [/*#__PURE__*/_jsxs("div", {
+                className: "rounded-xl bg-white p-3",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "text-[9px] font-bold text-slate-400",
+                  children: "Vendedores"
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "text-sm font-extrabold text-potiguar-800",
+                  children: [store.sellerParticipated, "/", store.sellers]
+                })]
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "rounded-xl bg-white p-3",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "text-[9px] font-bold text-slate-400",
+                  children: "Líderes"
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "text-sm font-extrabold text-potiguar-800",
+                  children: [store.leaderParticipated, "/", store.leaders]
+                })]
+              })]
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-4 max-h-56 overflow-auto rounded-xl bg-white p-3",
+              children: store.missingPeople.length ? store.missingPeople.map(person => /*#__PURE__*/_jsxs("div", {
+                className: "flex items-center justify-between gap-3 border-b border-slate-50 py-2 last:border-0",
+                children: [/*#__PURE__*/_jsxs("div", {
+                  className: "min-w-0",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "truncate text-xs font-extrabold text-potiguar-950",
+                    children: person.name
+                  }), /*#__PURE__*/_jsxs("p", {
+                    className: "text-[10px] text-slate-400",
+                    children: [person.profile, " • CPF ", formatCpf(person.cpf)]
+                  })]
+                }), /*#__PURE__*/_jsx("span", {
+                  className: "rounded-full bg-red-50 px-2.5 py-1 text-[9px] font-extrabold text-potiguar-red",
+                  children: "Pendente"
+                })]
+              }, person.cpf)) : /*#__PURE__*/_jsx("div", {
+                className: "rounded-xl bg-potiguar-lime/15 p-4 text-center text-xs font-extrabold text-potiguar-900",
+                children: "Todos os elegíveis da loja já participaram 🎯"
+              })
+            })]
+          }, store.store))
+        })]
+      })]
+    }), module === "announcements" && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card overflow-hidden rounded-2xl",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "hero-pattern pitch-lines p-6 text-white",
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime",
+          children: "RH • Endomarketing"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-2 font-display text-2xl font-extrabold",
+          children: "Central de comunicados"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-2 max-w-2xl text-sm leading-6 text-white/65",
+          children: "Cadastre o comunicado da rodada, inclua vídeo/anexos e agende quando ele deve aparecer para os participantes."
+        })]
+      }), /*#__PURE__*/_jsxs("form", {
+        onSubmit: saveAnnouncement,
+        className: "grid gap-5 p-5 sm:p-6",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "rounded-2xl bg-potiguar-lime/10 p-4",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: "1. Conteúdo principal"
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "mt-4 grid gap-4 md:grid-cols-[1fr_.45fr]",
+            children: [/*#__PURE__*/_jsxs("label", {
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+                children: "Título que aparecerá para o colaborador"
+              }), /*#__PURE__*/_jsx("input", {
+                value: announcementForm.title || "",
+                onChange: e => setAnnouncementForm({
+                  ...announcementForm,
+                  title: e.target.value
+                }),
+                placeholder: "Ex.: Vídeo obrigatório da rodada",
+                className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+              })]
+            }), /*#__PURE__*/_jsxs("label", {
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+                children: "Tempo mínimo do vídeo"
+              }), /*#__PURE__*/_jsx("input", {
+                type: "number",
+                min: "0",
+                value: announcementForm.minimumSeconds || 30,
+                onChange: e => setAnnouncementForm({
+                  ...announcementForm,
+                  minimumSeconds: e.target.value
+                }),
+                className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+              })]
+            })]
+          }), /*#__PURE__*/_jsxs("label", {
+            className: "mt-4 block",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Texto do comunicado"
+            }), /*#__PURE__*/_jsx("textarea", {
+              rows: "5",
+              value: announcementForm.body || "",
+              onChange: e => setAnnouncementForm({
+                ...announcementForm,
+                body: e.target.value
+              }),
+              placeholder: "Escreva aqui a orientação que o colaborador precisa ler antes de palpitar.",
+              className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "grid gap-5 lg:grid-cols-2",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "rounded-2xl bg-slate-50 p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "2. Vídeo e arquivos"
+            }), /*#__PURE__*/_jsxs("label", {
+              className: "mt-4 block",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+                children: "URL do vídeo"
+              }), /*#__PURE__*/_jsx("input", {
+                value: announcementForm.videoUrl || "",
+                onChange: e => setAnnouncementForm({
+                  ...announcementForm,
+                  videoUrl: e.target.value
+                }),
+                placeholder: "Cole o link do YouTube",
+                className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+              })]
+            }), /*#__PURE__*/_jsxs("label", {
+              className: "mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-potiguar-700/25 bg-white p-5 text-center transition hover:border-potiguar-lime",
+              children: [/*#__PURE__*/_jsx(Icon, {
+                name: "plus",
+                className: "text-potiguar-700"
+              }), /*#__PURE__*/_jsx("span", {
+                className: "mt-2 text-xs font-extrabold text-potiguar-950",
+                children: "Adicionar arquivos"
+              }), /*#__PURE__*/_jsx("span", {
+                className: "mt-1 text-[10px] text-slate-400",
+                children: "PDF, imagem ou documento • até 5 arquivos • 900 KB cada"
+              }), /*#__PURE__*/_jsx("input", {
+                type: "file",
+                multiple: true,
+                onChange: attachAnnouncementFiles,
+                className: "hidden"
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "mt-4 space-y-2",
+              children: [(announcementForm.attachments || []).map(file => /*#__PURE__*/_jsxs("div", {
+                className: "flex items-center justify-between gap-3 rounded-xl bg-white p-3",
+                children: [/*#__PURE__*/_jsxs("div", {
+                  className: "min-w-0",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "truncate text-xs font-extrabold text-potiguar-950",
+                    children: file.name
+                  }), /*#__PURE__*/_jsxs("p", {
+                    className: "text-[10px] text-slate-400",
+                    children: [Math.round((file.size || 0) / 1024), " KB"]
+                  })]
+                }), /*#__PURE__*/_jsx("button", {
+                  type: "button",
+                  onClick: () => removeAnnouncementAttachment(file.id),
+                  className: "rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red",
+                  children: "Remover"
+                })]
+              }, file.id)), !(announcementForm.attachments || []).length && /*#__PURE__*/_jsx("p", {
+                className: "text-xs text-slate-400",
+                children: "Nenhum arquivo anexado."
+              })]
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "rounded-2xl bg-slate-50 p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "3. Agendamento"
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "mt-4 grid gap-4 sm:grid-cols-2",
+              children: [/*#__PURE__*/_jsxs("label", {
+                children: [/*#__PURE__*/_jsx("span", {
+                  className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+                  children: "Iniciar em"
+                }), /*#__PURE__*/_jsx("input", {
+                  type: "datetime-local",
+                  value: formatDateTimeInput(announcementForm.startsAt),
+                  onChange: e => setAnnouncementForm({
+                    ...announcementForm,
+                    startsAt: e.target.value
+                  }),
+                  className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+                })]
+              }), /*#__PURE__*/_jsxs("label", {
+                children: [/*#__PURE__*/_jsx("span", {
+                  className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+                  children: "Finalizar em"
+                }), /*#__PURE__*/_jsx("input", {
+                  type: "datetime-local",
+                  value: formatDateTimeInput(announcementForm.endsAt),
+                  onChange: e => setAnnouncementForm({
+                    ...announcementForm,
+                    endsAt: e.target.value
+                  }),
+                  className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+                })]
+              })]
+            }), /*#__PURE__*/_jsxs("label", {
+              className: "mt-4 block",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+                children: "Status visível"
+              }), /*#__PURE__*/_jsx("input", {
+                value: announcementForm.publishedAt || "",
+                onChange: e => setAnnouncementForm({
+                  ...announcementForm,
+                  publishedAt: e.target.value
+                }),
+                placeholder: "Ex.: ATIVO, Programado, Rodada 16 avos",
+                className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+              })]
+            }), /*#__PURE__*/_jsxs("label", {
+              className: "mt-4 block",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+                children: "ID interno"
+              }), /*#__PURE__*/_jsx("input", {
+                value: announcementForm.id || "",
+                onChange: e => setAnnouncementForm({
+                  ...announcementForm,
+                  id: e.target.value
+                }),
+                placeholder: "Pode deixar automático",
+                className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+              })]
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500",
+              children: "Dica para o RH: ao mudar o ID do comunicado, a leitura será exigida novamente para a rodada."
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "flex flex-col gap-3 sm:flex-row sm:justify-end",
+          children: [/*#__PURE__*/_jsx("button", {
+            type: "button",
+            onClick: () => setAnnouncementForm(settings.announcement || defaultAnnouncement),
+            className: "rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400",
+            children: "Desfazer alterações"
+          }), /*#__PURE__*/_jsx("button", {
+            type: "submit",
+            className: "rounded-xl bg-potiguar-900 px-6 py-3 text-xs font-extrabold text-white",
+            children: "Salvar comunicado"
+          })]
+        })]
+      })]
+    }), module === "awards" && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card rounded-2xl p-5 sm:p-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600",
+          children: "Premiação"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+          children: "Prêmio da rodada"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-1 text-xs text-slate-400",
+          children: "Este prêmio aparece na Home dos participantes."
+        })]
+      }), /*#__PURE__*/_jsxs("form", {
+        onSubmit: saveAward,
+        className: "mt-5 grid gap-4",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "grid gap-4 md:grid-cols-2",
+          children: [/*#__PURE__*/_jsxs("label", {
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Prêmio"
+            }), /*#__PURE__*/_jsx("input", {
+              value: awardForm.name || "",
+              onChange: e => setAwardForm({
+                ...awardForm,
+                name: e.target.value
+              }),
+              className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+            })]
+          }), /*#__PURE__*/_jsxs("label", {
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Critério"
+            }), /*#__PURE__*/_jsx("input", {
+              value: awardForm.criterion || "",
+              onChange: e => setAwardForm({
+                ...awardForm,
+                criterion: e.target.value
+              }),
+              className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Descrição"
+          }), /*#__PURE__*/_jsx("textarea", {
+            rows: "3",
+            value: awardForm.description || "",
+            onChange: e => setAwardForm({
+              ...awardForm,
+              description: e.target.value
+            }),
+            className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "flex justify-end",
+          children: /*#__PURE__*/_jsx("button", {
+            type: "submit",
+            className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white",
+            children: "Salvar premiação"
+          })
+        })]
+      })]
+    }), module === "rounds" && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card rounded-2xl p-5 sm:p-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: "Rodada"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+          children: "Controle da rodada e resultado"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-1 text-xs text-slate-400",
+          children: "Use o status para comunicar o momento da rodada. O resultado recalcula os pontos de palpite."
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "mt-5 rounded-2xl border border-potiguar-500/15 bg-potiguar-lime/5 p-4",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "Calendário automático"
+            }), /*#__PURE__*/_jsx("h4", {
+              className: "font-display text-lg font-extrabold text-potiguar-950",
+              children: "Fases finais da Copa"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-xs text-slate-500",
+              children: "16 avos em modo teste; a partir das oitavas, rodadas oficiais. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes do jogo."
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "flex flex-col gap-2 sm:items-end",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800",
+              children: "Até 10 min antes"
+            }), /*#__PURE__*/_jsx("button", {
+              type: "button",
+              onClick: syncWorldCupMatches,
+              className: "rounded-xl bg-potiguar-900 px-4 py-2.5 text-[10px] font-extrabold text-white",
+              children: "Sincronizar Copa"
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-4 rounded-2xl border border-white bg-white/80 p-4",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "flex items-center justify-between gap-3",
+            children: [/*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+                children: "football-data.org"
+              }), /*#__PURE__*/_jsx("h5", {
+                className: "text-sm font-extrabold text-potiguar-950",
+                children: "Jogos sincronizados"
+              })]
+            }), /*#__PURE__*/_jsxs("span", {
+              className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800",
+              children: [worldCupMatches.length, " jogos"]
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3",
+            children: [(activeGames || []).slice(0, 6).map(match => {
+              const access = getGamePredictionAccess(match);
+              return /*#__PURE__*/_jsxs("div", {
+                className: "rounded-xl bg-slate-50 p-3",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+                  children: match.group
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "mt-1 truncate text-xs font-extrabold text-potiguar-950",
+                  children: [match.home, " x ", match.away]
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "mt-1 text-[10px] text-slate-400",
+                  children: [formatDateTime(match.kickoffAt), " • fecha ", formatDateTime(access.closeAt)]
+                })]
+              }, match.id);
+            }), worldCupMatches.length === 0 && /*#__PURE__*/_jsx("p", {
+              className: "text-xs text-slate-400",
+              children: "Nenhum jogo sincronizado ainda. Configure a API key e clique em Sincronizar Copa."
+            })]
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3",
+          children: knockoutRounds.map(round => {
+            const access = getPredictionAccess(round);
+            return /*#__PURE__*/_jsxs("button", {
+              type: "button",
+              onClick: () => applyCalendarRound(round),
+              className: `rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:shadow-md ${round.official ? "border-potiguar-500/20 bg-white" : "border-amber-200 bg-amber-50"}`,
+              children: [/*#__PURE__*/_jsxs("div", {
+                className: "flex items-start justify-between gap-3",
+                children: [/*#__PURE__*/_jsxs("div", {
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+                    children: round.phase
+                  }), /*#__PURE__*/_jsx("p", {
+                    className: "mt-1 text-sm font-extrabold text-potiguar-950",
+                    children: round.name
+                  })]
+                }), /*#__PURE__*/_jsx("span", {
+                  className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${round.official ? "bg-potiguar-lime/25 text-potiguar-800" : "bg-amber-100 text-amber-700"}`,
+                  children: round.official ? "OFICIAL" : "TESTE"
+                })]
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "mt-3 text-[10px] leading-4 text-slate-500",
+                children: ["Jogo: ", formatDateTime(round.kickoffAt), " • Palpites até ", formatDateTime(access.closeAt)]
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "mt-1 text-[10px] font-bold text-potiguar-700",
+                children: ["Abertura sugerida: ", formatDateTime(access.openAt)]
+              })]
+            }, round.id);
+          })
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500",
+          children: [/*#__PURE__*/_jsx("strong", {
+            className: "text-potiguar-950",
+            children: "Regra dos palpites:"
+          }), " ", predictionRules.join(" • ")]
+        })]
+      }), /*#__PURE__*/_jsxs("form", {
+        onSubmit: saveRound,
+        className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_.7fr_.8fr_.8fr_auto] md:items-end",
+        children: [/*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Nome da rodada"
+          }), /*#__PURE__*/_jsx("input", {
+            value: roundForm.name || "",
+            onChange: e => setRoundForm({
+              ...roundForm,
+              name: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Status"
+          }), /*#__PURE__*/_jsxs("select", {
+            value: roundForm.status || "open",
+            onChange: e => setRoundForm({
+              ...roundForm,
+              status: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: [/*#__PURE__*/_jsx("option", {
+              value: "open",
+              children: "Aberta"
+            }), /*#__PURE__*/_jsx("option", {
+              value: "predictions_closed",
+              children: "Palpites encerrados"
+            }), /*#__PURE__*/_jsx("option", {
+              value: "results",
+              children: "Resultado lançado"
+            }), /*#__PURE__*/_jsx("option", {
+              value: "closed",
+              children: "Rodada encerrada"
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Horário do jogo"
+          }), /*#__PURE__*/_jsx("input", {
+            type: "datetime-local",
+            value: (roundForm.kickoffAt || "").slice(0, 16),
+            onChange: e => setRoundForm({
+              ...roundForm,
+              kickoffAt: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Fecha automaticamente"
+          }), /*#__PURE__*/_jsx("input", {
+            type: "text",
+            readOnly: true,
+            value: formatDateTime(roundWindow.closeAt),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-potiguar-800 outline-none"
+          })]
+        }), /*#__PURE__*/_jsx("button", {
+          type: "submit",
+          className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white",
+          children: "Salvar rodada"
+        })]
+      }), /*#__PURE__*/_jsxs("form", {
+        onSubmit: saveResult,
+        className: "mt-5 grid gap-4 rounded-2xl bg-potiguar-950 p-4 text-white md:grid-cols-[1fr_.4fr_.4fr_auto] md:items-end",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime",
+            children: "Resultado do jogo"
+          }), /*#__PURE__*/_jsxs("p", {
+            className: "mt-1 text-sm font-extrabold",
+            children: [currentAdminGame.home, " x ", currentAdminGame.away]
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-white/70",
+            children: currentAdminGame.home
+          }), /*#__PURE__*/_jsx("input", {
+            type: "number",
+            min: "0",
+            value: resultForm.homeScore,
+            onChange: e => setResultForm({
+              ...resultForm,
+              homeScore: e.target.value
+            }),
+            className: "w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-white/70",
+            children: currentAdminGame.away
+          }), /*#__PURE__*/_jsx("input", {
+            type: "number",
+            min: "0",
+            value: resultForm.awayScore,
+            onChange: e => setResultForm({
+              ...resultForm,
+              awayScore: e.target.value
+            }),
+            className: "w-full rounded-xl border border-white/10 bg-white/10 px-3 py-3 text-xs text-white outline-none focus:border-potiguar-lime"
+          })]
+        }), /*#__PURE__*/_jsx("button", {
+          type: "submit",
+          className: "rounded-xl bg-potiguar-lime px-5 py-3 text-xs font-extrabold text-potiguar-950",
+          children: "Salvar resultado"
+        })]
+      }), /*#__PURE__*/_jsxs("section", {
+        className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-700",
+              children: "Fechamento da rodada"
+            }), /*#__PURE__*/_jsxs("h4", {
+              className: "mt-1 font-display text-lg font-extrabold text-potiguar-950",
+              children: ["Ganhadores da ", roundForm.phase || "rodada"]
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-xs leading-5 text-slate-500",
+              children: productFocusEnabled ? "Ao encerrar, o sistema registra o 1º vendedor geral, o 1º vendedor de cada loja e os 2 primeiros líderes geral." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites."
+            })]
+          }), /*#__PURE__*/_jsx("button", {
+            type: "button",
+            onClick: closeRound,
+            className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white",
+            children: "Encerrar e registrar ganhadores"
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-4 grid gap-3 lg:grid-cols-3",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "rounded-xl bg-white p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "Top 3 geral"
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-3 space-y-2",
+              children: roundClosingSummary.topOverall.length ? roundClosingSummary.topOverall.map((person, index) => /*#__PURE__*/_jsxs("div", {
+                className: "flex items-center gap-2 rounded-xl bg-slate-50 p-2",
+                children: [/*#__PURE__*/_jsx("span", {
+                  className: "w-6 text-center text-xs",
+                  children: ["🥇", "🥈", "🥉"][index]
+                }), /*#__PURE__*/_jsxs("div", {
+                  className: "min-w-0 flex-1",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "truncate text-xs font-extrabold text-potiguar-950",
+                    children: person.name
+                  }), /*#__PURE__*/_jsxs("p", {
+                    className: "text-[10px] text-slate-400",
+                    children: [person.store, " • ", person.role]
+                  })]
+                }), /*#__PURE__*/_jsx("strong", {
+                  className: "text-xs text-potiguar-900",
+                  children: person.points
+                })]
+              }, person.cpf)) : /*#__PURE__*/_jsx("p", {
+                className: "text-xs text-slate-400",
+                children: "Sem pontuação registrada ainda."
+              })
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "rounded-xl bg-white p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "Top 2 líderes"
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-3 space-y-2",
+              children: roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/_jsxs("div", {
+                className: "flex items-center gap-2 rounded-xl bg-slate-50 p-2",
+                children: [/*#__PURE__*/_jsx("span", {
+                  className: "w-6 text-center text-xs",
+                  children: ["🥇", "🥈", "🥉"][index]
+                }), /*#__PURE__*/_jsxs("div", {
+                  className: "min-w-0 flex-1",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "truncate text-xs font-extrabold text-potiguar-950",
+                    children: person.name
+                  }), /*#__PURE__*/_jsx("p", {
+                    className: "text-[10px] text-slate-400",
+                    children: person.store
+                  })]
+                }), /*#__PURE__*/_jsx("strong", {
+                  className: "text-xs text-potiguar-900",
+                  children: person.points
+                })]
+              }, person.cpf)) : /*#__PURE__*/_jsx("p", {
+                className: "text-xs text-slate-400",
+                children: "Sem líderes pontuados ainda."
+              })
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "rounded-xl bg-white p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "Vendedor por loja"
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-3 grid gap-2 sm:grid-cols-2",
+              children: roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => /*#__PURE__*/_jsxs("div", {
+                className: "rounded-xl bg-slate-50 p-3",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "text-[10px] font-extrabold text-potiguar-800",
+                  children: item.store
+                }), /*#__PURE__*/_jsx("p", {
+                  className: "mt-1 truncate text-xs font-extrabold text-potiguar-950",
+                  children: item.winner.name
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "text-[10px] text-slate-400",
+                  children: [item.winner.points, " pts • ", item.winner.role]
+                })]
+              }, item.store)) : /*#__PURE__*/_jsx("p", {
+                className: "text-xs text-slate-400",
+                children: "Sem lojas com pontuação registrada ainda."
+              })
+            })]
+          })]
+        })]
+      })]
+    }), module === "rankings" && /*#__PURE__*/_jsxs("section", {
+      className: "space-y-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8",
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime",
+          children: "Classificação consolidada"
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("h3", {
+              className: "font-display text-3xl font-extrabold",
+              children: "Rankings do piloto"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-2 text-sm text-white/60",
+              children: "Ranking calculado com dados gravados no banco: leituras, palpites e vendas. Atualização automática a cada 15 segundos."
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "glass rounded-2xl px-5 py-3",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-bold uppercase text-white/45",
+              children: "Atualização"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "font-display text-lg font-extrabold",
+              children: "Automática"
+            })]
+          })]
+        })]
+      }), /*#__PURE__*/_jsxs("section", {
+        className: "soft-card rounded-2xl p-5 sm:p-6",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: "Premiação Oitavas"
+          }), /*#__PURE__*/_jsx("h4", {
+            className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+            children: "Ganhadores previstos da rodada"
+          }), /*#__PURE__*/_jsx("p", {
+            className: "mt-1 text-xs text-slate-400",
+            children: "Acompanhamento ao vivo: 1º vendedor geral, 1º vendedor de cada loja e os 2 primeiros líderes geral."
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-4 grid gap-3 md:grid-cols-2",
+          children: [/*#__PURE__*/_jsxs("a", {
+            href: (settings.award || defaultAward).storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl,
+            target: "_blank",
+            rel: "noreferrer",
+            className: "rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "Prêmio por loja"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-sm font-extrabold text-potiguar-950",
+              children: (settings.award || defaultAward).storeSellerPrize || defaultAward.storeSellerPrize
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-[10px] text-slate-400",
+              children: "Para o 1º vendedor de cada loja"
+            })]
+          }), /*#__PURE__*/_jsxs("a", {
+            href: (settings.award || defaultAward).mainPrizeUrl || defaultAward.mainPrizeUrl,
+            target: "_blank",
+            rel: "noreferrer",
+            className: "rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "Prêmio geral/liderança"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-sm font-extrabold text-potiguar-950",
+              children: (settings.award || defaultAward).overallSellerPrize || defaultAward.overallSellerPrize
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-[10px] text-slate-400",
+              children: "Para 1º vendedor geral e top 2 líderes"
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-5 grid gap-4 xl:grid-cols-3",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "rounded-2xl bg-potiguar-lime/15 p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "1º vendedor geral"
+            }), roundClosingSummary.topSellerOverall ? /*#__PURE__*/_jsxs("div", {
+              className: "mt-3 flex items-center gap-3",
+              children: [/*#__PURE__*/_jsx(Avatar, {
+                initials: roundClosingSummary.topSellerOverall.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
+                photoUrl: roundClosingSummary.topSellerOverall.photoUrl
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "min-w-0 flex-1",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "truncate text-sm font-extrabold text-potiguar-950",
+                  children: roundClosingSummary.topSellerOverall.name
+                }), /*#__PURE__*/_jsx("p", {
+                  className: "text-[10px] text-slate-500",
+                  children: roundClosingSummary.topSellerOverall.store
+                })]
+              }), /*#__PURE__*/_jsx("strong", {
+                className: "font-display text-lg text-potiguar-900",
+                children: roundClosingSummary.topSellerOverall.points
+              })]
+            }) : /*#__PURE__*/_jsx("p", {
+              className: "mt-3 text-xs text-slate-400",
+              children: "Aguardando pontuação."
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "rounded-2xl bg-slate-50 p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "Top 2 líderes geral"
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-3 space-y-2",
+              children: roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/_jsxs("div", {
+                className: "flex items-center gap-2 rounded-xl bg-white p-2",
+                children: [/*#__PURE__*/_jsx("span", {
+                  className: "w-6 text-center text-xs",
+                  children: ["🥇", "🥈"][index]
+                }), /*#__PURE__*/_jsxs("div", {
+                  className: "min-w-0 flex-1",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "truncate text-xs font-extrabold text-potiguar-950",
+                    children: person.name
+                  }), /*#__PURE__*/_jsx("p", {
+                    className: "text-[10px] text-slate-400",
+                    children: person.store
+                  })]
+                }), /*#__PURE__*/_jsx("strong", {
+                  className: "text-xs text-potiguar-900",
+                  children: person.points
+                })]
+              }, person.cpf)) : /*#__PURE__*/_jsx("p", {
+                className: "text-xs text-slate-400",
+                children: "Aguardando líderes pontuarem."
+              })
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "rounded-2xl bg-slate-50 p-4",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+              children: "1º vendedor por loja"
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-1",
+              children: roundClosingSummary.storeWinners.length ? roundClosingSummary.storeWinners.map(item => /*#__PURE__*/_jsxs("div", {
+                className: "rounded-xl bg-white p-2",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "text-[10px] font-extrabold text-potiguar-800",
+                  children: item.store
+                }), /*#__PURE__*/_jsx("p", {
+                  className: "truncate text-xs font-extrabold text-potiguar-950",
+                  children: item.winner?.name || "—"
+                })]
+              }, item.store)) : /*#__PURE__*/_jsx("p", {
+                className: "text-xs text-slate-400",
+                children: "Aguardando lojas pontuarem."
+              })
+            })]
+          })]
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "grid gap-6 xl:grid-cols-2",
+        children: [/*#__PURE__*/_jsxs("section", {
+          className: "soft-card overflow-hidden rounded-2xl",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "border-b border-slate-100 p-5",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "Pontuação geral"
+            }), /*#__PURE__*/_jsx("h4", {
+              className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+              children: "Ranking geral de participantes"
+            }), /*#__PURE__*/_jsx("p", {
+              className: "mt-1 text-xs text-slate-400",
+              children: "Fonte: leituras, palpites e vendas registradas no servidor."
+            })]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "divide-y divide-slate-100",
+            children: pilotRanking.slice(0, 10).map((person, index) => /*#__PURE__*/_jsxs("div", {
+              className: "flex items-center gap-3 px-5 py-3",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: `grid h-8 w-8 place-items-center rounded-lg text-xs font-extrabold ${index < 3 ? "bg-potiguar-lime/20 text-potiguar-800" : "text-slate-400"}`,
+                children: index < 3 ? ["🥇", "🥈", "🥉"][index] : index + 1
+              }), /*#__PURE__*/_jsx(Avatar, {
+                initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
+                photoUrl: person.photoUrl
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "min-w-0 flex-1",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "truncate text-xs font-extrabold text-potiguar-950",
+                  children: person.name
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "text-[10px] text-slate-400",
+                  children: [person.store, " • ", person.role, " • Comunicado ", person.announcementPoints, " pt • Palpite ", person.predictionPoints, " pts/", person.predictionHits, " acerto(s)", person.salesPoints + person.topSellerPoints || person.storeGoalPoints ? ` • Venda ${person.salesPoints + person.topSellerPoints} pts/${person.soldQuantity} m²${person.storeGoalPoints ? ` • Meta ${person.storeGoalPoints} pts` : ""}` : ""]
+                })]
+              }), /*#__PURE__*/_jsxs("strong", {
+                className: "font-display text-lg text-potiguar-900",
+                children: [person.points, " pts"]
+              })]
+            }, person.name))
+          })]
+        }), productFocusEnabled && /*#__PURE__*/_jsxs("section", {
+          className: "soft-card overflow-hidden rounded-2xl",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "border-b border-slate-100 p-5",
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "Desafio da semana"
+            }), /*#__PURE__*/_jsx("h4", {
+              className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+              children: "Quantidade por vendedor"
+            })]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "divide-y divide-slate-100",
+            children: salesRanking.map((person, index) => /*#__PURE__*/_jsxs("div", {
+              className: "flex items-center gap-3 px-5 py-4",
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "w-7 text-center text-xs font-extrabold text-slate-400",
+                children: index + 1
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "min-w-0 flex-1",
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "truncate text-xs font-extrabold text-potiguar-950",
+                  children: person.name
+                }), /*#__PURE__*/_jsx("p", {
+                  className: "text-[10px] text-slate-400",
+                  children: person.store
+                })]
+              }), /*#__PURE__*/_jsxs("span", {
+                className: "rounded-xl bg-potiguar-lime/20 px-3 py-2 font-display text-lg font-extrabold text-potiguar-800",
+                children: [person.quantity, " ", productCatalog.find(product => assignments.some(item => item.productId === product.id))?.unit || "un."]
+              })]
+            }, person.name))
+          })]
+        })]
+      }), /*#__PURE__*/_jsxs("section", {
+        className: "soft-card rounded-2xl p-5 sm:p-6",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: "Desempenho acumulado"
+          }), /*#__PURE__*/_jsx("h4", {
+            className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+            children: "Ranking das lojas"
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "mt-5 grid gap-3 md:grid-cols-2",
+          children: storeSummaries.map((store, index) => /*#__PURE__*/_jsxs("div", {
+            className: "flex items-center gap-4 rounded-xl bg-slate-50 p-4",
+            children: [/*#__PURE__*/_jsxs("span", {
+              className: "grid h-9 w-9 place-items-center rounded-xl bg-white text-xs font-extrabold text-potiguar-900",
+              children: [index + 1, "º"]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "min-w-0 flex-1",
+              children: [/*#__PURE__*/_jsxs("div", {
+                className: "flex justify-between text-xs",
+                children: [/*#__PURE__*/_jsx("strong", {
+                  className: "text-potiguar-950",
+                  children: store.store
+                }), /*#__PURE__*/_jsxs("strong", {
+                  className: "text-potiguar-700",
+                  children: [store.points, " pts"]
+                })]
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "mt-1 text-[10px] text-slate-400",
+                children: [store.readCount, " leituras • ", store.predictionCount, " palpites • ", store.participants, " participantes"]
+              })]
+            })]
+          }, store.store))
+        })]
+      }), /*#__PURE__*/_jsxs("section", {
+        className: "soft-card overflow-hidden rounded-2xl",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "border-b border-slate-100 p-5 sm:p-6",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: "Detalhamento por loja"
+          }), /*#__PURE__*/_jsx("h4", {
+            className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+            children: "Ranking interno de cada loja"
+          }), /*#__PURE__*/_jsx("p", {
+            className: "mt-1 text-xs text-slate-400",
+            children: "Mostra a composição dos pontos por colaborador: comunicado, palpites, acertos e vendas/metas quando estiverem ativas."
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "divide-y divide-slate-100",
+          children: storeSummaries.map(summary => /*#__PURE__*/_jsxs("div", {
+            className: "p-5 sm:p-6",
+            children: [/*#__PURE__*/_jsxs("div", {
+              className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between",
+              children: [/*#__PURE__*/_jsxs("div", {
+                children: [/*#__PURE__*/_jsxs("p", {
+                  className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+                  children: [summary.sellerCount, " vendedores • ", summary.leaderCount, " líderes"]
+                }), /*#__PURE__*/_jsx("h5", {
+                  className: "mt-1 font-display text-lg font-extrabold text-potiguar-950",
+                  children: summary.store
+                })]
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "flex flex-wrap gap-2 text-[10px] font-extrabold",
+                children: [/*#__PURE__*/_jsxs("span", {
+                  className: "rounded-full bg-potiguar-lime/20 px-3 py-1 text-potiguar-800",
+                  children: [summary.points, " pts"]
+                }), /*#__PURE__*/_jsxs("span", {
+                  className: "rounded-full bg-slate-100 px-3 py-1 text-slate-500",
+                  children: [summary.readCount, " leituras"]
+                }), /*#__PURE__*/_jsxs("span", {
+                  className: "rounded-full bg-slate-100 px-3 py-1 text-slate-500",
+                  children: [summary.predictionCount, " palpites"]
+                })]
+              })]
+            }), /*#__PURE__*/_jsx("div", {
+              className: "mt-4 overflow-x-auto",
+              children: /*#__PURE__*/_jsxs("table", {
+                className: "w-full min-w-[840px] text-left",
+                children: [/*#__PURE__*/_jsx("thead", {
+                  className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400",
+                  children: /*#__PURE__*/_jsxs("tr", {
+                    children: [/*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3",
+                      children: "#"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3",
+                      children: "Colaborador"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3",
+                      children: "Perfil"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3 text-center",
+                      children: "Comunicado"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3 text-center",
+                      children: "Palpite"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3 text-center",
+                      children: "Acertos"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3 text-center",
+                      children: "Placar exato"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3 text-center",
+                      children: "Venda/meta"
+                    }), /*#__PURE__*/_jsx("th", {
+                      className: "px-4 py-3 text-right",
+                      children: "Total"
+                    })]
+                  })
+                }), /*#__PURE__*/_jsx("tbody", {
+                  className: "divide-y divide-slate-100",
+                  children: summary.people.map((person, index) => /*#__PURE__*/_jsxs("tr", {
+                    className: index === 0 ? "bg-potiguar-lime/10" : "",
+                    children: [/*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3 text-xs font-extrabold text-slate-400",
+                      children: index === 0 ? "🥇" : index + 1
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3",
+                      children: /*#__PURE__*/_jsxs("div", {
+                        className: "flex items-center gap-3",
+                        children: [/*#__PURE__*/_jsx(Avatar, {
+                          initials: person.name.split(" ").map(part => part[0]).slice(0, 2).join(""),
+                          photoUrl: person.photoUrl
+                        }), /*#__PURE__*/_jsxs("div", {
+                          className: "min-w-0",
+                          children: [/*#__PURE__*/_jsx("p", {
+                            className: "truncate text-xs font-extrabold text-potiguar-950",
+                            children: person.name
+                          }), /*#__PURE__*/_jsxs("p", {
+                            className: "text-[10px] text-slate-400",
+                            children: ["CPF ", person.cpf]
+                          })]
+                        })]
+                      })
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3",
+                      children: /*#__PURE__*/_jsx("span", {
+                        className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${person.role === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`,
+                        children: person.role
+                      })
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900",
+                      children: person.announcementPoints
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900",
+                      children: person.predictionPoints
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900",
+                      children: person.predictionHits
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900",
+                      children: person.exactPredictions
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3 text-center text-xs font-bold text-potiguar-900",
+                      children: person.salesPoints + person.topSellerPoints + person.storeGoalPoints
+                    }), /*#__PURE__*/_jsx("td", {
+                      className: "px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-900",
+                      children: person.points
+                    })]
+                  }, person.cpf))
+                })]
+              })
+            })]
+          }, summary.store))
+        })]
+      })]
+    }), module === "predictions" && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card overflow-hidden rounded-2xl",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: "Palpites enviados"
+          }), /*#__PURE__*/_jsx("h3", {
+            className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+            children: "Jogos da rodada"
+          }), /*#__PURE__*/_jsx("p", {
+            className: "mt-1 text-xs text-slate-400",
+            children: "Lista consolidada dos palpites gravados no servidor."
+          })]
+        }), /*#__PURE__*/_jsxs("span", {
+          className: "rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold text-potiguar-800",
+          children: [predictionEntries.length, " PALPITES"]
+        })]
+      }), predictionEntries.length === 0 ? /*#__PURE__*/_jsx("div", {
+        className: "p-6 text-sm text-slate-400",
+        children: "Nenhum palpite gravado ainda. Os palpites feitos antes desta atualização não foram armazenados no servidor."
+      }) : /*#__PURE__*/_jsx("div", {
+        className: "overflow-x-auto",
+        children: /*#__PURE__*/_jsxs("table", {
+          className: "w-full min-w-[760px] text-left",
+          children: [/*#__PURE__*/_jsx("thead", {
+            className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400",
+            children: /*#__PURE__*/_jsxs("tr", {
+              children: [/*#__PURE__*/_jsx("th", {
+                className: "px-5 py-3",
+                children: "Vendedor"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Loja"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Jogo"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Palpite"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Resultado"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Pontos"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-5 py-3 text-right",
+                children: "Enviado em"
+              })]
+            })
+          }), /*#__PURE__*/_jsx("tbody", {
+            className: "divide-y divide-slate-100",
+            children: predictionEntries.map(entry => {
+              const result = (settings.matchResults || defaultMatchResults)[entry.match_id];
+              const points = getPredictionPoints(entry, settings.matchResults || defaultMatchResults);
+              return /*#__PURE__*/_jsxs("tr", {
+                children: [/*#__PURE__*/_jsxs("td", {
+                  className: "px-5 py-4",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "text-xs font-extrabold text-potiguar-950",
+                    children: entry.full_name
+                  }), /*#__PURE__*/_jsxs("p", {
+                    className: "text-[10px] text-slate-400",
+                    children: ["CPF ", formatCpf(entry.cpf)]
+                  })]
+                }), /*#__PURE__*/_jsx("td", {
+                  className: "px-4 py-4 text-xs font-bold text-potiguar-800",
+                  children: entry.store
+                }), /*#__PURE__*/_jsxs("td", {
+                  className: "px-4 py-4 text-xs text-slate-500",
+                  children: [entry.home_team, " x ", entry.away_team]
+                }), /*#__PURE__*/_jsxs("td", {
+                  className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900",
+                  children: [entry.home_score, " × ", entry.away_score]
+                }), /*#__PURE__*/_jsx("td", {
+                  className: "px-4 py-4 font-display text-lg font-extrabold text-potiguar-900",
+                  children: result ? `${result.homeScore} × ${result.awayScore}` : "—"
+                }), /*#__PURE__*/_jsx("td", {
+                  className: "px-4 py-4",
+                  children: /*#__PURE__*/_jsxs("span", {
+                    className: `rounded-xl px-3 py-2 text-xs font-extrabold ${points === 4 ? "bg-potiguar-lime/25 text-potiguar-800" : points === 2 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-400"}`,
+                    children: [points, " pts"]
+                  })
+                }), /*#__PURE__*/_jsx("td", {
+                  className: "px-5 py-4 text-right text-xs text-slate-400",
+                  children: new Date(entry.submitted_at).toLocaleString("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short"
+                  })
+                })]
+              }, `${entry.cpf}-${entry.match_id}-${entry.submitted_at}`);
+            })
+          })]
+        })
+      })]
+    }), module === "dashboard" && /*#__PURE__*/_jsx("section", {
+      className: "space-y-6",
+      children: /*#__PURE__*/_jsxs("div", {
+        className: "grid gap-6 xl:grid-cols-[1.25fr_.75fr]",
+        children: [/*#__PURE__*/_jsxs("section", {
+          className: "soft-card rounded-2xl p-5 sm:p-6",
+          children: [/*#__PURE__*/_jsxs("div", {
+            className: "flex items-center justify-between",
+            children: [/*#__PURE__*/_jsxs("div", {
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+                children: "Evolução do piloto"
+              }), /*#__PURE__*/_jsx("h3", {
+                className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+                children: "Participação em apuração"
+              })]
+            }), /*#__PURE__*/_jsx(Icon, {
+              name: "chart",
+              className: "text-potiguar-700"
+            })]
+          }), /*#__PURE__*/_jsx("div", {
+            className: "mt-8 flex h-48 items-end justify-between gap-3 border-b border-slate-100 px-2",
+            children: [0, 0, 0, 0, 0, 0, 0].map((value, index) => /*#__PURE__*/_jsxs("div", {
+              className: "flex h-full flex-1 flex-col justify-end gap-2 text-center",
+              children: [/*#__PURE__*/_jsxs("span", {
+                className: "text-[9px] font-bold text-potiguar-700",
+                children: [value, "%"]
+              }), /*#__PURE__*/_jsx("div", {
+                className: "mx-auto w-full max-w-10 rounded-t-lg bg-gradient-to-t from-potiguar-900 to-potiguar-lime",
+                style: {
+                  height: `${Math.max(value, 4)}%`
+                }
+              }), /*#__PURE__*/_jsx("span", {
+                className: "text-[9px] font-bold text-slate-400",
+                children: ["S", "T", "Q", "Q", "S", "S", "D"][index]
+              })]
+            }, index))
+          })]
+        }), /*#__PURE__*/_jsxs("section", {
+          className: "hero-pattern pitch-lines rounded-2xl p-6 text-white",
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime",
+            children: "Resumo comercial"
+          }), /*#__PURE__*/_jsx("h3", {
+            className: "mt-1 font-display text-xl font-extrabold",
+            children: "Desafios da semana"
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "mt-6 space-y-4",
+            children: [/*#__PURE__*/_jsxs("div", {
+              className: "rounded-xl bg-white/10 p-4",
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] text-white/45",
+                children: "Desafios ativos"
+              }), /*#__PURE__*/_jsx("p", {
+                className: "mt-1 font-display text-3xl font-extrabold",
+                children: assignments.length
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "rounded-xl bg-white/10 p-4",
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] text-white/45",
+                children: "Quantidade lançada"
+              }), /*#__PURE__*/_jsx("p", {
+                className: "mt-1 font-display text-3xl font-extrabold",
+                children: salesEntries.reduce((sum, item) => sum + Number(item.quantity), 0)
+              })]
+            }), /*#__PURE__*/_jsxs("div", {
+              className: "rounded-xl bg-white/10 p-4",
+              children: [/*#__PURE__*/_jsx("p", {
+                className: "text-[10px] text-white/45",
+                children: "Lojas com produto configurado"
+              }), /*#__PURE__*/_jsxs("p", {
+                className: "mt-1 font-display text-3xl font-extrabold",
+                children: [new Set(assignments.map(item => item.store)).size, "/", fixedStores.length]
+              })]
+            })]
+          })]
+        })]
+      })
+    }), module === "products" && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card rounded-2xl p-5 sm:p-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: "Configuração comercial"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+          children: "Cadastro e desafios da semana"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-1 text-xs text-slate-400",
+          children: "Informe o código/SKU usado pela Potiguar para preencher os dados do produto pelo site."
+        })]
+      }), /*#__PURE__*/_jsxs("form", {
+        onSubmit: createProduct,
+        className: "mt-5 rounded-2xl border border-potiguar-500/15 bg-potiguar-lime/5 p-4",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex flex-col gap-4 xl:flex-row xl:items-end",
+          children: [/*#__PURE__*/_jsxs("label", {
+            className: "xl:w-44",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Código/SKU"
+            }), /*#__PURE__*/_jsx("input", {
+              "aria-label": "Código SKU do produto",
+              value: newProduct.sku,
+              onChange: e => setNewProduct({
+                ...newProduct,
+                sku: e.target.value.replace(/\D/g, "")
+              }),
+              placeholder: "Ex.: 219134",
+              className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+            })]
+          }), /*#__PURE__*/_jsx("button", {
+            type: "button",
+            onClick: lookupProduct,
+            className: "rounded-xl border border-potiguar-900/15 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-800",
+            children: "Buscar no site"
+          }), /*#__PURE__*/_jsxs("label", {
+            className: "min-w-0 flex-1",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Nome do produto"
+            }), /*#__PURE__*/_jsx("input", {
+              "aria-label": "Nome do produto",
+              value: newProduct.name,
+              onChange: e => setNewProduct({
+                ...newProduct,
+                name: e.target.value
+              }),
+              className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+            })]
+          }), /*#__PURE__*/_jsxs("label", {
+            className: "xl:w-40",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Marca"
+            }), /*#__PURE__*/_jsx("input", {
+              "aria-label": "Marca do produto",
+              value: newProduct.brand,
+              onChange: e => setNewProduct({
+                ...newProduct,
+                brand: e.target.value
+              }),
+              className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+            })]
+          }), /*#__PURE__*/_jsxs("label", {
+            className: "xl:w-36",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Preço"
+            }), /*#__PURE__*/_jsx("input", {
+              "aria-label": "Preço do produto",
+              value: newProduct.price,
+              onChange: e => setNewProduct({
+                ...newProduct,
+                price: e.target.value
+              }),
+              className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+            })]
+          }), /*#__PURE__*/_jsx("button", {
+            type: "submit",
+            className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white",
+            children: "Cadastrar produto"
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "mt-4 grid gap-4 md:grid-cols-[120px_1fr]",
+          children: [/*#__PURE__*/_jsx("div", {
+            className: "grid aspect-square place-items-center overflow-hidden rounded-xl border border-slate-100 bg-white",
+            children: newProduct.imageUrl ? /*#__PURE__*/_jsx("img", {
+              src: newProduct.imageUrl,
+              alt: newProduct.name,
+              className: "h-full w-full object-contain p-2"
+            }) : /*#__PURE__*/_jsx(Icon, {
+              name: "fire",
+              className: "text-slate-200",
+              size: 32
+            })
+          }), /*#__PURE__*/_jsxs("label", {
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+              children: "Descrição"
+            }), /*#__PURE__*/_jsx("textarea", {
+              "aria-label": "Descrição do produto",
+              value: newProduct.description,
+              onChange: e => setNewProduct({
+                ...newProduct,
+                description: e.target.value
+              }),
+              rows: "4",
+              className: "w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs leading-5 outline-none focus:border-potiguar-500"
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("p", {
+          className: "mt-3 text-[10px] text-slate-400",
+          children: ["Teste da consulta: informe o SKU ", /*#__PURE__*/_jsx("strong", {
+            children: "219134"
+          }), ". Preço e disponibilidade devem ser atualizados sempre no momento da consulta."]
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "mt-5",
+        children: /*#__PURE__*/_jsx("p", {
+          className: "text-xs font-extrabold text-potiguar-950",
+          children: "Vincular desafio à loja"
+        })
+      }), /*#__PURE__*/_jsxs("form", {
+        onSubmit: assignProduct,
+        className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.5fr_.7fr_auto] md:items-end",
+        children: [/*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Loja"
+          }), /*#__PURE__*/_jsx("select", {
+            "aria-label": "Loja do desafio da semana",
+            value: newAssignment.store,
+            onChange: e => setNewAssignment({
+              ...newAssignment,
+              store: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: [...fixedStores, "Rede Potiguar"].map(store => /*#__PURE__*/_jsx("option", {
+              children: store
+            }, store))
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Produto"
+          }), /*#__PURE__*/_jsx("select", {
+            "aria-label": "Desafio da semana",
+            value: newAssignment.productId,
+            onChange: e => setNewAssignment({
+              ...newAssignment,
+              productId: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: productCatalog.map(product => /*#__PURE__*/_jsxs("option", {
+              value: product.id,
+              children: [product.sku, " • ", product.name]
+            }, product.id))
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Meta"
+          }), /*#__PURE__*/_jsx("input", {
+            "aria-label": "Meta do desafio da semana",
+            type: "number",
+            min: "1",
+            value: newAssignment.goal,
+            onChange: e => setNewAssignment({
+              ...newAssignment,
+              goal: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
+          })]
+        }), /*#__PURE__*/_jsx("button", {
+          type: "submit",
+          className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white",
+          children: "Vincular produto"
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3",
+        children: assignments.map((item, index) => {
+          const product = productCatalog.find(product => product.id === item.productId);
+          return /*#__PURE__*/_jsx("div", {
+            className: "rounded-2xl border border-slate-100 p-4",
+            children: /*#__PURE__*/_jsxs("div", {
+              className: "flex items-start justify-between gap-3",
+              children: [/*#__PURE__*/_jsxs("div", {
+                children: [/*#__PURE__*/_jsx("p", {
+                  className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+                  children: item.store
+                }), /*#__PURE__*/_jsx("p", {
+                  className: "mt-1 text-sm font-extrabold text-potiguar-950",
+                  children: product?.name
+                }), /*#__PURE__*/_jsxs("p", {
+                  className: "mt-1 text-[10px] text-slate-400",
+                  children: ["SKU ", product?.sku, " • ", product?.brand, " • ", product?.price]
+                })]
+              }), /*#__PURE__*/_jsxs("span", {
+                className: "rounded-lg bg-potiguar-lime/20 px-2.5 py-1 text-[10px] font-extrabold text-potiguar-800",
+                children: ["META ", item.goal]
+              })]
+            })
+          }, `${item.store}-${item.productId}-${index}`);
+        })
+      })]
+    }), module === "sales" && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card rounded-2xl p-5 sm:p-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        children: [/*#__PURE__*/_jsx("p", {
+          className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+          children: "Apuração do desafio da semana"
+        }), /*#__PURE__*/_jsx("h3", {
+          className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+          children: "Vendas do desafio por vendedor"
+        }), /*#__PURE__*/_jsx("p", {
+          className: "mt-1 text-xs text-slate-400",
+          children: productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas."
+        })]
+      }), !productFocusEnabled && /*#__PURE__*/_jsx("div", {
+        className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800",
+        children: "Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de desafio da semana agora."
+      }), productFocusEnabled && /*#__PURE__*/_jsxs("form", {
+        onSubmit: addSale,
+        className: "mt-5 grid gap-4 rounded-2xl bg-slate-50 p-4 md:grid-cols-[1fr_1.2fr_1.6fr_.7fr_auto] md:items-end",
+        children: [/*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Loja"
+          }), /*#__PURE__*/_jsx("select", {
+            "aria-label": "Loja da venda",
+            value: newSale.store,
+            onChange: e => {
+              const store = e.target.value;
+              const sellers = users.filter(user => user.profile === "Vendedor" && user.store === store);
+              const products = assignments.filter(item => item.store === store);
+              setNewSale({
+                ...newSale,
+                store,
+                seller: sellers[0]?.name || "",
+                productId: products[0]?.productId || ""
+              });
+            },
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: fixedStores.map(store => /*#__PURE__*/_jsx("option", {
+              children: store
+            }, store))
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Vendedor"
+          }), /*#__PURE__*/_jsxs("select", {
+            "aria-label": "Vendedor da venda",
+            value: newSale.seller,
+            onChange: e => setNewSale({
+              ...newSale,
+              seller: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: [/*#__PURE__*/_jsx("option", {
+              value: "",
+              children: "Selecione"
+            }), sellersForSale.map(user => /*#__PURE__*/_jsx("option", {
+              children: user.name
+            }, user.cpf))]
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Desafio da semana"
+          }), /*#__PURE__*/_jsxs("select", {
+            "aria-label": "Desafio vendido",
+            value: newSale.productId,
+            onChange: e => setNewSale({
+              ...newSale,
+              productId: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: [/*#__PURE__*/_jsx("option", {
+              value: "",
+              children: "Selecione"
+            }), productsForSale.map(item => {
+              const product = productCatalog.find(product => product.id === item.productId);
+              return /*#__PURE__*/_jsxs("option", {
+                value: item.productId,
+                children: [product?.sku, " • ", product?.name]
+              }, item.productId);
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Quantidade"
+          }), /*#__PURE__*/_jsx("input", {
+            "aria-label": "Quantidade vendida",
+            type: "number",
+            min: "0.01",
+            step: "0.01",
+            value: newSale.quantity,
+            onChange: e => setNewSale({
+              ...newSale,
+              quantity: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
+          })]
+        }), /*#__PURE__*/_jsx("button", {
+          type: "submit",
+          className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white",
+          children: "Registrar venda"
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "mt-5 overflow-x-auto",
+        children: /*#__PURE__*/_jsxs("table", {
+          className: "w-full min-w-[650px] text-left",
+          children: [/*#__PURE__*/_jsx("thead", {
+            className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400",
+            children: /*#__PURE__*/_jsxs("tr", {
+              children: [/*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Vendedor"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Loja"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Produto"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3 text-right",
+                children: "Quantidade"
+              })]
+            })
+          }), /*#__PURE__*/_jsx("tbody", {
+            className: "divide-y divide-slate-100",
+            children: salesEntries.map(entry => {
+              const product = productCatalog.find(product => product.id === entry.productId);
+              return /*#__PURE__*/_jsxs("tr", {
+                children: [/*#__PURE__*/_jsx("td", {
+                  className: "px-4 py-3 text-xs font-extrabold text-potiguar-950",
+                  children: entry.seller
+                }), /*#__PURE__*/_jsx("td", {
+                  className: "px-4 py-3 text-xs text-slate-500",
+                  children: entry.store
+                }), /*#__PURE__*/_jsxs("td", {
+                  className: "px-4 py-3 text-xs text-slate-500",
+                  children: [entry.productSku || product?.sku, " • ", entry.productName || product?.name]
+                }), /*#__PURE__*/_jsx("td", {
+                  className: "px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800",
+                  children: entry.quantity
+                })]
+              }, entry.id);
+            })
+          })]
+        })
+      })]
+    }), module === "users" && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card overflow-hidden rounded-2xl",
+      children: [/*#__PURE__*/_jsx("div", {
+        className: "border-b border-slate-100 p-5 sm:p-6",
+        children: /*#__PURE__*/_jsxs("div", {
+          className: "flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "Controle de acesso"
+            }), /*#__PURE__*/_jsx("h3", {
+              className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+              children: "Usuários cadastrados"
+            }), /*#__PURE__*/_jsxs("p", {
+              className: "mt-1 text-xs text-slate-400",
+              children: [users.length, " usuários • ", fixedStores.length, " lojas fixas"]
+            })]
+          }), /*#__PURE__*/_jsxs("div", {
+            className: "flex flex-col gap-3 sm:flex-row",
+            children: [/*#__PURE__*/_jsxs("label", {
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "sr-only",
+                children: "Pesquisar usuários"
+              }), /*#__PURE__*/_jsx("input", {
+                "aria-label": "Pesquisar usuários",
+                value: userSearch,
+                onChange: event => setUserSearch(event.target.value),
+                placeholder: "Buscar nome ou CPF",
+                className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs outline-none focus:border-potiguar-500 sm:w-60"
+              })]
+            }), /*#__PURE__*/_jsxs("label", {
+              children: [/*#__PURE__*/_jsx("span", {
+                className: "sr-only",
+                children: "Filtrar por loja"
+              }), /*#__PURE__*/_jsxs("select", {
+                "aria-label": "Filtrar por loja",
+                value: storeFilter,
+                onChange: event => setStoreFilter(event.target.value),
+                className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold text-potiguar-900 outline-none focus:border-potiguar-500 sm:w-48",
+                children: [/*#__PURE__*/_jsx("option", {
+                  children: "Todas"
+                }), fixedStores.map(store => /*#__PURE__*/_jsx("option", {
+                  children: store
+                }, store)), /*#__PURE__*/_jsx("option", {
+                  children: "Rede Potiguar"
+                })]
+              })]
+            }), /*#__PURE__*/_jsxs("button", {
+              onClick: () => {
+                if (showUserForm) cancelUserForm();else setShowUserForm(true);
+              },
+              className: "flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white",
+              children: [/*#__PURE__*/_jsx(Icon, {
+                name: "plus",
+                size: 15
+              }), " Novo usuário"]
+            })]
+          })]
+        })
+      }), showUserForm && /*#__PURE__*/_jsxs("form", {
+        onSubmit: createUser,
+        className: "grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-5",
+        children: [/*#__PURE__*/_jsx("div", {
+          className: "sm:col-span-2 xl:col-span-5",
+          children: /*#__PURE__*/_jsx("p", {
+            className: "text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: editingCpf ? "Editando colaborador" : "Novo colaborador"
+          })
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Nome completo"
+          }), /*#__PURE__*/_jsx("input", {
+            "aria-label": "Nome do novo colaborador",
+            value: newUser.name,
+            onChange: e => setNewUser({
+              ...newUser,
+              name: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "CPF"
+          }), /*#__PURE__*/_jsx("input", {
+            "aria-label": "CPF do novo colaborador",
+            inputMode: "numeric",
+            value: newUser.cpf,
+            onChange: e => setNewUser({
+              ...newUser,
+              cpf: formatCpf(e.target.value)
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Cargo"
+          }), /*#__PURE__*/_jsxs("select", {
+            "aria-label": "Cargo do novo colaborador",
+            value: newUser.job,
+            onChange: e => {
+              const job = e.target.value;
+              setNewUser({
+                ...newUser,
+                job,
+                profile: job === "Administrador" ? "Administrador" : job === "Líder de loja" ? "Liderança" : "Vendedor",
+                store: job === "Administrador" ? "Rede Potiguar" : newUser.store
+              });
+            },
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: [/*#__PURE__*/_jsx("option", {
+              children: "Vendedor"
+            }), /*#__PURE__*/_jsx("option", {
+              children: "Líder de loja"
+            }), /*#__PURE__*/_jsx("option", {
+              children: "Administrador"
+            })]
+          })]
+        }), /*#__PURE__*/_jsxs("label", {
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: "Loja"
+          }), /*#__PURE__*/_jsx("select", {
+            "aria-label": "Loja do novo colaborador",
+            value: newUser.store,
+            onChange: e => setNewUser({
+              ...newUser,
+              store: e.target.value
+            }),
+            className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs",
+            children: [...fixedStores, "Rede Potiguar"].map(store => /*#__PURE__*/_jsx("option", {
+              children: store
+            }, store))
+          })]
+        }), /*#__PURE__*/_jsxs("div", {
+          className: "flex items-end gap-2",
+          children: [/*#__PURE__*/_jsx("button", {
+            type: "button",
+            onClick: cancelUserForm,
+            className: "rounded-xl px-4 py-3 text-xs font-bold text-slate-400",
+            children: "Cancelar"
+          }), /*#__PURE__*/_jsx("button", {
+            type: "submit",
+            className: "flex-1 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white",
+            children: editingCpf ? "Salvar" : "Cadastrar"
+          })]
+        })]
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "overflow-x-auto",
+        children: [/*#__PURE__*/_jsxs("table", {
+          className: "w-full min-w-[820px] text-left",
+          children: [/*#__PURE__*/_jsx("thead", {
+            className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400",
+            children: /*#__PURE__*/_jsxs("tr", {
+              children: [/*#__PURE__*/_jsx("th", {
+                className: "px-6 py-3",
+                children: "Colaborador"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Cargo original"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Perfil no piloto"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Loja"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-4 py-3",
+                children: "Status"
+              }), /*#__PURE__*/_jsx("th", {
+                className: "px-6 py-3 text-right",
+                children: "Ações"
+              })]
+            })
+          }), /*#__PURE__*/_jsx("tbody", {
+            className: "divide-y divide-slate-100",
+            children: visibleUsers.map(user => /*#__PURE__*/_jsxs("tr", {
+              className: "hover:bg-potiguar-lime/5",
+              children: [/*#__PURE__*/_jsx("td", {
+                className: "px-6 py-4",
+                children: /*#__PURE__*/_jsxs("div", {
+                  className: "flex items-center gap-3",
+                  children: [/*#__PURE__*/_jsx(Avatar, {
+                    initials: user.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+                    photoUrl: profilePhotos[onlyDigits(user.cpf)]
+                  }), /*#__PURE__*/_jsxs("div", {
+                    children: [/*#__PURE__*/_jsx("p", {
+                      className: "text-xs font-extrabold text-potiguar-950",
+                      children: user.name
+                    }), /*#__PURE__*/_jsxs("p", {
+                      className: "mt-0.5 text-[10px] font-semibold text-slate-400",
+                      children: ["CPF ", user.cpf]
+                    })]
+                  })]
+                })
+              }), /*#__PURE__*/_jsx("td", {
+                className: "px-4 py-4 text-xs font-semibold text-slate-500",
+                children: user.job
+              }), /*#__PURE__*/_jsx("td", {
+                className: "px-4 py-4",
+                children: /*#__PURE__*/_jsx("span", {
+                  className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`,
+                  children: user.profile
+                })
+              }), /*#__PURE__*/_jsx("td", {
+                className: "px-4 py-4 text-xs font-bold text-potiguar-800",
+                children: user.store
+              }), /*#__PURE__*/_jsx("td", {
+                className: "px-4 py-4",
+                children: /*#__PURE__*/_jsxs("span", {
+                  className: "inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600",
+                  children: [/*#__PURE__*/_jsx("span", {
+                    className: "h-1.5 w-1.5 rounded-full bg-emerald-500"
+                  }), user.status]
+                })
+              }), /*#__PURE__*/_jsx("td", {
+                className: "px-6 py-4 text-right",
+                children: /*#__PURE__*/_jsxs("div", {
+                  className: "flex justify-end gap-2",
+                  children: [user.profile !== "Administrador" && /*#__PURE__*/_jsx("button", {
+                    onClick: () => onAccessAs(user),
+                    className: "rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950",
+                    children: "Acessar como"
+                  }), /*#__PURE__*/_jsx("button", {
+                    onClick: () => resetUserPassword(user),
+                    className: "rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700",
+                    children: "Resetar senha"
+                  }), /*#__PURE__*/_jsx("button", {
+                    onClick: () => startEditUser(user),
+                    className: "rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500",
+                    children: "Editar"
+                  })]
+                })
+              })]
+            }, user.cpf))
+          })]
+        }), visibleUsers.length === 0 && /*#__PURE__*/_jsx("div", {
+          className: "p-10 text-center text-sm font-semibold text-slate-400",
+          children: "Nenhum usuário encontrado."
+        })]
+      })]
+    }), formModule && /*#__PURE__*/_jsxs("section", {
+      className: "soft-card rounded-2xl p-5 sm:p-6",
+      children: [/*#__PURE__*/_jsxs("div", {
+        className: "flex items-center justify-between",
+        children: [/*#__PURE__*/_jsxs("div", {
+          children: [/*#__PURE__*/_jsx("p", {
+            className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+            children: "Cadastro e manutenção"
+          }), /*#__PURE__*/_jsx("h3", {
+            className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+            children: formModule.title
+          })]
+        }), /*#__PURE__*/_jsx("button", {
+          onClick: () => setModule("dashboard"),
+          className: "grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-500",
+          children: /*#__PURE__*/_jsx(Icon, {
+            name: "close",
+            size: 16
+          })
+        })]
+      }), /*#__PURE__*/_jsx("div", {
+        className: "mt-5 grid gap-4 md:grid-cols-3",
+        children: formModule.fields.map((field, index) => /*#__PURE__*/_jsxs("label", {
+          className: "block",
+          children: [/*#__PURE__*/_jsx("span", {
+            className: "mb-2 block text-xs font-extrabold text-potiguar-950",
+            children: field
+          }), /*#__PURE__*/_jsx("input", {
+            "aria-label": field,
+            type: field.includes("Data") || field.includes("Abertura") || field.includes("Encerramento") ? "datetime-local" : field.includes("Meta") ? "number" : "text",
+            placeholder: index === 0 ? "Preencha aqui" : "",
+            className: "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-potiguar-500 focus:bg-white"
+          })]
+        }, field))
+      }), /*#__PURE__*/_jsxs("div", {
+        className: "mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end",
+        children: [/*#__PURE__*/_jsx("button", {
+          onClick: () => setModule("dashboard"),
+          className: "rounded-xl px-5 py-3 text-xs font-extrabold text-slate-400",
+          children: "Cancelar"
+        }), /*#__PURE__*/_jsx("button", {
+          onClick: () => setToast(`${formModule.button}: registro preparado. A persistência será feita no PostgreSQL.`),
+          className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white",
+          children: formModule.button
+        })]
+      })]
+    }), module === "dashboard" && /*#__PURE__*/_jsxs("div", {
+      className: "grid gap-6 xl:grid-cols-[1.25fr_.75fr]",
+      children: [/*#__PURE__*/_jsxs("section", {
+        className: "soft-card rounded-2xl p-5 sm:p-6",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex items-center justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: productFocusEnabled ? "Desempenho por loja" : "Fase teste"
+            }), /*#__PURE__*/_jsx("h3", {
+              className: "mt-1 font-display text-xl font-extrabold text-potiguar-950",
+              children: "Acompanhamento das lojas"
+            })]
+          }), /*#__PURE__*/_jsx("span", {
+            className: "text-xs font-bold text-slate-400",
+            children: "Atualização automática"
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "mt-6 grid gap-3 md:grid-cols-2",
+          children: storeSummaries.map((summary, index) => {
+            const maxPoints = Math.max(1, ...storeSummaries.map(item => item.points));
+            return /*#__PURE__*/_jsxs("div", {
+              className: "rounded-2xl border border-slate-100 bg-slate-50 p-4",
+              children: [/*#__PURE__*/_jsxs("div", {
+                className: "flex items-start justify-between gap-3",
+                children: [/*#__PURE__*/_jsxs("div", {
+                  children: [/*#__PURE__*/_jsxs("p", {
+                    className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700",
+                    children: [index + 1, "º lugar"]
+                  }), /*#__PURE__*/_jsx("h4", {
+                    className: "mt-1 text-sm font-extrabold text-potiguar-950",
+                    children: summary.store
+                  }), /*#__PURE__*/_jsxs("p", {
+                    className: "mt-1 text-[10px] text-slate-400",
+                    children: [summary.sellerCount, " vendedores • ", summary.leaderCount, " líderes"]
+                  })]
+                }), /*#__PURE__*/_jsxs("strong", {
+                  className: "font-display text-xl text-potiguar-900",
+                  children: [summary.points, " pts"]
+                })]
+              }), /*#__PURE__*/_jsx("div", {
+                className: "mt-3 progress-track h-2.5 rounded-full",
+                children: /*#__PURE__*/_jsx("div", {
+                  className: "progress-fill h-full rounded-full",
+                  style: {
+                    width: `${Math.min(summary.points / maxPoints * 100, 100)}%`
+                  }
+                })
+              }), /*#__PURE__*/_jsxs("div", {
+                className: "mt-3 grid grid-cols-3 gap-2 text-center",
+                children: [/*#__PURE__*/_jsxs("div", {
+                  className: "rounded-xl bg-white p-2",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "text-[9px] font-bold text-slate-400",
+                    children: "Leituras"
+                  }), /*#__PURE__*/_jsx("p", {
+                    className: "text-sm font-extrabold text-potiguar-800",
+                    children: summary.readCount
+                  })]
+                }), /*#__PURE__*/_jsxs("div", {
+                  className: "rounded-xl bg-white p-2",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "text-[9px] font-bold text-slate-400",
+                    children: "Palpites"
+                  }), /*#__PURE__*/_jsx("p", {
+                    className: "text-sm font-extrabold text-potiguar-800",
+                    children: summary.predictionCount
+                  })]
+                }), /*#__PURE__*/_jsxs("div", {
+                  className: "rounded-xl bg-white p-2",
+                  children: [/*#__PURE__*/_jsx("p", {
+                    className: "text-[9px] font-bold text-slate-400",
+                    children: "Top vendedor"
+                  }), /*#__PURE__*/_jsx("p", {
+                    className: "truncate text-[10px] font-extrabold text-potiguar-800",
+                    children: summary.topSeller?.name?.split(" ")[0] || "—"
+                  })]
+                })]
+              })]
+            }, summary.store);
+          })
+        })]
+      }), /*#__PURE__*/_jsxs("section", {
+        className: "hero-pattern pitch-lines rounded-2xl p-6 text-white",
+        children: [/*#__PURE__*/_jsxs("div", {
+          className: "flex items-center justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-lime",
+              children: "Rodada atual"
+            }), /*#__PURE__*/_jsx("h3", {
+              className: "mt-1 font-display text-xl font-extrabold",
+              children: "Status operacional"
+            })]
+          }), /*#__PURE__*/_jsx(Icon, {
+            name: "shield",
+            className: "text-potiguar-lime"
+          })]
+        }), /*#__PURE__*/_jsx("div", {
+          className: "mt-6 space-y-4",
+          children: [["Comunicado publicado", true], [productFocusEnabled ? "Desafio da semana ativo" : "Desafio da semana nas oitavas", productFocusEnabled], [productFocusEnabled ? "Metas configuradas" : "Metas comerciais pausadas", productFocusEnabled], ["Resultados dos jogos", false]].map(([label, ok]) => /*#__PURE__*/_jsxs("div", {
+            className: "flex items-center justify-between rounded-xl bg-white/7 p-3",
+            children: [/*#__PURE__*/_jsx("span", {
+              className: "text-xs font-bold",
+              children: label
+            }), /*#__PURE__*/_jsx("span", {
+              className: `grid h-6 w-6 place-items-center rounded-full ${ok ? "bg-potiguar-lime text-potiguar-950" : "bg-white/10 text-white/40"}`,
+              children: /*#__PURE__*/_jsx(Icon, {
+                name: ok ? "check" : "clock",
+                size: 13
+              })
+            })]
+          }, label))
+        }), /*#__PURE__*/_jsx("button", {
+          onClick: () => setToast("Encerramento simulado. Em produção, a ação será auditada e impedirá novos palpites."),
+          className: "mt-6 w-full rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-xs font-extrabold hover:bg-white/15",
+          children: "Encerrar rodada"
+        })]
+      })]
+    })]
+  });
 }
 function App() {
   const savedSessionCpf = (() => {
@@ -4552,101 +5812,112 @@ function App() {
     setAcknowledgedAccessKey("");
     setToast("");
   };
-  if (pendingPasswordUser) return /*#__PURE__*/React.createElement(ChangePasswordScreen, {
+  if (pendingPasswordUser) return /*#__PURE__*/_jsx(ChangePasswordScreen, {
     user: pendingPasswordUser,
     currentPassword: pendingCurrentPassword,
     onChanged: changeInitialPassword,
     onCancel: logout
   });
-  if (!effectiveUser) return /*#__PURE__*/React.createElement(LoginScreen, {
+  if (!effectiveUser) return /*#__PURE__*/_jsx(LoginScreen, {
     onLogin: login,
     userMap: dynamicDemoUsers
   });
-  return /*#__PURE__*/React.createElement("div", {
-    className: "app-shell"
-  }, /*#__PURE__*/React.createElement(Sidebar, {
-    page: activePage,
-    setPage: setPage,
-    user: effectiveUser,
-    onLogout: logout,
-    profilePhotos: profilePhotos
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "main-column"
-  }, /*#__PURE__*/React.createElement(Topbar, {
-    page: activePage,
-    user: effectiveUser,
-    onLogout: logout,
-    profilePhotos: profilePhotos,
-    isImpersonating: isImpersonating,
-    onStopImpersonation: stopAccessAsUser
-  }), /*#__PURE__*/React.createElement("main", {
-    className: "mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10"
-  }, isImpersonating && /*#__PURE__*/React.createElement("div", {
-    className: "mb-4 flex flex-col gap-3 rounded-2xl border border-potiguar-lime/40 bg-potiguar-lime/15 p-4 sm:flex-row sm:items-center sm:justify-between"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Modo validação"), /*#__PURE__*/React.createElement("p", {
-    className: "text-sm font-extrabold text-potiguar-950"
-  }, "Você está vendo o sistema como ", effectiveUser.name, " • ", effectiveUser.store, " • ", effectiveUser.accessRole === "leadership" ? "Liderança" : "Vendedor")), /*#__PURE__*/React.createElement("button", {
-    onClick: stopAccessAsUser,
-    className: "rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"
-  }, "Voltar ao admin")), activePage === "home" && /*#__PURE__*/React.createElement(Home, {
-    acknowledged: announcementAcknowledged,
-    setPage: setPage,
-    setToast: setToast,
-    user: effectiveUser,
-    pilotRanking: pilotRanking,
-    totalSold: effectiveUserStoreSold,
-    profilePhotos: profilePhotos,
-    settings: appSettings,
-    activeGames: activeGames,
-    onAcknowledge: saveAnnouncementRead,
-    onSaveProfilePhoto: saveProfilePhoto
-  }), activePage === "guesses" && /*#__PURE__*/React.createElement(Guesses, {
-    acknowledged: announcementAcknowledged,
-    setPage: setPage,
-    setToast: setToast,
-    user: effectiveUser,
-    settings: appSettings,
-    activeGames: activeGames,
-    onSavePrediction: savePrediction
-  }), activePage === "ranking" && /*#__PURE__*/React.createElement(RankingPage, {
-    user: effectiveUser,
-    pilotRanking: pilotRanking
-  }), activePage === "store" && /*#__PURE__*/React.createElement(StorePage, {
-    user: effectiveUser,
-    pilotRanking: pilotRanking,
-    totalSold: effectiveUserStoreSold,
-    settings: appSettings
-  }), activePage === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
-    adminUser: effectiveUser,
-    users: allRegisteredUsers,
-    customUsers: customUsers,
-    setToast: setToast,
-    predictionEntries: activePredictionEntries,
-    readEntries: activeReadEntries,
-    salesEntries: activeSalesEntries,
-    setSalesEntries: setSalesEntries,
-    pilotRanking: pilotRanking,
-    totalSold: totalSold,
-    profilePhotos: profilePhotos,
-    settings: scoringSettings,
-    activeGames: activeGames,
-    worldCupMatches: worldCupMatches,
-    onSaveSetting: saveSetting,
-    onRefreshData: refreshData,
-    onAccessAs: accessAsUser
-  }))), /*#__PURE__*/React.createElement(MobileNav, {
-    page: activePage,
-    setPage: setPage,
-    user: effectiveUser
-  }), toast && /*#__PURE__*/React.createElement("div", {
-    className: "toast fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-potiguar-950 px-5 py-3 text-xs font-bold text-white shadow-2xl lg:bottom-8"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "grid h-5 w-5 place-items-center rounded-full bg-potiguar-lime text-potiguar-950"
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "check",
-    size: 12
-  })), toast));
+  return /*#__PURE__*/_jsxs("div", {
+    className: "app-shell",
+    children: [/*#__PURE__*/_jsx(Sidebar, {
+      page: activePage,
+      setPage: setPage,
+      user: effectiveUser,
+      onLogout: logout,
+      profilePhotos: profilePhotos
+    }), /*#__PURE__*/_jsxs("div", {
+      className: "main-column",
+      children: [/*#__PURE__*/_jsx(Topbar, {
+        page: activePage,
+        user: effectiveUser,
+        onLogout: logout,
+        profilePhotos: profilePhotos,
+        isImpersonating: isImpersonating,
+        onStopImpersonation: stopAccessAsUser
+      }), /*#__PURE__*/_jsxs("main", {
+        className: "mobile-safe mx-auto max-w-[1440px] p-4 sm:p-8 lg:p-10",
+        children: [isImpersonating && /*#__PURE__*/_jsxs("div", {
+          className: "mb-4 flex flex-col gap-3 rounded-2xl border border-potiguar-lime/40 bg-potiguar-lime/15 p-4 sm:flex-row sm:items-center sm:justify-between",
+          children: [/*#__PURE__*/_jsxs("div", {
+            children: [/*#__PURE__*/_jsx("p", {
+              className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700",
+              children: "Modo validação"
+            }), /*#__PURE__*/_jsxs("p", {
+              className: "text-sm font-extrabold text-potiguar-950",
+              children: ["Você está vendo o sistema como ", effectiveUser.name, " • ", effectiveUser.store, " • ", effectiveUser.accessRole === "leadership" ? "Liderança" : "Vendedor"]
+            })]
+          }), /*#__PURE__*/_jsx("button", {
+            onClick: stopAccessAsUser,
+            className: "rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white",
+            children: "Voltar ao admin"
+          })]
+        }), activePage === "home" && /*#__PURE__*/_jsx(Home, {
+          acknowledged: announcementAcknowledged,
+          setPage: setPage,
+          setToast: setToast,
+          user: effectiveUser,
+          pilotRanking: pilotRanking,
+          totalSold: effectiveUserStoreSold,
+          profilePhotos: profilePhotos,
+          settings: appSettings,
+          activeGames: activeGames,
+          onAcknowledge: saveAnnouncementRead,
+          onSaveProfilePhoto: saveProfilePhoto
+        }), activePage === "guesses" && /*#__PURE__*/_jsx(Guesses, {
+          acknowledged: announcementAcknowledged,
+          setPage: setPage,
+          setToast: setToast,
+          user: effectiveUser,
+          settings: appSettings,
+          activeGames: activeGames,
+          onSavePrediction: savePrediction
+        }), activePage === "ranking" && /*#__PURE__*/_jsx(RankingPage, {
+          user: effectiveUser,
+          pilotRanking: pilotRanking
+        }), activePage === "store" && /*#__PURE__*/_jsx(StorePage, {
+          user: effectiveUser,
+          pilotRanking: pilotRanking,
+          totalSold: effectiveUserStoreSold,
+          settings: appSettings
+        }), activePage === "admin" && /*#__PURE__*/_jsx(AdminPage, {
+          adminUser: effectiveUser,
+          users: allRegisteredUsers,
+          customUsers: customUsers,
+          setToast: setToast,
+          predictionEntries: activePredictionEntries,
+          readEntries: activeReadEntries,
+          salesEntries: activeSalesEntries,
+          setSalesEntries: setSalesEntries,
+          pilotRanking: pilotRanking,
+          totalSold: totalSold,
+          profilePhotos: profilePhotos,
+          settings: scoringSettings,
+          activeGames: activeGames,
+          worldCupMatches: worldCupMatches,
+          onSaveSetting: saveSetting,
+          onRefreshData: refreshData,
+          onAccessAs: accessAsUser
+        })]
+      })]
+    }), /*#__PURE__*/_jsx(MobileNav, {
+      page: activePage,
+      setPage: setPage,
+      user: effectiveUser
+    }), toast && /*#__PURE__*/_jsxs("div", {
+      className: "toast fixed bottom-24 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-potiguar-950 px-5 py-3 text-xs font-bold text-white shadow-2xl lg:bottom-8",
+      children: [/*#__PURE__*/_jsx("span", {
+        className: "grid h-5 w-5 place-items-center rounded-full bg-potiguar-lime text-potiguar-950",
+        children: /*#__PURE__*/_jsx(Icon, {
+          name: "check",
+          size: 12
+        })
+      }), toast]
+    })]
+  });
 }
-ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/_jsx(App, {}));
