@@ -2112,7 +2112,15 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       </div>
       <section className="soft-card rounded-2xl p-5 sm:p-6">
         <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Ações rápidas</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">O que vamos movimentar?</h3></div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:hidden">
+          {actions.map(([icon,title,,value]) => (
+            <button key={title} onClick={() => setModule(value)} className={`flex items-center gap-2 rounded-2xl border px-3 py-2.5 text-left transition ${module === value ? "border-potiguar-500 bg-potiguar-lime text-potiguar-950 shadow-sm" : "border-slate-100 bg-slate-50 text-potiguar-900"}`}>
+              <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-xl ${module === value ? "bg-potiguar-950 text-potiguar-lime" : "bg-white text-potiguar-900"}`}><Icon name={icon} size={15}/></span>
+              <span className="truncate text-[11px] font-extrabold">{title}</span>
+            </button>
+          ))}
+        </div>
+        <div className="mt-5 hidden gap-3 sm:grid sm:grid-cols-2 xl:grid-cols-4">
           {actions.map(([icon,title,desc,value]) => <button key={title} onClick={() => setModule(value)} className={`lift rounded-2xl border p-4 text-left ${module === value ? "border-potiguar-500 bg-potiguar-lime/10" : "border-slate-100 bg-slate-50"}`}><span className="grid h-10 w-10 place-items-center rounded-xl bg-potiguar-900 text-potiguar-lime"><Icon name={icon} size={19}/></span><strong className="mt-4 block text-sm text-potiguar-950">{title}</strong><span className="mt-1 block text-[10px] leading-4 text-slate-400">{desc}</span></button>)}
         </div>
       </section>

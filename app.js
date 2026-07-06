@@ -2785,7 +2785,20 @@ function AdminPage({
   }, "Ações rápidas"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "O que vamos movimentar?")), /*#__PURE__*/React.createElement("div", {
-    className: "mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+    className: "mt-4 grid grid-cols-2 gap-2 sm:hidden"
+  }, actions.map(([icon, title,, value]) => /*#__PURE__*/React.createElement("button", {
+    key: title,
+    onClick: () => setModule(value),
+    className: `flex items-center gap-2 rounded-2xl border px-3 py-2.5 text-left transition ${module === value ? "border-potiguar-500 bg-potiguar-lime text-potiguar-950 shadow-sm" : "border-slate-100 bg-slate-50 text-potiguar-900"}`
+  }, /*#__PURE__*/React.createElement("span", {
+    className: `grid h-7 w-7 shrink-0 place-items-center rounded-xl ${module === value ? "bg-potiguar-950 text-potiguar-lime" : "bg-white text-potiguar-900"}`
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: icon,
+    size: 15
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "truncate text-[11px] font-extrabold"
+  }, title)))), /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 hidden gap-3 sm:grid sm:grid-cols-2 xl:grid-cols-4"
   }, actions.map(([icon, title, desc, value]) => /*#__PURE__*/React.createElement("button", {
     key: title,
     onClick: () => setModule(value),
