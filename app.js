@@ -2431,11 +2431,6 @@ function AdminPage({
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const startEditUser = user => {
     const cpf = onlyDigits(user.cpf);
-    const editable = (Array.isArray(customUsers) ? customUsers : []).some(item => onlyDigits(item.cpf) === cpf);
-    if (!editable) {
-      setToast("Este usuário veio da base importada. Nesta fase, edite apenas usuários cadastrados pelo admin.");
-      return;
-    }
     setEditingCpf(cpf);
     setNewUser({
       name: user.name,

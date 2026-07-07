@@ -1799,11 +1799,6 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
 
   const startEditUser = user => {
     const cpf = onlyDigits(user.cpf);
-    const editable = (Array.isArray(customUsers) ? customUsers : []).some(item => onlyDigits(item.cpf) === cpf);
-    if (!editable) {
-      setToast("Este usuário veio da base importada. Nesta fase, edite apenas usuários cadastrados pelo admin.");
-      return;
-    }
     setEditingCpf(cpf);
     setNewUser({
       name: user.name,
