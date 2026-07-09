@@ -389,9 +389,13 @@ const getStoreStats = storeName => {
     networkPosition: sorted.findIndex(store => store.name === stats.name) + 1
   };
 };
-const getStoreFocus = storeName => {
-  const assignment = initialProductAssignments.find(item => item.store === storeName) || initialProductAssignments[0];
-  const product = focusProducts.find(item => item.id === assignment.productId) || focusProducts[0];
+const getProductCatalog = settings => Array.isArray(settings?.productCatalog) ? settings.productCatalog : focusProducts;
+const getProductAssignments = settings => Array.isArray(settings?.productAssignments) ? settings.productAssignments : initialProductAssignments;
+const getStoreFocus = (storeName, settings) => {
+  const assignments = getProductAssignments(settings);
+  const catalog = getProductCatalog(settings);
+  const assignment = assignments.find(item => item.store === storeName) || assignments[0] || initialProductAssignments[0];
+  const product = catalog.find(item => item.id === assignment.productId) || focusProducts.find(item => item.id === assignment.productId) || catalog[0] || focusProducts[0];
   const stats = getStoreStats(storeName);
   const goal = assignment.goal || stats.goal;
   const sold = stats.sold;
@@ -420,18 +424,96 @@ const getStoreRanking = (storeName, limit = 10) => rankedSellers.filter(user => 
   };
 }).sort((a, b) => b.points - a.points).slice(0, limit);
 const games = [{
-  id: 1,
-  time: "19:00",
-  group: "Grupo C",
-  home: "Escócia",
-  away: "Brasil",
-  homeFlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-  awayFlag: "🇧🇷",
-  venue: "Miami Stadium",
-  kickoffAt: "2026-07-03T19:00:00-03:00",
+  id: 101,
+  time: "17:00",
+  group: "Quartas de final",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-09T17:00:00-03:00",
+  status: "scheduled"
+}, {
+  id: 102,
+  time: "21:00",
+  group: "Quartas de final",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-10T21:00:00-03:00",
+  status: "scheduled"
+}, {
+  id: 103,
+  time: "17:00",
+  group: "Quartas de final",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-11T17:00:00-03:00",
+  status: "scheduled"
+}, {
+  id: 104,
+  time: "21:00",
+  group: "Quartas de final",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-11T21:00:00-03:00",
+  status: "scheduled"
+}, {
+  id: 201,
+  time: "21:00",
+  group: "Semifinal",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-14T21:00:00-03:00",
+  status: "scheduled"
+}, {
+  id: 202,
+  time: "21:00",
+  group: "Semifinal",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-15T21:00:00-03:00",
+  status: "scheduled"
+}, {
+  id: 301,
+  time: "17:00",
+  group: "Disputa de terceiro lugar",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-18T17:00:00-03:00",
+  status: "scheduled"
+}, {
+  id: 401,
+  time: "17:00",
+  group: "Final",
+  home: "A definir",
+  away: "A definir",
+  homeFlag: "🌐",
+  awayFlag: "🌐",
+  venue: "A definir",
+  kickoffAt: "2026-07-19T17:00:00-03:00",
   status: "scheduled"
 }];
 const teamFlags = {
+  "A definir": "🌐",
   Brasil: "🇧🇷",
   Brazil: "🇧🇷",
   Argentina: "🇦🇷",
@@ -478,6 +560,15 @@ const normalizeSyncedMatch = match => ({
 const getActiveGames = (syncedMatches = [], round = defaultRoundConfig) => {
   const normalized = syncedMatches.map(normalizeSyncedMatch).filter(match => match.id && match.kickoffAt);
   if (!normalized.length) return games;
+  if (round?.id === "quartas-final") {
+    const startsAt = new Date("2026-07-09T00:00:00-03:00");
+    const endsAt = new Date("2026-07-19T23:59:59-03:00");
+    const finalStretch = normalized.filter(match => {
+      const date = new Date(match.kickoffAt);
+      return date >= startsAt && date <= endsAt;
+    });
+    return (finalStretch.length ? finalStretch : normalized).filter(match => ["scheduled", "live", "finished"].includes(match.status)).sort((a, b) => new Date(a.kickoffAt) - new Date(b.kickoffAt));
+  }
   const sameRound = normalized.filter(match => match.roundId === round.id || match.phase === round.phase || match.roundName === round.name);
   return (sameRound.length ? sameRound : normalized).filter(match => ["scheduled", "live", "finished"].includes(match.status)).sort((a, b) => new Date(a.kickoffAt) - new Date(b.kickoffAt));
 };
@@ -518,11 +609,11 @@ const isAnnouncementActive = (announcement = {}, date = new Date()) => {
   return true;
 };
 const knockoutRounds = [{
-  id: "teste-16avos",
-  phase: "16 avos",
-  name: "Teste 16 avos",
-  official: false,
-  kickoffAt: "2026-07-03T21:00:00"
+  id: "quartas-final",
+  phase: "Fase final",
+  name: "Quartas de final até a Final",
+  official: true,
+  kickoffAt: "2026-07-09T17:00:00"
 }, {
   id: "oitavas-dia-1",
   phase: "Oitavas",
@@ -653,17 +744,17 @@ const getGamePredictionAccess = (game, now = new Date()) => {
   };
 };
 const defaultAnnouncement = {
-  id: "endomarketing-oitavas-produto-em-foco-17",
+  id: "endomarketing-quartas-produto-em-foco-17",
   title: "Produto em Foco #17: produtos versáteis",
   body: "O 17º episódio do Produto em Foco está no ar! O tema da vez são produtos versáteis (mesas dobráveis, bancos, coolers e caixas térmicas), uma categoria com enorme potencial de vendas combinadas.\n\n💡 O Valor do Rito em Grupo\nEste formato foi feito para ser assistido e debatido juntos (com todo o time ou em minigrupos). Incentive a equipe a maratonar e rever os vídeos sempre que precisar. Isso constrói o repertório técnico necessário para surpreender o consumidor e melhorar a experiência do cliente no chão de loja.\n\nFoco da liderança no rito de hoje:\n• Troca real: estimule o time a falar sobre os benefícios e a quebra de objeções.\n• Venda consultiva: provoque a oferta de soluções complementares (mesa + cooler + banquetas).\n\n📝 Checklist Rápido:\n1. Assistir em grupo e debater a aplicação imediata nas vendas.\n2. Aplicar a prova da semana.\n3. Garantir a inscrição de todos no canal para consultas frequentes.\n\n🚀 Líder: sua condução transforma o vídeo em resultado e constrói a segurança que o time precisa para vender mais.\n\nContamos com você. Excelentes vendas!",
-  videoUrl: "https://www.youtube.com/shorts/vrCzG8vK6To",
+  videoUrl: "https://youtube.com/shorts/_zhzrgEL9T8",
   minimumSeconds: 30,
-  publishedAt: "OITAVAS • ativo",
+  publishedAt: "QUARTAS • ativo",
   startsAt: "",
   endsAt: "",
   attachments: []
 };
-const defaultScoringStartAt = "2026-07-04T00:00:00-03:00";
+const defaultScoringStartAt = "2026-07-09T00:00:00-03:00";
 const defaultMatchResults = {
   1: {
     homeScore: 0,
@@ -671,18 +762,18 @@ const defaultMatchResults = {
   }
 };
 const defaultRoundConfig = {
-  id: "oitavas",
-  phase: "Oitavas",
-  name: "Oitavas de final",
+  id: "quartas-final",
+  phase: "Fase final",
+  name: "Quartas de final até a Final",
   official: true,
   status: "open",
-  kickoffAt: "2026-07-04T13:00:00",
-  predictionsCloseAt: "2026-07-04T12:50:00"
+  kickoffAt: "2026-07-09T17:00:00",
+  predictionsCloseAt: "2026-07-09T16:50:00"
 };
 const defaultAward = {
-  name: "Premiação Oitavas de Final",
+  name: "Premiação da Fase Final",
   criterion: "Desafio da semana + endomarketing + palpites",
-  description: "1º vendedor de cada loja ganha uma Mochila Potiguar. 1º vendedor geral e os 2 primeiros líderes geral ganham um Robô Aspirador Potiguar.",
+  description: "1º vendedor de cada loja ganha uma Mochila Potiguar. 1º vendedor geral ganha um Robô Aspirador Potiguar. Os 2 primeiros líderes geral ganham Robô Aspirador somente se a loja atingir pelo menos 90% da meta do desafio e 80% de aderência aos palpites.",
   storeSellerPrize: "Mochila Potiguar",
   storeSellerPrizeUrl: "https://www.apotiguar.com.br/produto/mochila-reforcada-preta-potiguar-105635",
   overallSellerPrize: "Robô Aspirador Potiguar",
@@ -694,7 +785,9 @@ const defaultAppSettings = {
   round: defaultRoundConfig,
   award: defaultAward,
   scoringStartAt: defaultScoringStartAt,
-  matchResults: defaultMatchResults
+  matchResults: defaultMatchResults,
+  productCatalog: focusProducts,
+  productAssignments: initialProductAssignments
 };
 const getEntryDate = entry => new Date(entry.submitted_at || entry.submittedAt || entry.readAt || entry.createdAt || entry.created_at || 0);
 const isAfterScoringStart = (entry, settings = defaultAppSettings) => {
@@ -739,6 +832,8 @@ const getTieTime = value => {
 };
 const compareRankingRows = (a, b) => b.points - a.points || b.exactPredictions - a.exactPredictions || b.predictionHits - a.predictionHits || b.soldQuantity - a.soldQuantity || (b.storeGoalHit ? 1 : 0) - (a.storeGoalHit ? 1 : 0) || b.storeGoalPercent - a.storeGoalPercent || b.storeActiveSellers - a.storeActiveSellers || b.storeSellerPoints - a.storeSellerPoints || getTieTime(a.firstReadAt) - getTieTime(b.firstReadAt) || getTieTime(a.firstPredictionAt) - getTieTime(b.firstPredictionAt) || getTieTime(a.firstSaleAt) - getTieTime(b.firstSaleAt) || a.name.localeCompare(b.name);
 const compareStoreTopSellerTie = (a, b) => b.soldQuantity - a.soldQuantity || b.predictionPoints - a.predictionPoints || b.exactPredictions - a.exactPredictions || b.predictionHits - a.predictionHits || getTieTime(a.firstSaleAt) - getTieTime(b.firstSaleAt) || a.name.localeCompare(b.name);
+const LEADER_PRIZE_MIN_GOAL_PERCENT = 90;
+const LEADER_PRIZE_MIN_ADHERENCE_PERCENT = 80;
 const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
   const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
@@ -766,6 +861,8 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     firstSaleAt: "",
     storeGoalHit: false,
     storeGoalPercent: 0,
+    storeAdherencePercent: 0,
+    leaderPrizeEligible: false,
     storeActiveSellers: 0,
     storeSellerPoints: 0
   }));
@@ -804,6 +901,13 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     acc[store] = (acc[store] || 0) + Number(entry.quantity || 0);
     return acc;
   }, {}) : {};
+  const predictionCpfsByStore = predictionEntries.filter(entry => isAfterScoringStart(entry, settings)).reduce((acc, entry) => {
+    const row = byCpf[onlyDigits(entry.cpf)];
+    if (!row) return acc;
+    if (!acc[row.store]) acc[row.store] = new Set();
+    acc[row.store].add(row.cpf);
+    return acc;
+  }, {});
   Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
     const row = byCpf[cpf];
     if (!row || quantity <= 0) return;
@@ -829,7 +933,9 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
       });
     }
   });
-  initialProductAssignments.forEach(assignment => {
+  const scoringAssignments = getProductAssignments(settings);
+  const primaryStoreAssignments = fixedStores.map(store => scoringAssignments.find(item => item.store === store) || initialProductAssignments.find(item => item.store === store)).filter(Boolean);
+  primaryStoreAssignments.forEach(assignment => {
     const storeGoal = Number(assignment.goal || 0);
     if (!storeGoal || Number(salesByStore[assignment.store] || 0) < storeGoal) return;
     rows.filter(row => row.store === assignment.store).forEach(row => {
@@ -838,18 +944,21 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     });
   });
   fixedStores.forEach(store => {
-    const assignment = initialProductAssignments.find(item => item.store === store);
+    const assignment = primaryStoreAssignments.find(item => item.store === store);
     const goal = Number(assignment?.goal || 0);
     const sold = Number(salesByStore[store] || 0);
     const storeRows = rows.filter(row => row.store === store);
     const storeSellers = storeRows.filter(row => row.role === "Vendedor");
     const storeGoalHit = goal > 0 && sold >= goal;
     const storeGoalPercent = goal > 0 ? Math.round(sold / goal * 100) : 0;
+    const storeAdherencePercent = storeRows.length ? Math.round((predictionCpfsByStore[store]?.size || 0) / storeRows.length * 100) : 0;
     const storeActiveSellers = storeSellers.filter(row => row.soldQuantity > 0).length;
     const storeSellerPoints = storeSellers.reduce((sum, row) => sum + row.points, 0);
     storeRows.forEach(row => {
       row.storeGoalHit = storeGoalHit;
       row.storeGoalPercent = storeGoalPercent;
+      row.storeAdherencePercent = storeAdherencePercent;
+      row.leaderPrizeEligible = row.role === "Liderança" && storeGoalPercent >= LEADER_PRIZE_MIN_GOAL_PERCENT && storeAdherencePercent >= LEADER_PRIZE_MIN_ADHERENCE_PERCENT;
       row.storeActiveSellers = storeActiveSellers;
       row.storeSellerPoints = storeSellerPoints;
     });
@@ -860,11 +969,13 @@ const getRoundClosingSummary = rankingRows => {
   const eligibleRows = rankingRows.filter(row => row.role !== "Administrador");
   const sellers = eligibleRows.filter(row => row.role === "Vendedor");
   const leaders = eligibleRows.filter(row => row.role === "Liderança");
+  const prizeEligibleLeaders = leaders.filter(row => row.leaderPrizeEligible);
   return {
     overallWinner: eligibleRows[0] || null,
     topOverall: eligibleRows.slice(0, 3),
     topSellerOverall: sellers[0] || null,
-    topLeaders: leaders.slice(0, 2),
+    topLeaders: prizeEligibleLeaders.slice(0, 2),
+    leaderCandidates: leaders.slice(0, 5),
     storeWinners: fixedStores.map(store => ({
       store,
       winner: sellers.filter(row => row.store === store)[0] || null
@@ -999,7 +1110,7 @@ function LoginScreen({
     className: "my-auto max-w-md"
   }, /*#__PURE__*/React.createElement("span", {
     className: "inline-flex rounded-full bg-potiguar-lime/15 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime"
-  }, "Piloto comercial 2026"), /*#__PURE__*/React.createElement("h1", {
+  }, "Campanha oficial 2026"), /*#__PURE__*/React.createElement("h1", {
     className: "mt-6 font-display text-5xl font-extrabold leading-[1.02]"
   }, "Leu.", /*#__PURE__*/React.createElement("br", null), "Palpitou.", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
     className: "text-potiguar-lime"
@@ -1007,7 +1118,7 @@ function LoginScreen({
     className: "mt-5 text-sm leading-6 text-white/60"
   }, "Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja.")), /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-white/35"
-  }, "Acesso controlado • Piloto multi-lojas")), /*#__PURE__*/React.createElement("section", {
+  }, "Acesso Potiguar • Todas as lojas")), /*#__PURE__*/React.createElement("section", {
     className: "flex flex-col justify-center p-6 sm:p-10 lg:p-14"
   }, /*#__PURE__*/React.createElement("div", {
     className: "mb-9 lg:hidden"
@@ -1365,10 +1476,11 @@ function StatCard({
 function ProductCard({
   user,
   totalSold,
-  pilotRanking
+  pilotRanking,
+  settings
 }) {
   const leadership = user.accessRole === "leadership";
-  const focus = getStoreFocus(user.store);
+  const focus = getStoreFocus(user.store, settings);
   const percent = Math.round(totalSold / focus.goal * 100);
   const remaining = Math.max(focus.goal - totalSold, 0);
   const width = `${Math.min(percent, 100)}%`;
@@ -1425,6 +1537,93 @@ function ProductCard({
   }), /*#__PURE__*/React.createElement("div", {
     className: "absolute -right-5 -top-5 grid h-14 w-14 rotate-6 place-items-center rounded-2xl bg-potiguar-yellow font-display text-lg font-extrabold text-potiguar-950 shadow-xl"
   }, leadership ? "+4" : "+5")))));
+}
+function ChallengeReminder({
+  user,
+  totalSold,
+  pilotRanking,
+  setPage,
+  roundId,
+  settings
+}) {
+  const focus = getStoreFocus(user.store, settings);
+  const unit = focus.product.unit || "un.";
+  const percent = Math.round(totalSold / focus.goal * 100);
+  const storageKey = `copaChallengeReminder:${onlyDigits(user.cpf)}:${roundId || defaultRoundConfig.id}`;
+  const [open, setOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem(storageKey) !== "1";
+    } catch (error) {
+      return true;
+    }
+  });
+  const topSeller = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor" && person.soldQuantity > 0).sort((a, b) => b.soldQuantity - a.soldQuantity || b.points - a.points)[0];
+  const close = () => {
+    try {
+      sessionStorage.setItem(storageKey, "1");
+    } catch (error) {}
+    setOpen(false);
+  };
+  if (!open) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "fixed inset-0 z-50 grid place-items-end bg-potiguar-950/55 p-4 backdrop-blur-sm sm:place-items-center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "w-full max-w-lg overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-potiguar-950/35"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "hero-pattern pitch-lines p-6 text-white"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-start justify-between gap-4"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.2em] text-potiguar-lime"
+  }, "Lembrete comercial"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-2 font-display text-2xl font-extrabold"
+  }, "Desafio da Semana"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 text-sm text-white/65"
+  }, user.store, " • meta ", focus.goal, " ", unit)), /*#__PURE__*/React.createElement("button", {
+    onClick: close,
+    className: "grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white/70"
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "close",
+    size: 18
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Produto foco da loja"), /*#__PURE__*/React.createElement("h4", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, focus.product.name), /*#__PURE__*/React.createElement("p", {
+    className: "mt-2 text-sm leading-6 text-slate-500"
+  }, "SKU ", focus.product.sku, " • Marca ", focus.product.brand, ". Cada venda ajuda sua loja a bater a meta e movimenta o ranking."), /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 rounded-2xl bg-slate-50 p-4"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-end justify-between gap-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-bold text-slate-400"
+  }, "Atingimento da loja"), /*#__PURE__*/React.createElement("p", {
+    className: "font-display text-3xl font-extrabold text-potiguar-950"
+  }, percent, "%")), /*#__PURE__*/React.createElement("p", {
+    className: "text-right text-xs font-extrabold text-potiguar-800"
+  }, totalSold, " / ", focus.goal, " ", unit)), /*#__PURE__*/React.createElement("div", {
+    className: "mt-3 h-2.5 overflow-hidden rounded-full bg-white"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "h-full rounded-full bg-potiguar-lime",
+    style: {
+      width: `${Math.min(percent, 100)}%`
+    }
+  })), /*#__PURE__*/React.createElement("p", {
+    className: "mt-3 text-xs font-semibold text-slate-500"
+  }, topSeller ? `Destaque atual: ${topSeller.name} com ${topSeller.soldQuantity} ${unit}.` : "Ainda não há venda lançada para este desafio.")), /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 grid gap-3 sm:grid-cols-2"
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      close();
+      setPage("store");
+    },
+    className: "rounded-2xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
+  }, "Ver desafio e ranking"), /*#__PURE__*/React.createElement("button", {
+    onClick: close,
+    className: "rounded-2xl border border-slate-100 bg-slate-50 px-5 py-3 text-xs font-extrabold text-potiguar-900"
+  }, "Continuar")))));
 }
 function Announcement({
   acknowledged,
@@ -1577,11 +1776,12 @@ function MiniRanking({
 }
 function StoreMiniRanking({
   user,
-  pilotRanking
+  pilotRanking,
+  settings
 }) {
   const localRanking = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").slice(0, 4);
   const myPosition = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").findIndex(person => person.name === user.name) + 1;
-  const unit = getStoreFocus(user.store).product.unit || "un.";
+  const unit = getStoreFocus(user.store, settings).product.unit || "un.";
   return /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1622,8 +1822,10 @@ function LeaderPrizeRanking({
   pilotRanking,
   award = defaultAward
 }) {
-  const leaders = pilotRanking.filter(person => person.role === "Liderança").slice(0, 2);
+  const leaders = pilotRanking.filter(person => person.role === "Liderança" && person.leaderPrizeEligible).slice(0, 2);
+  const myRow = pilotRanking.find(person => person.cpf === onlyDigits(user.cpf));
   const myLeaderPosition = pilotRanking.filter(person => person.role === "Liderança").findIndex(person => person.cpf === onlyDigits(user.cpf)) + 1;
+  const eligibleText = myRow?.leaderPrizeEligible ? "Sua loja já cumpre os critérios de premiação." : `Para concorrer: meta da loja ≥ ${LEADER_PRIZE_MIN_GOAL_PERCENT}% e aderência ≥ ${LEADER_PRIZE_MIN_ADHERENCE_PERCENT}%. Hoje: meta ${myRow?.storeGoalPercent || 0}% • aderência ${myRow?.storeAdherencePercent || 0}%.`;
   return /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1632,9 +1834,11 @@ function LeaderPrizeRanking({
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
   }, "Premiação liderança"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
-  }, "Top 2 líderes geral"), /*#__PURE__*/React.createElement("p", {
+  }, "Top 2 líderes elegíveis"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, "Sua posição: ", myLeaderPosition || "—", "º entre líderes • prêmio: ", award.leadershipPrize)), /*#__PURE__*/React.createElement(Icon, {
+  }, "Sua posição: ", myLeaderPosition || "—", "º entre líderes • prêmio: ", award.leadershipPrize), /*#__PURE__*/React.createElement("p", {
+    className: `mt-2 text-xs font-bold ${myRow?.leaderPrizeEligible ? "text-emerald-600" : "text-amber-600"}`
+  }, eligibleText)), /*#__PURE__*/React.createElement(Icon, {
     name: "trophy",
     className: "text-potiguar-red"
   })), /*#__PURE__*/React.createElement("div", {
@@ -1678,7 +1882,7 @@ function Home({
   const firstOpenAccess = gameAccess.find(access => access.open);
   const nextAccess = firstOpenAccess || gameAccess.find(access => now < access.closeAt);
   const predictionsClosed = !firstOpenAccess;
-  const storeFocus = getStoreFocus(user.store);
+  const storeFocus = getStoreFocus(user.store, settings);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
   const activeSellers = storeSellers.filter(person => person.soldQuantity > 0).length;
@@ -1693,7 +1897,14 @@ function Home({
   const announcementActive = isAnnouncementActive(settings.announcement || defaultAnnouncement, now);
   return /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
+  }, productFocusEnabled && /*#__PURE__*/React.createElement(ChallengeReminder, {
+    user: user,
+    totalSold: totalSold,
+    pilotRanking: pilotRanking,
+    setPage: setPage,
+    roundId: round.id,
+    settings: settings
+  }), /*#__PURE__*/React.createElement("section", {
     className: "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-semibold text-slate-400"
@@ -1739,12 +1950,12 @@ function Home({
     icon: "target",
     label: leadership && productFocusEnabled ? "Vendedores com venda" : "Palpites certos",
     value: leadership && productFocusEnabled ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0,
-    detail: leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`,
+    detail: leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos na rodada`,
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: productFocusEnabled ? "fire" : "ball",
-    label: productFocusEnabled ? "Meta da loja" : "Fase teste",
-    value: productFocusEnabled ? `${storePercent}%` : "16 avos",
+    label: productFocusEnabled ? "Meta da loja" : "Fase final",
+    value: productFocusEnabled ? `${storePercent}%` : "Finais",
     detail: productFocusEnabled ? `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}` : "Somente palpites nesta etapa",
     accent: "white"
   })), /*#__PURE__*/React.createElement("div", {
@@ -1752,7 +1963,8 @@ function Home({
   }, productFocusEnabled ? /*#__PURE__*/React.createElement(ProductCard, {
     user: user,
     totalSold: totalSold,
-    pilotRanking: pilotRanking
+    pilotRanking: pilotRanking,
+    settings: settings
   }) : /*#__PURE__*/React.createElement("section", {
     className: "hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1760,11 +1972,11 @@ function Home({
   }, /*#__PURE__*/React.createElement(Icon, {
     name: "ball",
     size: 16
-  }), " Fase teste"), /*#__PURE__*/React.createElement("h3", {
+  }), " Fase final"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-3 font-display text-3xl font-extrabold"
-  }, "16 avos sem desafio da semana"), /*#__PURE__*/React.createElement("p", {
+  }, "Disputa oficial em andamento"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm leading-6 text-white/65"
-  }, "Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Desafio da semana e metas comerciais entram a partir das oitavas.")), /*#__PURE__*/React.createElement("div", {
+  }, "Acompanhe os palpites, o endomarketing e o desafio da semana da sua loja.")), /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
   }, /*#__PURE__*/React.createElement(MiniRanking, {
     pilotRanking: pilotRanking
@@ -1788,7 +2000,7 @@ function Home({
     target: "_blank",
     rel: "noreferrer",
     className: "rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15"
-  }, "1º vendedor geral e Top 2 líderes: ", award.overallSellerPrize || defaultAward.overallSellerPrize))))), /*#__PURE__*/React.createElement("div", {
+  }, "1º vendedor geral e Top 2 líderes elegíveis: ", award.overallSellerPrize || defaultAward.overallSellerPrize))))), /*#__PURE__*/React.createElement("div", {
     className: "grid gap-6 xl:grid-cols-[1.45fr_.8fr]"
   }, announcementActive ? /*#__PURE__*/React.createElement(Announcement, {
     acknowledged: acknowledged,
@@ -1828,7 +2040,8 @@ function Home({
     award: award
   }), user.accessRole !== "admin" && /*#__PURE__*/React.createElement(StoreMiniRanking, {
     user: user,
-    pilotRanking: pilotRanking
+    pilotRanking: pilotRanking,
+    settings: settings
   }));
 }
 function Guesses({
@@ -1939,7 +2152,7 @@ function Guesses({
     className: "flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"
   }, /*#__PURE__*/React.createElement("span", {
     className: "pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"
-  }), " ", round.official ? "Rodada oficial" : "Rodada teste", " • ", round.phase), /*#__PURE__*/React.createElement("h2", {
+  }), " Rodada oficial • ", round.phase), /*#__PURE__*/React.createElement("h2", {
     className: "mt-3 font-display text-3xl font-extrabold"
   }, round.name), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
@@ -2066,7 +2279,7 @@ function RankingPage({
     className: "mt-2 font-display text-3xl font-extrabold"
   }, "Quem está voando?"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
-  }, tab === "geral" ? "Classificação geral do piloto comercial." : `Classificação apenas da loja ${user.store}.`)), /*#__PURE__*/React.createElement("div", {
+  }, tab === "geral" ? "Classificação geral da campanha." : `Classificação apenas da loja ${user.store}.`)), /*#__PURE__*/React.createElement("div", {
     className: "flex items-end justify-center gap-3"
   }, podium.map((p, i) => {
     const rank = [2, 1, 3][i];
@@ -2131,7 +2344,7 @@ function StorePage({
   settings
 }) {
   const productFocusEnabled = isProductFocusEnabled(settings);
-  const storeFocus = getStoreFocus(user.store);
+  const storeFocus = getStoreFocus(user.store, settings);
   const storeUnit = storeFocus.product.unit || "unidades";
   const storeGoal = storeFocus.goal || 1;
   const storePercent = Math.round(totalSold / storeGoal * 100);
@@ -2160,9 +2373,9 @@ function StorePage({
     size: 16
   }), " Loja ", user.store), /*#__PURE__*/React.createElement("h2", {
     className: "mt-3 font-display text-3xl font-extrabold"
-  }, "Fase teste: foco nos palpites"), /*#__PURE__*/React.createElement("p", {
+  }, "Fase final: foco total na disputa"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm leading-6 text-white/65"
-  }, "Nesta etapa não teremos desafio da semana nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.")), user.accessRole === "leadership" && /*#__PURE__*/React.createElement("div", {
+  }, "Acompanhe a equipe, os palpites, leituras e o ranking comercial da loja.")), user.accessRole === "leadership" && /*#__PURE__*/React.createElement("div", {
     className: "grid grid-cols-3 gap-3"
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "users",
@@ -2228,7 +2441,7 @@ function StorePage({
     className: "mt-3 font-display text-3xl font-extrabold"
   }, "Juntos até a meta!"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
-  }, "Piloto ativo em ", user.store, " • ranking atualizado pelas vendas reais")), /*#__PURE__*/React.createElement("div", {
+  }, "Campanha ativa em ", user.store, " • ranking atualizado pelas vendas")), /*#__PURE__*/React.createElement("div", {
     className: "glass rounded-2xl px-5 py-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-bold uppercase tracking-wider text-white/45"
@@ -2351,8 +2564,8 @@ function AdminPage({
     store: PILOT_STORE
   });
   const [editingCpf, setEditingCpf] = useState("");
-  const [assignments, setAssignments] = useState(initialProductAssignments);
-  const [productCatalog, setProductCatalog] = useState(focusProducts);
+  const [assignments, setAssignments] = useState(getProductAssignments(settings));
+  const [productCatalog, setProductCatalog] = useState(getProductCatalog(settings));
   const [newProduct, setNewProduct] = useState({
     sku: "",
     name: "",
@@ -2393,6 +2606,8 @@ function AdminPage({
     setAnnouncementForm(settings.announcement || defaultAnnouncement);
     setAwardForm(settings.award || defaultAward);
     setRoundForm(settings.round || defaultRoundConfig);
+    setAssignments(getProductAssignments(settings));
+    setProductCatalog(getProductCatalog(settings));
     const result = (settings.matchResults || defaultMatchResults)[currentAdminGame.id] || defaultMatchResults[1] || {};
     setResultForm({
       homeScore: String(result.homeScore),
@@ -2418,7 +2633,10 @@ function AdminPage({
     acc[entry.seller].quantity += Number(entry.quantity);
     return acc;
   }, {})).sort((a, b) => b.quantity - a.quantity);
-  const storeGoal = assignments.find(item => item.store === PILOT_STORE)?.goal || 200;
+  const networkGoal = fixedStores.reduce((sum, store) => {
+    const assignment = assignments.find(item => item.store === store);
+    return sum + Number(assignment?.goal || 0);
+  }, 0) || 1;
   const sellerCount = users.filter(user => user.profile === "Vendedor").length;
   const leaderCount = users.filter(user => user.profile === "Liderança").length;
   const adminCount = users.filter(user => user.profile === "Administrador").length;
@@ -2504,18 +2722,20 @@ function AdminPage({
       setToast("Não foi possível redefinir a senha no servidor.");
     }
   };
-  const assignProduct = event => {
+  const assignProduct = async event => {
     event.preventDefault();
     const exists = assignments.some(item => item.store === newAssignment.store && item.productId === newAssignment.productId);
     if (exists) {
       setToast("Este desafio já está definido para a loja.");
       return;
     }
-    setAssignments([...assignments, {
+    const nextAssignments = [...assignments, {
       ...newAssignment,
       goal: Number(newAssignment.goal)
-    }]);
-    setToast("Desafio da semana vinculado à loja.");
+    }];
+    setAssignments(nextAssignments);
+    const ok = await onSaveSetting("productAssignments", nextAssignments);
+    setToast(ok ? "Desafio da semana vinculado à loja." : "Desafio vinculado na tela, mas não foi salvo no servidor.");
   };
   const lookupProduct = () => {
     const code = newProduct.sku.trim();
@@ -2530,7 +2750,7 @@ function AdminPage({
     }
     setToast("Produto não encontrado na consulta demonstrativa.");
   };
-  const createProduct = event => {
+  const createProduct = async event => {
     event.preventDefault();
     if (!newProduct.sku || !newProduct.name) {
       setToast("Informe o código/SKU e o nome do produto.");
@@ -2541,10 +2761,12 @@ function AdminPage({
       return;
     }
     const id = `${newProduct.sku}-${Date.now()}`;
-    setProductCatalog([...productCatalog, {
+    const nextCatalog = [...productCatalog, {
       ...newProduct,
       id
-    }]);
+    }];
+    setProductCatalog(nextCatalog);
+    await onSaveSetting("productCatalog", nextCatalog);
     setNewProduct({
       sku: "",
       name: "",
@@ -2554,7 +2776,7 @@ function AdminPage({
       imageUrl: "",
       siteUrl: ""
     });
-    setToast("Produto cadastrado no piloto.");
+    setToast("Produto cadastrado na campanha.");
   };
   const addSale = async event => {
     event.preventDefault();
@@ -2656,6 +2878,7 @@ function AdminPage({
       predictionsCloseAt: roundWindow.closeAt.toISOString()
     };
     const ok = await onSaveSetting("round", next);
+    if (ok && next.id === "quartas-final") await onSaveSetting("scoringStartAt", defaultScoringStartAt);
     if (ok) setToast("Rodada atualizada.");
   };
   const applyCalendarRound = round => {
@@ -2706,7 +2929,7 @@ function AdminPage({
       winners: roundClosingSummary
     };
     const ok = await onSaveSetting("round", next);
-    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com vendedor geral, vendedores por loja e top 2 líderes." : "Fase teste encerrada com top geral, líderes e vendedores por loja.");
+    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com vendedor geral, vendedores por loja e top 2 líderes elegíveis." : "Rodada encerrada com top geral, líderes e vendedores por loja.");
   };
   const exportReport = () => {
     const rows = [["posicao", "nome", "cpf", "loja", "perfil", "pontos", "comunicado", "palpite_pts", "acertos", "placar_exato", "venda_pts", "quantidade", "meta_pts"], ...pilotRanking.map((person, index) => [index + 1, person.name, person.cpf, person.store, person.role, person.points, person.announcementPoints, person.predictionPoints, person.predictionHits, person.exactPredictions, person.salesPoints + person.topSellerPoints, person.soldQuantity, person.storeGoalPoints])];
@@ -2728,7 +2951,7 @@ function AdminPage({
     className: "flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-sm font-semibold text-slate-400"
-  }, "Piloto comercial • acesso administrativo"), /*#__PURE__*/React.createElement("h2", {
+  }, "Copa Potiguar • acesso administrativo"), /*#__PURE__*/React.createElement("h2", {
     className: "font-display text-3xl font-extrabold text-potiguar-950"
   }, "Central de administração")), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2"
@@ -2751,7 +2974,7 @@ function AdminPage({
     className: "grid grid-cols-2 gap-3 xl:grid-cols-4"
   }, /*#__PURE__*/React.createElement(StatCard, {
     icon: "users",
-    label: "Participantes do piloto",
+    label: "Participantes da campanha",
     value: participantCount,
     detail: `${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`,
     accent: "green"
@@ -2769,9 +2992,9 @@ function AdminPage({
     accent: "white"
   }), /*#__PURE__*/React.createElement(StatCard, {
     icon: productFocusEnabled ? "store" : "trophy",
-    label: productFocusEnabled ? "Meta da rede" : "Fase teste",
-    value: productFocusEnabled ? `${Math.round(totalSold / storeGoal * 100)}%` : "16 avos",
-    detail: productFocusEnabled ? `${totalSold} de ${storeGoal}` : "Somente endomarketing e palpites",
+    label: productFocusEnabled ? "Meta da rede" : "Fase final",
+    value: productFocusEnabled ? `${Math.round(totalSold / networkGoal * 100)}%` : "Finais",
+    detail: productFocusEnabled ? `${totalSold} de ${networkGoal}` : "Somente endomarketing e palpites",
     accent: "white"
   })), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
@@ -3097,7 +3320,7 @@ function AdminPage({
       ...announcementForm,
       publishedAt: e.target.value
     }),
-    placeholder: "Ex.: ATIVO, Programado, Rodada 16 avos",
+    placeholder: "Ex.: ATIVO, Programado, Fase final",
     className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
   })), /*#__PURE__*/React.createElement("label", {
     className: "mt-4 block"
@@ -3186,7 +3409,7 @@ function AdminPage({
     className: "font-display text-lg font-extrabold text-potiguar-950"
   }, "Fases finais da Copa"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-500"
-  }, "16 avos em modo teste; a partir das oitavas, rodadas oficiais. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes do jogo.")), /*#__PURE__*/React.createElement("div", {
+  }, "A rodada atual pode cobrir todos os jogos da fase final. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes de cada jogo.")), /*#__PURE__*/React.createElement("div", {
     className: "flex flex-col gap-2 sm:items-end"
   }, /*#__PURE__*/React.createElement("span", {
     className: "rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800"
@@ -3337,7 +3560,7 @@ function AdminPage({
     className: "mt-1 font-display text-lg font-extrabold text-potiguar-950"
   }, "Ganhadores da ", roundForm.phase || "rodada"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs leading-5 text-slate-500"
-  }, productFocusEnabled ? "Ao encerrar, o sistema registra o 1º vendedor geral, o 1º vendedor de cada loja e os 2 primeiros líderes geral." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites.")), /*#__PURE__*/React.createElement("button", {
+  }, productFocusEnabled ? `Ao encerrar, o sistema registra o 1º vendedor geral, o 1º vendedor de cada loja e os 2 primeiros líderes elegíveis: meta mínima ${LEADER_PRIZE_MIN_GOAL_PERCENT}% e aderência mínima ${LEADER_PRIZE_MIN_ADHERENCE_PERCENT}%.` : "Na rodada, contam leitura do endomarketing, palpites e desafio quando ativo.")), /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: closeRound,
     className: "rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white"
@@ -3368,7 +3591,7 @@ function AdminPage({
     className: "rounded-xl bg-white p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Top 2 líderes"), /*#__PURE__*/React.createElement("div", {
+  }, "Top 2 líderes elegíveis"), /*#__PURE__*/React.createElement("div", {
     className: "mt-3 space-y-2"
   }, roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
     key: person.cpf,
@@ -3381,11 +3604,11 @@ function AdminPage({
     className: "truncate text-xs font-extrabold text-potiguar-950"
   }, person.name), /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] text-slate-400"
-  }, person.store)), /*#__PURE__*/React.createElement("strong", {
+  }, person.store, " • meta ", person.storeGoalPercent, "% • aderência ", person.storeAdherencePercent, "%")), /*#__PURE__*/React.createElement("strong", {
     className: "text-xs text-potiguar-900"
   }, person.points))) : /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400"
-  }, "Sem líderes pontuados ainda."))), /*#__PURE__*/React.createElement("div", {
+  }, "Nenhum líder elegível ainda. Critérios: 90% da meta e 80% de aderência."))), /*#__PURE__*/React.createElement("div", {
     className: "rounded-xl bg-white p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
@@ -3412,7 +3635,7 @@ function AdminPage({
     className: "mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h3", {
     className: "font-display text-3xl font-extrabold"
-  }, "Rankings do piloto"), /*#__PURE__*/React.createElement("p", {
+  }, "Rankings da campanha"), /*#__PURE__*/React.createElement("p", {
     className: "mt-2 text-sm text-white/60"
   }, "Ranking calculado com dados gravados no banco: leituras, palpites e vendas. Atualização automática a cada 15 segundos.")), /*#__PURE__*/React.createElement("div", {
     className: "glass rounded-2xl px-5 py-3"
@@ -3424,11 +3647,11 @@ function AdminPage({
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Premiação Oitavas"), /*#__PURE__*/React.createElement("h4", {
+  }, "Premiação da fase final"), /*#__PURE__*/React.createElement("h4", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Ganhadores previstos da rodada"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, "Acompanhamento ao vivo: 1º vendedor geral, 1º vendedor de cada loja e os 2 primeiros líderes geral.")), /*#__PURE__*/React.createElement("div", {
+  }, "Acompanhamento ao vivo: 1º vendedor geral, 1º vendedor de cada loja e os 2 primeiros líderes elegíveis.")), /*#__PURE__*/React.createElement("div", {
     className: "mt-4 grid gap-3 md:grid-cols-2"
   }, /*#__PURE__*/React.createElement("a", {
     href: (settings.award || defaultAward).storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl,
@@ -3452,7 +3675,7 @@ function AdminPage({
     className: "mt-1 text-sm font-extrabold text-potiguar-950"
   }, (settings.award || defaultAward).overallSellerPrize || defaultAward.overallSellerPrize), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-[10px] text-slate-400"
-  }, "Para 1º vendedor geral e top 2 líderes"))), /*#__PURE__*/React.createElement("div", {
+  }, "Para 1º vendedor geral e top 2 líderes elegíveis"))), /*#__PURE__*/React.createElement("div", {
     className: "mt-5 grid gap-4 xl:grid-cols-3"
   }, /*#__PURE__*/React.createElement("div", {
     className: "rounded-2xl bg-potiguar-lime/15 p-4"
@@ -3477,7 +3700,7 @@ function AdminPage({
     className: "rounded-2xl bg-slate-50 p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
-  }, "Top 2 líderes geral"), /*#__PURE__*/React.createElement("div", {
+  }, "Top 2 líderes elegíveis"), /*#__PURE__*/React.createElement("div", {
     className: "mt-3 space-y-2"
   }, roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => /*#__PURE__*/React.createElement("div", {
     key: person.cpf,
@@ -3494,7 +3717,7 @@ function AdminPage({
     className: "text-xs text-potiguar-900"
   }, person.points))) : /*#__PURE__*/React.createElement("p", {
     className: "text-xs text-slate-400"
-  }, "Aguardando líderes pontuarem."))), /*#__PURE__*/React.createElement("div", {
+  }, "Aguardando líderes cumprirem meta mínima de 90% e aderência de 80%."))), /*#__PURE__*/React.createElement("div", {
     className: "rounded-2xl bg-slate-50 p-4"
   }, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700"
@@ -3749,7 +3972,7 @@ function AdminPage({
     className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, "Evolução do piloto"), /*#__PURE__*/React.createElement("h3", {
+  }, "Evolução da campanha"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Participação em apuração")), /*#__PURE__*/React.createElement(Icon, {
     name: "chart",
@@ -3961,7 +4184,7 @@ function AdminPage({
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Vendas do desafio por vendedor"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas.")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
+  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana temporariamente desativado. Ative a rodada oficial para lançar vendas.")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
     className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800"
   }, "Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de desafio da semana agora."), productFocusEnabled && /*#__PURE__*/React.createElement("form", {
     onSubmit: addSale,
@@ -4177,7 +4400,7 @@ function AdminPage({
     className: "px-4 py-3"
   }, "Cargo original"), /*#__PURE__*/React.createElement("th", {
     className: "px-4 py-3"
-  }, "Perfil no piloto"), /*#__PURE__*/React.createElement("th", {
+  }, "Perfil na campanha"), /*#__PURE__*/React.createElement("th", {
     className: "px-4 py-3"
   }, "Loja"), /*#__PURE__*/React.createElement("th", {
     className: "px-4 py-3"
@@ -4270,7 +4493,7 @@ function AdminPage({
     className: "flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
-  }, productFocusEnabled ? "Desempenho por loja" : "Fase teste"), /*#__PURE__*/React.createElement("h3", {
+  }, productFocusEnabled ? "Desempenho por loja" : "Fase final"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Acompanhamento das lojas")), /*#__PURE__*/React.createElement("span", {
     className: "text-xs font-bold text-slate-400"

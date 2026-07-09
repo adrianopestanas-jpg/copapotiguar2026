@@ -228,9 +228,14 @@ const getStoreStats = storeName => {
   };
 };
 
-const getStoreFocus = storeName => {
-  const assignment = initialProductAssignments.find(item => item.store === storeName) || initialProductAssignments[0];
-  const product = focusProducts.find(item => item.id === assignment.productId) || focusProducts[0];
+const getProductCatalog = settings => Array.isArray(settings?.productCatalog) ? settings.productCatalog : focusProducts;
+const getProductAssignments = settings => Array.isArray(settings?.productAssignments) ? settings.productAssignments : initialProductAssignments;
+
+const getStoreFocus = (storeName, settings) => {
+  const assignments = getProductAssignments(settings);
+  const catalog = getProductCatalog(settings);
+  const assignment = assignments.find(item => item.store === storeName) || assignments[0] || initialProductAssignments[0];
+  const product = catalog.find(item => item.id === assignment.productId) || focusProducts.find(item => item.id === assignment.productId) || catalog[0] || focusProducts[0];
   const stats = getStoreStats(storeName);
   const goal = assignment.goal || stats.goal;
   const sold = stats.sold;
@@ -267,10 +272,18 @@ const getStoreRanking = (storeName, limit = 10) => rankedSellers
   .slice(0, limit);
 
 const games = [
-  { id: 1, time: "19:00", group: "Grupo C", home: "Escócia", away: "Brasil", homeFlag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", awayFlag: "🇧🇷", venue: "Miami Stadium", kickoffAt: "2026-07-03T19:00:00-03:00", status: "scheduled" },
+  { id: 101, time: "17:00", group: "Quartas de final", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-09T17:00:00-03:00", status: "scheduled" },
+  { id: 102, time: "21:00", group: "Quartas de final", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-10T21:00:00-03:00", status: "scheduled" },
+  { id: 103, time: "17:00", group: "Quartas de final", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-11T17:00:00-03:00", status: "scheduled" },
+  { id: 104, time: "21:00", group: "Quartas de final", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-11T21:00:00-03:00", status: "scheduled" },
+  { id: 201, time: "21:00", group: "Semifinal", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-14T21:00:00-03:00", status: "scheduled" },
+  { id: 202, time: "21:00", group: "Semifinal", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-15T21:00:00-03:00", status: "scheduled" },
+  { id: 301, time: "17:00", group: "Disputa de terceiro lugar", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-18T17:00:00-03:00", status: "scheduled" },
+  { id: 401, time: "17:00", group: "Final", home: "A definir", away: "A definir", homeFlag: "🌐", awayFlag: "🌐", venue: "A definir", kickoffAt: "2026-07-19T17:00:00-03:00", status: "scheduled" },
 ];
 
 const teamFlags = {
+  "A definir": "🌐",
   Brasil: "🇧🇷",
   Brazil: "🇧🇷",
   Argentina: "🇦🇷",
@@ -320,6 +333,17 @@ const normalizeSyncedMatch = match => ({
 const getActiveGames = (syncedMatches = [], round = defaultRoundConfig) => {
   const normalized = syncedMatches.map(normalizeSyncedMatch).filter(match => match.id && match.kickoffAt);
   if (!normalized.length) return games;
+  if (round?.id === "quartas-final") {
+    const startsAt = new Date("2026-07-09T00:00:00-03:00");
+    const endsAt = new Date("2026-07-19T23:59:59-03:00");
+    const finalStretch = normalized.filter(match => {
+      const date = new Date(match.kickoffAt);
+      return date >= startsAt && date <= endsAt;
+    });
+    return (finalStretch.length ? finalStretch : normalized)
+      .filter(match => ["scheduled", "live", "finished"].includes(match.status))
+      .sort((a, b) => new Date(a.kickoffAt) - new Date(b.kickoffAt));
+  }
   const sameRound = normalized.filter(match => match.roundId === round.id || match.phase === round.phase || match.roundName === round.name);
   return (sameRound.length ? sameRound : normalized)
     .filter(match => ["scheduled", "live", "finished"].includes(match.status))
@@ -371,7 +395,7 @@ const isAnnouncementActive = (announcement = {}, date = new Date()) => {
 };
 
 const knockoutRounds = [
-  { id: "teste-16avos", phase: "16 avos", name: "Teste 16 avos", official: false, kickoffAt: "2026-07-03T21:00:00" },
+  { id: "quartas-final", phase: "Fase final", name: "Quartas de final até a Final", official: true, kickoffAt: "2026-07-09T17:00:00" },
   { id: "oitavas-dia-1", phase: "Oitavas", name: "Oitavas de final • Dia 1", official: true, kickoffAt: "2026-07-04T17:00:00" },
   { id: "oitavas-dia-2", phase: "Oitavas", name: "Oitavas de final • Dia 2", official: true, kickoffAt: "2026-07-05T17:00:00" },
   { id: "oitavas-dia-3", phase: "Oitavas", name: "Oitavas de final • Dia 3", official: true, kickoffAt: "2026-07-06T17:00:00" },
@@ -411,33 +435,33 @@ const getGamePredictionAccess = (game, now = new Date()) => {
   return { open: true, reason: `Aberto até ${formatDateTime(closeAt)}.`, openAt, closeAt };
 };
 const defaultAnnouncement = {
-  id: "endomarketing-oitavas-produto-em-foco-17",
+  id: "endomarketing-quartas-produto-em-foco-17",
   title: "Produto em Foco #17: produtos versáteis",
   body: "O 17º episódio do Produto em Foco está no ar! O tema da vez são produtos versáteis (mesas dobráveis, bancos, coolers e caixas térmicas), uma categoria com enorme potencial de vendas combinadas.\n\n💡 O Valor do Rito em Grupo\nEste formato foi feito para ser assistido e debatido juntos (com todo o time ou em minigrupos). Incentive a equipe a maratonar e rever os vídeos sempre que precisar. Isso constrói o repertório técnico necessário para surpreender o consumidor e melhorar a experiência do cliente no chão de loja.\n\nFoco da liderança no rito de hoje:\n• Troca real: estimule o time a falar sobre os benefícios e a quebra de objeções.\n• Venda consultiva: provoque a oferta de soluções complementares (mesa + cooler + banquetas).\n\n📝 Checklist Rápido:\n1. Assistir em grupo e debater a aplicação imediata nas vendas.\n2. Aplicar a prova da semana.\n3. Garantir a inscrição de todos no canal para consultas frequentes.\n\n🚀 Líder: sua condução transforma o vídeo em resultado e constrói a segurança que o time precisa para vender mais.\n\nContamos com você. Excelentes vendas!",
-  videoUrl: "https://www.youtube.com/shorts/vrCzG8vK6To",
+  videoUrl: "https://youtube.com/shorts/_zhzrgEL9T8",
   minimumSeconds: 30,
-  publishedAt: "OITAVAS • ativo",
+  publishedAt: "QUARTAS • ativo",
   startsAt: "",
   endsAt: "",
   attachments: [],
 };
-const defaultScoringStartAt = "2026-07-04T00:00:00-03:00";
+const defaultScoringStartAt = "2026-07-09T00:00:00-03:00";
 const defaultMatchResults = {
   1: { homeScore: 0, awayScore: 3 },
 };
 const defaultRoundConfig = {
-  id: "oitavas",
-  phase: "Oitavas",
-  name: "Oitavas de final",
+  id: "quartas-final",
+  phase: "Fase final",
+  name: "Quartas de final até a Final",
   official: true,
   status: "open",
-  kickoffAt: "2026-07-04T13:00:00",
-  predictionsCloseAt: "2026-07-04T12:50:00",
+  kickoffAt: "2026-07-09T17:00:00",
+  predictionsCloseAt: "2026-07-09T16:50:00",
 };
 const defaultAward = {
-  name: "Premiação Oitavas de Final",
+  name: "Premiação da Fase Final",
   criterion: "Desafio da semana + endomarketing + palpites",
-  description: "1º vendedor de cada loja ganha uma Mochila Potiguar. 1º vendedor geral e os 2 primeiros líderes geral ganham um Robô Aspirador Potiguar.",
+  description: "1º vendedor de cada loja ganha uma Mochila Potiguar. 1º vendedor geral ganha um Robô Aspirador Potiguar. Os 2 primeiros líderes geral ganham Robô Aspirador somente se a loja atingir pelo menos 90% da meta do desafio e 80% de aderência aos palpites.",
   storeSellerPrize: "Mochila Potiguar",
   storeSellerPrizeUrl: "https://www.apotiguar.com.br/produto/mochila-reforcada-preta-potiguar-105635",
   overallSellerPrize: "Robô Aspirador Potiguar",
@@ -450,6 +474,8 @@ const defaultAppSettings = {
   award: defaultAward,
   scoringStartAt: defaultScoringStartAt,
   matchResults: defaultMatchResults,
+  productCatalog: focusProducts,
+  productAssignments: initialProductAssignments,
 };
 
 const getEntryDate = entry => new Date(entry.submitted_at || entry.submittedAt || entry.readAt || entry.createdAt || entry.created_at || 0);
@@ -515,6 +541,9 @@ const compareStoreTopSellerTie = (a, b) => (
   a.name.localeCompare(b.name)
 );
 
+const LEADER_PRIZE_MIN_GOAL_PERCENT = 90;
+const LEADER_PRIZE_MIN_ADHERENCE_PERCENT = 80;
+
 const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, profilePhotos = {}, settings = defaultAppSettings) => {
   const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
@@ -542,6 +571,8 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     firstSaleAt: "",
     storeGoalHit: false,
     storeGoalPercent: 0,
+    storeAdherencePercent: 0,
+    leaderPrizeEligible: false,
     storeActiveSellers: 0,
     storeSellerPoints: 0,
   }));
@@ -581,6 +612,14 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     return acc;
   }, {}) : {};
 
+  const predictionCpfsByStore = predictionEntries.filter(entry => isAfterScoringStart(entry, settings)).reduce((acc, entry) => {
+    const row = byCpf[onlyDigits(entry.cpf)];
+    if (!row) return acc;
+    if (!acc[row.store]) acc[row.store] = new Set();
+    acc[row.store].add(row.cpf);
+    return acc;
+  }, {});
+
   Object.entries(salesByCpf).forEach(([cpf, quantity]) => {
     const row = byCpf[cpf];
     if (!row || quantity <= 0) return;
@@ -613,7 +652,12 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
     }
   });
 
-  initialProductAssignments.forEach(assignment => {
+  const scoringAssignments = getProductAssignments(settings);
+  const primaryStoreAssignments = fixedStores
+    .map(store => scoringAssignments.find(item => item.store === store) || initialProductAssignments.find(item => item.store === store))
+    .filter(Boolean);
+
+  primaryStoreAssignments.forEach(assignment => {
     const storeGoal = Number(assignment.goal || 0);
     if (!storeGoal || Number(salesByStore[assignment.store] || 0) < storeGoal) return;
     rows.filter(row => row.store === assignment.store).forEach(row => {
@@ -623,18 +667,21 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   });
 
   fixedStores.forEach(store => {
-    const assignment = initialProductAssignments.find(item => item.store === store);
+    const assignment = primaryStoreAssignments.find(item => item.store === store);
     const goal = Number(assignment?.goal || 0);
     const sold = Number(salesByStore[store] || 0);
     const storeRows = rows.filter(row => row.store === store);
     const storeSellers = storeRows.filter(row => row.role === "Vendedor");
     const storeGoalHit = goal > 0 && sold >= goal;
     const storeGoalPercent = goal > 0 ? Math.round((sold / goal) * 100) : 0;
+    const storeAdherencePercent = storeRows.length ? Math.round(((predictionCpfsByStore[store]?.size || 0) / storeRows.length) * 100) : 0;
     const storeActiveSellers = storeSellers.filter(row => row.soldQuantity > 0).length;
     const storeSellerPoints = storeSellers.reduce((sum, row) => sum + row.points, 0);
     storeRows.forEach(row => {
       row.storeGoalHit = storeGoalHit;
       row.storeGoalPercent = storeGoalPercent;
+      row.storeAdherencePercent = storeAdherencePercent;
+      row.leaderPrizeEligible = row.role === "Liderança" && storeGoalPercent >= LEADER_PRIZE_MIN_GOAL_PERCENT && storeAdherencePercent >= LEADER_PRIZE_MIN_ADHERENCE_PERCENT;
       row.storeActiveSellers = storeActiveSellers;
       row.storeSellerPoints = storeSellerPoints;
     });
@@ -647,11 +694,13 @@ const getRoundClosingSummary = rankingRows => {
   const eligibleRows = rankingRows.filter(row => row.role !== "Administrador");
   const sellers = eligibleRows.filter(row => row.role === "Vendedor");
   const leaders = eligibleRows.filter(row => row.role === "Liderança");
+  const prizeEligibleLeaders = leaders.filter(row => row.leaderPrizeEligible);
   return {
     overallWinner: eligibleRows[0] || null,
     topOverall: eligibleRows.slice(0, 3),
     topSellerOverall: sellers[0] || null,
-    topLeaders: leaders.slice(0, 2),
+    topLeaders: prizeEligibleLeaders.slice(0, 2),
+    leaderCandidates: leaders.slice(0, 5),
     storeWinners: fixedStores
       .map(store => ({
         store,
@@ -786,11 +835,11 @@ function LoginScreen({ onLogin, userMap }) {
         <section className="hero-pattern pitch-lines hidden p-10 text-white lg:flex lg:flex-col">
           <Brand />
           <div className="my-auto max-w-md">
-            <span className="inline-flex rounded-full bg-potiguar-lime/15 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime">Piloto comercial 2026</span>
+            <span className="inline-flex rounded-full bg-potiguar-lime/15 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime">Campanha oficial 2026</span>
             <h1 className="mt-6 font-display text-5xl font-extrabold leading-[1.02]">Leu.<br/>Palpitou.<br/><span className="text-potiguar-lime">Vendeu.</span></h1>
             <p className="mt-5 text-sm leading-6 text-white/60">Uma disputa única entre vendedores, com liderança acompanhando o resultado da própria loja.</p>
           </div>
-          <p className="text-xs text-white/35">Acesso controlado • Piloto multi-lojas</p>
+          <p className="text-xs text-white/35">Acesso Potiguar • Todas as lojas</p>
         </section>
         <section className="flex flex-col justify-center p-6 sm:p-10 lg:p-14">
           <div className="mb-9 lg:hidden"><Brand compact /></div>
@@ -1047,9 +1096,9 @@ function StatCard({ icon, label, value, detail, accent = "green" }) {
   );
 }
 
-function ProductCard({ user, totalSold, pilotRanking }) {
+function ProductCard({ user, totalSold, pilotRanking, settings }) {
   const leadership = user.accessRole === "leadership";
-  const focus = getStoreFocus(user.store);
+  const focus = getStoreFocus(user.store, settings);
   const percent = Math.round((totalSold / focus.goal) * 100);
   const remaining = Math.max(focus.goal - totalSold, 0);
   const width = `${Math.min(percent, 100)}%`;
@@ -1090,6 +1139,70 @@ function ProductCard({ user, totalSold, pilotRanking }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function ChallengeReminder({ user, totalSold, pilotRanking, setPage, roundId, settings }) {
+  const focus = getStoreFocus(user.store, settings);
+  const unit = focus.product.unit || "un.";
+  const percent = Math.round((totalSold / focus.goal) * 100);
+  const storageKey = `copaChallengeReminder:${onlyDigits(user.cpf)}:${roundId || defaultRoundConfig.id}`;
+  const [open, setOpen] = useState(() => {
+    try {
+      return sessionStorage.getItem(storageKey) !== "1";
+    } catch (error) {
+      return true;
+    }
+  });
+  const topSeller = pilotRanking
+    .filter(person => person.store === user.store && person.role === "Vendedor" && person.soldQuantity > 0)
+    .sort((a, b) => b.soldQuantity - a.soldQuantity || b.points - a.points)[0];
+  const close = () => {
+    try {
+      sessionStorage.setItem(storageKey, "1");
+    } catch (error) {}
+    setOpen(false);
+  };
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-end bg-potiguar-950/55 p-4 backdrop-blur-sm sm:place-items-center">
+      <div className="w-full max-w-lg overflow-hidden rounded-[28px] bg-white shadow-2xl shadow-potiguar-950/35">
+        <div className="hero-pattern pitch-lines p-6 text-white">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-potiguar-lime">Lembrete comercial</p>
+              <h3 className="mt-2 font-display text-2xl font-extrabold">Desafio da Semana</h3>
+              <p className="mt-2 text-sm text-white/65">{user.store} • meta {focus.goal} {unit}</p>
+            </div>
+            <button onClick={close} className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white/70">
+              <Icon name="close" size={18} />
+            </button>
+          </div>
+        </div>
+        <div className="p-5 sm:p-6">
+          <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Produto foco da loja</p>
+          <h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">{focus.product.name}</h4>
+          <p className="mt-2 text-sm leading-6 text-slate-500">SKU {focus.product.sku} • Marca {focus.product.brand}. Cada venda ajuda sua loja a bater a meta e movimenta o ranking.</p>
+          <div className="mt-5 rounded-2xl bg-slate-50 p-4">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400">Atingimento da loja</p>
+                <p className="font-display text-3xl font-extrabold text-potiguar-950">{percent}%</p>
+              </div>
+              <p className="text-right text-xs font-extrabold text-potiguar-800">{totalSold} / {focus.goal} {unit}</p>
+            </div>
+            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white">
+              <div className="h-full rounded-full bg-potiguar-lime" style={{ width: `${Math.min(percent, 100)}%` }}></div>
+            </div>
+            <p className="mt-3 text-xs font-semibold text-slate-500">{topSeller ? `Destaque atual: ${topSeller.name} com ${topSeller.soldQuantity} ${unit}.` : "Ainda não há venda lançada para este desafio."}</p>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <button onClick={() => { close(); setPage("store"); }} className="rounded-2xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Ver desafio e ranking</button>
+            <button onClick={close} className="rounded-2xl border border-slate-100 bg-slate-50 px-5 py-3 text-xs font-extrabold text-potiguar-900">Continuar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1224,10 +1337,10 @@ function MiniRanking({ pilotRanking }) {
   );
 }
 
-function StoreMiniRanking({ user, pilotRanking }) {
+function StoreMiniRanking({ user, pilotRanking, settings }) {
   const localRanking = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").slice(0, 4);
   const myPosition = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor").findIndex(person => person.name === user.name) + 1;
-  const unit = getStoreFocus(user.store).product.unit || "un.";
+  const unit = getStoreFocus(user.store, settings).product.unit || "un.";
   return (
     <section className="soft-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-center justify-between">
@@ -1258,15 +1371,20 @@ function StoreMiniRanking({ user, pilotRanking }) {
 }
 
 function LeaderPrizeRanking({ user, pilotRanking, award = defaultAward }) {
-  const leaders = pilotRanking.filter(person => person.role === "Liderança").slice(0, 2);
+  const leaders = pilotRanking.filter(person => person.role === "Liderança" && person.leaderPrizeEligible).slice(0, 2);
+  const myRow = pilotRanking.find(person => person.cpf === onlyDigits(user.cpf));
   const myLeaderPosition = pilotRanking.filter(person => person.role === "Liderança").findIndex(person => person.cpf === onlyDigits(user.cpf)) + 1;
+  const eligibleText = myRow?.leaderPrizeEligible
+    ? "Sua loja já cumpre os critérios de premiação."
+    : `Para concorrer: meta da loja ≥ ${LEADER_PRIZE_MIN_GOAL_PERCENT}% e aderência ≥ ${LEADER_PRIZE_MIN_ADHERENCE_PERCENT}%. Hoje: meta ${myRow?.storeGoalPercent || 0}% • aderência ${myRow?.storeAdherencePercent || 0}%.`;
   return (
     <section className="soft-card rounded-2xl p-5 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Premiação liderança</p>
-          <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Top 2 líderes geral</h3>
+          <h3 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Top 2 líderes elegíveis</h3>
           <p className="mt-1 text-xs text-slate-400">Sua posição: {myLeaderPosition || "—"}º entre líderes • prêmio: {award.leadershipPrize}</p>
+          <p className={`mt-2 text-xs font-bold ${myRow?.leaderPrizeEligible ? "text-emerald-600" : "text-amber-600"}`}>{eligibleText}</p>
         </div>
         <Icon name="trophy" className="text-potiguar-red" />
       </div>
@@ -1296,7 +1414,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
   const firstOpenAccess = gameAccess.find(access => access.open);
   const nextAccess = firstOpenAccess || gameAccess.find(access => now < access.closeAt);
   const predictionsClosed = !firstOpenAccess;
-  const storeFocus = getStoreFocus(user.store);
+  const storeFocus = getStoreFocus(user.store, settings);
   const storeFocusUnit = storeFocus.product.unit || "unidades";
   const storeSellers = pilotRanking.filter(person => person.store === user.store && person.role === "Vendedor");
   const activeSellers = storeSellers.filter(person => person.soldQuantity > 0).length;
@@ -1311,6 +1429,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
   const announcementActive = isAnnouncementActive(settings.announcement || defaultAnnouncement, now);
   return (
     <div className="space-y-6">
+      {productFocusEnabled && <ChallengeReminder user={user} totalSold={totalSold} pilotRanking={pilotRanking} setPage={setPage} roundId={round.id} settings={settings} />}
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-slate-400">{round.name} • {firstOpenAccess ? `palpites até ${formatDateTime(firstOpenAccess.closeAt)}` : "sem jogo aberto para palpite"}</p>
@@ -1332,16 +1451,16 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatCard icon="bolt" label={leadership ? "Pontos da liderança" : "Seus pontos"} value={userRanking?.points || 0} detail={productFocusEnabled ? leadership ? `Comunicado ${userRanking?.announcementPoints || 0} • Meta ${userRanking?.storeGoalPoints || 0}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0} • Venda ${(userRanking?.salesPoints || 0) + (userRanking?.topSellerPoints || 0)}` : `Comunicado ${userRanking?.announcementPoints || 0} • Palpite ${userRanking?.predictionPoints || 0}`} accent="green" />
         <StatCard icon="ranking" label="Posição geral" value={`${userPosition || "—"}º`} detail={userRanking?.isTopSeller ? "Destaque do desafio da semana" : "Ranking atualizado automaticamente"} accent="lime" />
-        <StatCard icon="target" label={leadership && productFocusEnabled ? "Vendedores com venda" : "Palpites certos"} value={leadership && productFocusEnabled ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0} detail={leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos no piloto`} accent="white" />
-        <StatCard icon={productFocusEnabled ? "fire" : "ball"} label={productFocusEnabled ? "Meta da loja" : "Fase teste"} value={productFocusEnabled ? `${storePercent}%` : "16 avos"} detail={productFocusEnabled ? `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}` : "Somente palpites nesta etapa"} accent="white" />
+        <StatCard icon="target" label={leadership && productFocusEnabled ? "Vendedores com venda" : "Palpites certos"} value={leadership && productFocusEnabled ? `${activeSellers}/${storeSellers.length}` : userRanking?.predictionHits || 0} detail={leadership && productFocusEnabled ? "Com pelo menos 1 venda lançada" : `${userRanking?.exactPredictions || 0} placar exato • ${totalPredictionHits} acertos na rodada`} accent="white" />
+        <StatCard icon={productFocusEnabled ? "fire" : "ball"} label={productFocusEnabled ? "Meta da loja" : "Fase final"} value={productFocusEnabled ? `${storePercent}%` : "Finais"} detail={productFocusEnabled ? `${totalSold} de ${storeFocus.goal} ${storeFocusUnit}` : "Somente palpites nesta etapa"} accent="white" />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.45fr_.8fr]">
-        {productFocusEnabled ? <ProductCard user={user} totalSold={totalSold} pilotRanking={pilotRanking} /> : (
+        {productFocusEnabled ? <ProductCard user={user} totalSold={totalSold} pilotRanking={pilotRanking} settings={settings} /> : (
           <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white shadow-xl shadow-potiguar-900/15 sm:p-8">
-            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-lime"><Icon name="ball" size={16} /> Fase teste</div>
-            <h3 className="mt-3 font-display text-3xl font-extrabold">16 avos sem desafio da semana</h3>
-            <p className="mt-2 text-sm leading-6 text-white/65">Nesta etapa vamos medir adesão aos palpites e leitura do endomarketing. Desafio da semana e metas comerciais entram a partir das oitavas.</p>
+            <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-lime"><Icon name="ball" size={16} /> Fase final</div>
+            <h3 className="mt-3 font-display text-3xl font-extrabold">Disputa oficial em andamento</h3>
+            <p className="mt-2 text-sm leading-6 text-white/65">Acompanhe os palpites, o endomarketing e o desafio da semana da sua loja.</p>
           </section>
         )}
         <div className="space-y-6">
@@ -1352,7 +1471,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
             <p className="mt-2 text-xs leading-5 text-slate-500">{award.criterion} • {award.description}</p>
             <div className="mt-4 grid gap-2">
               <a href={award.storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15">1º vendedor por loja: {award.storeSellerPrize || defaultAward.storeSellerPrize}</a>
-              <a href={award.mainPrizeUrl || defaultAward.mainPrizeUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15">1º vendedor geral e Top 2 líderes: {award.overallSellerPrize || defaultAward.overallSellerPrize}</a>
+              <a href={award.mainPrizeUrl || defaultAward.mainPrizeUrl} target="_blank" rel="noreferrer" className="rounded-xl bg-slate-50 px-3 py-2 text-[11px] font-extrabold text-potiguar-800 transition hover:bg-potiguar-lime/15">1º vendedor geral e Top 2 líderes elegíveis: {award.overallSellerPrize || defaultAward.overallSellerPrize}</a>
             </div>
           </section>
         </div>
@@ -1380,7 +1499,7 @@ function Home({ acknowledged, setPage, setToast, user, pilotRanking, totalSold, 
         </button>
       </div>
       {leadership && <LeaderPrizeRanking user={user} pilotRanking={pilotRanking} award={award} />}
-      {user.accessRole !== "admin" && <StoreMiniRanking user={user} pilotRanking={pilotRanking} />}
+      {user.accessRole !== "admin" && <StoreMiniRanking user={user} pilotRanking={pilotRanking} settings={settings} />}
     </div>
   );
 }
@@ -1470,7 +1589,7 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
       <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> {round.official ? "Rodada oficial" : "Rodada teste"} • {round.phase}</div>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-potiguar-lime"><span className="pulse-dot h-2 w-2 rounded-full bg-potiguar-lime"></span> Rodada oficial • {round.phase}</div>
             <h2 className="mt-3 font-display text-3xl font-extrabold">{round.name}</h2>
             <p className="mt-2 text-sm text-white/60">Digite o placar nos campos vermelhos. Placar exato vale 6 pontos no total; vencedor ou empate vale 2. Cada jogo fecha 10 minutos antes de começar.</p>
           </div>
@@ -1568,7 +1687,7 @@ function RankingPage({ user, pilotRanking }) {
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime">Temporada 2026</p>
             <h2 className="mt-2 font-display text-3xl font-extrabold">Quem está voando?</h2>
-            <p className="mt-2 text-sm text-white/60">{tab === "geral" ? "Classificação geral do piloto comercial." : `Classificação apenas da loja ${user.store}.`}</p>
+            <p className="mt-2 text-sm text-white/60">{tab === "geral" ? "Classificação geral da campanha." : `Classificação apenas da loja ${user.store}.`}</p>
           </div>
           <div className="flex items-end justify-center gap-3">
             {podium.map((p, i) => {
@@ -1615,7 +1734,7 @@ function RankingPage({ user, pilotRanking }) {
 
 function StorePage({ user, pilotRanking, totalSold, settings }) {
   const productFocusEnabled = isProductFocusEnabled(settings);
-  const storeFocus = getStoreFocus(user.store);
+  const storeFocus = getStoreFocus(user.store, settings);
   const storeUnit = storeFocus.product.unit || "unidades";
   const storeGoal = storeFocus.goal || 1;
   const storePercent = Math.round((totalSold / storeGoal) * 100);
@@ -1629,8 +1748,8 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
     <div className="space-y-6">
       <section className="hero-pattern pitch-lines rounded-[28px] p-6 text-white sm:p-8">
         <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"><Icon name="store" size={16}/> Loja {user.store}</div>
-        <h2 className="mt-3 font-display text-3xl font-extrabold">Fase teste: foco nos palpites</h2>
-        <p className="mt-2 text-sm leading-6 text-white/65">Nesta etapa não teremos desafio da semana nem meta comercial. A partir das oitavas, esta tela passa a mostrar metas, vendas e ranking comercial da loja.</p>
+        <h2 className="mt-3 font-display text-3xl font-extrabold">Fase final: foco total na disputa</h2>
+        <p className="mt-2 text-sm leading-6 text-white/65">Acompanhe a equipe, os palpites, leituras e o ranking comercial da loja.</p>
       </section>
       {user.accessRole === "leadership" && (
         <div className="grid grid-cols-3 gap-3">
@@ -1664,7 +1783,7 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
           <div>
             <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.18em] text-potiguar-lime"><Icon name="store" size={16}/> Loja {user.store}</div>
             <h2 className="mt-3 font-display text-3xl font-extrabold">Juntos até a meta!</h2>
-            <p className="mt-2 text-sm text-white/60">Piloto ativo em {user.store} • ranking atualizado pelas vendas reais</p>
+            <p className="mt-2 text-sm text-white/60">Campanha ativa em {user.store} • ranking atualizado pelas vendas</p>
           </div>
           <div className="glass rounded-2xl px-5 py-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">Atingimento hoje</p>
@@ -1727,8 +1846,8 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   const [showUserForm, setShowUserForm] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
   const [editingCpf, setEditingCpf] = useState("");
-  const [assignments, setAssignments] = useState(initialProductAssignments);
-  const [productCatalog, setProductCatalog] = useState(focusProducts);
+  const [assignments, setAssignments] = useState(getProductAssignments(settings));
+  const [productCatalog, setProductCatalog] = useState(getProductCatalog(settings));
   const [newProduct, setNewProduct] = useState({ sku: "", name: "", brand: "", price: "", description: "", imageUrl: "", siteUrl: "" });
   const [newAssignment, setNewAssignment] = useState({ store: "Centro", productId: "camesa-pano-prato-chef", goal: "50" });
   const [announcementForm, setAnnouncementForm] = useState(settings.announcement || defaultAnnouncement);
@@ -1750,6 +1869,8 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     setAnnouncementForm(settings.announcement || defaultAnnouncement);
     setAwardForm(settings.award || defaultAward);
     setRoundForm(settings.round || defaultRoundConfig);
+    setAssignments(getProductAssignments(settings));
+    setProductCatalog(getProductCatalog(settings));
     const result = (settings.matchResults || defaultMatchResults)[currentAdminGame.id] || defaultMatchResults[1] || {};
     setResultForm({ homeScore: String(result.homeScore), awayScore: String(result.awayScore) });
   }, [allUsers, settings, currentAdminGame.id]);
@@ -1781,7 +1902,10 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     acc[entry.seller].quantity += Number(entry.quantity);
     return acc;
   }, {})).sort((a, b) => b.quantity - a.quantity);
-  const storeGoal = assignments.find(item => item.store === PILOT_STORE)?.goal || 200;
+  const networkGoal = fixedStores.reduce((sum, store) => {
+    const assignment = assignments.find(item => item.store === store);
+    return sum + Number(assignment?.goal || 0);
+  }, 0) || 1;
   const sellerCount = users.filter(user => user.profile === "Vendedor").length;
   const leaderCount = users.filter(user => user.profile === "Liderança").length;
   const adminCount = users.filter(user => user.profile === "Administrador").length;
@@ -1867,15 +1991,17 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     }
   };
 
-  const assignProduct = event => {
+  const assignProduct = async event => {
     event.preventDefault();
     const exists = assignments.some(item => item.store === newAssignment.store && item.productId === newAssignment.productId);
     if (exists) {
       setToast("Este desafio já está definido para a loja.");
       return;
     }
-    setAssignments([...assignments, { ...newAssignment, goal: Number(newAssignment.goal) }]);
-    setToast("Desafio da semana vinculado à loja.");
+    const nextAssignments = [...assignments, { ...newAssignment, goal: Number(newAssignment.goal) }];
+    setAssignments(nextAssignments);
+    const ok = await onSaveSetting("productAssignments", nextAssignments);
+    setToast(ok ? "Desafio da semana vinculado à loja." : "Desafio vinculado na tela, mas não foi salvo no servidor.");
   };
 
   const lookupProduct = () => {
@@ -1892,7 +2018,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     setToast("Produto não encontrado na consulta demonstrativa.");
   };
 
-  const createProduct = event => {
+  const createProduct = async event => {
     event.preventDefault();
     if (!newProduct.sku || !newProduct.name) {
       setToast("Informe o código/SKU e o nome do produto.");
@@ -1903,9 +2029,11 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       return;
     }
     const id = `${newProduct.sku}-${Date.now()}`;
-    setProductCatalog([...productCatalog, { ...newProduct, id }]);
+    const nextCatalog = [...productCatalog, { ...newProduct, id }];
+    setProductCatalog(nextCatalog);
+    await onSaveSetting("productCatalog", nextCatalog);
     setNewProduct({ sku: "", name: "", brand: "", price: "", description: "", imageUrl: "", siteUrl: "" });
-    setToast("Produto cadastrado no piloto.");
+    setToast("Produto cadastrado na campanha.");
   };
 
   const addSale = async event => {
@@ -2011,6 +2139,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       predictionsCloseAt: roundWindow.closeAt.toISOString(),
     };
     const ok = await onSaveSetting("round", next);
+    if (ok && next.id === "quartas-final") await onSaveSetting("scoringStartAt", defaultScoringStartAt);
     if (ok) setToast("Rodada atualizada.");
   };
 
@@ -2057,7 +2186,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       winners: roundClosingSummary,
     };
     const ok = await onSaveSetting("round", next);
-    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com vendedor geral, vendedores por loja e top 2 líderes." : "Fase teste encerrada com top geral, líderes e vendedores por loja.");
+    if (ok) setToast(productFocusEnabled ? "Rodada encerrada com vendedor geral, vendedores por loja e top 2 líderes elegíveis." : "Rodada encerrada com top geral, líderes e vendedores por loja.");
   };
 
   const exportReport = () => {
@@ -2093,17 +2222,17 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div><p className="text-sm font-semibold text-slate-400">Piloto comercial • acesso administrativo</p><h2 className="font-display text-3xl font-extrabold text-potiguar-950">Central de administração</h2></div>
+        <div><p className="text-sm font-semibold text-slate-400">Copa Potiguar • acesso administrativo</p><h2 className="font-display text-3xl font-extrabold text-potiguar-950">Central de administração</h2></div>
         <div className="flex gap-2">
           <button onClick={() => { onRefreshData(); setToast("Dados atualizados."); }} className="flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900"><Icon name="clock" size={17}/> Atualizar</button>
           <button onClick={exportReport} className="flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"><Icon name="chart" size={17}/> Exportar relatório</button>
         </div>
       </section>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard icon="users" label="Participantes do piloto" value={participantCount} detail={`${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`} accent="green"/>
+        <StatCard icon="users" label="Participantes da campanha" value={participantCount} detail={`${sellerCount} vendedores • ${leaderCount} líderes • ${adminCount} admins`} accent="green"/>
         <StatCard icon="megaphone" label="Leituras" value={readEntries.length} detail={readEntries.length ? "Comunicados confirmados" : "Aguardando confirmações"} accent="lime"/>
         <StatCard icon="ball" label="Aderência aos palpites" value={`${predictionEngagement.totals.adherence}%`} detail={`${predictionEngagement.totals.participated}/${predictionEngagement.totals.eligible} participaram • faltam ${predictionEngagement.totals.missing}`} accent="white"/>
-        <StatCard icon={productFocusEnabled ? "store" : "trophy"} label={productFocusEnabled ? "Meta da rede" : "Fase teste"} value={productFocusEnabled ? `${Math.round(totalSold / storeGoal * 100)}%` : "16 avos"} detail={productFocusEnabled ? `${totalSold} de ${storeGoal}` : "Somente endomarketing e palpites"} accent="white"/>
+        <StatCard icon={productFocusEnabled ? "store" : "trophy"} label={productFocusEnabled ? "Meta da rede" : "Fase final"} value={productFocusEnabled ? `${Math.round(totalSold / networkGoal * 100)}%` : "Finais"} detail={productFocusEnabled ? `${totalSold} de ${networkGoal}` : "Somente endomarketing e palpites"} accent="white"/>
       </div>
       <section className="soft-card rounded-2xl p-5 sm:p-6">
         <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Ações rápidas</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">O que vamos movimentar?</h3></div>
@@ -2261,7 +2390,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                   <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Iniciar em</span><input type="datetime-local" value={formatDateTimeInput(announcementForm.startsAt)} onChange={e=>setAnnouncementForm({...announcementForm,startsAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
                   <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Finalizar em</span><input type="datetime-local" value={formatDateTimeInput(announcementForm.endsAt)} onChange={e=>setAnnouncementForm({...announcementForm,endsAt:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
                 </div>
-                <label className="mt-4 block"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status visível</span><input value={announcementForm.publishedAt || ""} onChange={e=>setAnnouncementForm({...announcementForm,publishedAt:e.target.value})} placeholder="Ex.: ATIVO, Programado, Rodada 16 avos" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+                <label className="mt-4 block"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status visível</span><input value={announcementForm.publishedAt || ""} onChange={e=>setAnnouncementForm({...announcementForm,publishedAt:e.target.value})} placeholder="Ex.: ATIVO, Programado, Fase final" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
                 <label className="mt-4 block"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">ID interno</span><input value={announcementForm.id || ""} onChange={e=>setAnnouncementForm({...announcementForm,id:e.target.value})} placeholder="Pode deixar automático" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
                 <div className="mt-4 rounded-xl bg-white p-3 text-xs leading-5 text-slate-500">
                   Dica para o RH: ao mudar o ID do comunicado, a leitura será exigida novamente para a rodada.
@@ -2296,7 +2425,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
               <div>
                 <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Calendário automático</p>
                 <h4 className="font-display text-lg font-extrabold text-potiguar-950">Fases finais da Copa</h4>
-                <p className="mt-1 text-xs text-slate-500">16 avos em modo teste; a partir das oitavas, rodadas oficiais. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes do jogo.</p>
+                <p className="mt-1 text-xs text-slate-500">A rodada atual pode cobrir todos os jogos da fase final. Os palpites ficam liberados em qualquer horário e encerram 10 minutos antes de cada jogo.</p>
               </div>
               <div className="flex flex-col gap-2 sm:items-end">
                 <span className="rounded-full bg-white px-3 py-1 text-[10px] font-extrabold text-potiguar-800">Até 10 min antes</span>
@@ -2365,7 +2494,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
               <div>
                 <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-700">Fechamento da rodada</p>
                 <h4 className="mt-1 font-display text-lg font-extrabold text-potiguar-950">Ganhadores da {roundForm.phase || "rodada"}</h4>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{productFocusEnabled ? "Ao encerrar, o sistema registra o 1º vendedor geral, o 1º vendedor de cada loja e os 2 primeiros líderes geral." : "Na fase teste, contam apenas leitura do endomarketing e pontos dos palpites."}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-500">{productFocusEnabled ? `Ao encerrar, o sistema registra o 1º vendedor geral, o 1º vendedor de cada loja e os 2 primeiros líderes elegíveis: meta mínima ${LEADER_PRIZE_MIN_GOAL_PERCENT}% e aderência mínima ${LEADER_PRIZE_MIN_ADHERENCE_PERCENT}%.` : "Na rodada, contam leitura do endomarketing, palpites e desafio quando ativo."}</p>
               </div>
               <button type="button" onClick={closeRound} className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Encerrar e registrar ganhadores</button>
             </div>
@@ -2383,15 +2512,15 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                 </div>
               </div>
               <div className="rounded-xl bg-white p-4">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Top 2 líderes</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Top 2 líderes elegíveis</p>
                 <div className="mt-3 space-y-2">
                   {roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => (
                     <div key={person.cpf} className="flex items-center gap-2 rounded-xl bg-slate-50 p-2">
                       <span className="w-6 text-center text-xs">{["🥇","🥈","🥉"][index]}</span>
-                      <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store}</p></div>
+                      <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store} • meta {person.storeGoalPercent}% • aderência {person.storeAdherencePercent}%</p></div>
                       <strong className="text-xs text-potiguar-900">{person.points}</strong>
                     </div>
-                  )) : <p className="text-xs text-slate-400">Sem líderes pontuados ainda.</p>}
+                  )) : <p className="text-xs text-slate-400">Nenhum líder elegível ainda. Critérios: 90% da meta e 80% de aderência.</p>}
                 </div>
               </div>
               <div className="rounded-xl bg-white p-4">
@@ -2416,7 +2545,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
             <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-potiguar-lime">Classificação consolidada</p>
             <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h3 className="font-display text-3xl font-extrabold">Rankings do piloto</h3>
+                <h3 className="font-display text-3xl font-extrabold">Rankings da campanha</h3>
                 <p className="mt-2 text-sm text-white/60">Ranking calculado com dados gravados no banco: leituras, palpites e vendas. Atualização automática a cada 15 segundos.</p>
               </div>
               <div className="glass rounded-2xl px-5 py-3">
@@ -2427,9 +2556,9 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
           </div>
           <section className="soft-card rounded-2xl p-5 sm:p-6">
             <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Premiação Oitavas</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Premiação da fase final</p>
               <h4 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ganhadores previstos da rodada</h4>
-              <p className="mt-1 text-xs text-slate-400">Acompanhamento ao vivo: 1º vendedor geral, 1º vendedor de cada loja e os 2 primeiros líderes geral.</p>
+              <p className="mt-1 text-xs text-slate-400">Acompanhamento ao vivo: 1º vendedor geral, 1º vendedor de cada loja e os 2 primeiros líderes elegíveis.</p>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <a href={(settings.award || defaultAward).storeSellerPrizeUrl || defaultAward.storeSellerPrizeUrl} target="_blank" rel="noreferrer" className="rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime">
@@ -2440,7 +2569,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
               <a href={(settings.award || defaultAward).mainPrizeUrl || defaultAward.mainPrizeUrl} target="_blank" rel="noreferrer" className="rounded-2xl border border-slate-100 bg-slate-50 p-4 transition hover:border-potiguar-lime">
                 <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Prêmio geral/liderança</p>
                 <p className="mt-1 text-sm font-extrabold text-potiguar-950">{(settings.award || defaultAward).overallSellerPrize || defaultAward.overallSellerPrize}</p>
-                <p className="mt-1 text-[10px] text-slate-400">Para 1º vendedor geral e top 2 líderes</p>
+                <p className="mt-1 text-[10px] text-slate-400">Para 1º vendedor geral e top 2 líderes elegíveis</p>
               </a>
             </div>
             <div className="mt-5 grid gap-4 xl:grid-cols-3">
@@ -2458,7 +2587,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                 ) : <p className="mt-3 text-xs text-slate-400">Aguardando pontuação.</p>}
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Top 2 líderes geral</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-potiguar-700">Top 2 líderes elegíveis</p>
                 <div className="mt-3 space-y-2">
                   {roundClosingSummary.topLeaders.length ? roundClosingSummary.topLeaders.map((person, index) => (
                     <div key={person.cpf} className="flex items-center gap-2 rounded-xl bg-white p-2">
@@ -2466,7 +2595,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                       <div className="min-w-0 flex-1"><p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p><p className="text-[10px] text-slate-400">{person.store}</p></div>
                       <strong className="text-xs text-potiguar-900">{person.points}</strong>
                     </div>
-                  )) : <p className="text-xs text-slate-400">Aguardando líderes pontuarem.</p>}
+                  )) : <p className="text-xs text-slate-400">Aguardando líderes cumprirem meta mínima de 90% e aderência de 80%.</p>}
                 </div>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
@@ -2637,7 +2766,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
         <section className="space-y-6">
           <div className="grid gap-6 xl:grid-cols-[1.25fr_.75fr]">
             <section className="soft-card rounded-2xl p-5 sm:p-6">
-              <div className="flex items-center justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Evolução do piloto</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Participação em apuração</h3></div><Icon name="chart" className="text-potiguar-700"/></div>
+              <div className="flex items-center justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Evolução da campanha</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Participação em apuração</h3></div><Icon name="chart" className="text-potiguar-700"/></div>
               <div className="mt-8 flex h-48 items-end justify-between gap-3 border-b border-slate-100 px-2">
                 {[0,0,0,0,0,0,0].map((value,index)=><div key={index} className="flex h-full flex-1 flex-col justify-end gap-2 text-center"><span className="text-[9px] font-bold text-potiguar-700">{value}%</span><div className="mx-auto w-full max-w-10 rounded-t-lg bg-gradient-to-t from-potiguar-900 to-potiguar-lime" style={{height:`${Math.max(value, 4)}%`}}></div><span className="text-[9px] font-bold text-slate-400">{["S","T","Q","Q","S","S","D"][index]}</span></div>)}
               </div>
@@ -2700,7 +2829,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
           <div>
             <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Apuração do desafio da semana</p>
             <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Vendas do desafio por vendedor</h3>
-            <p className="mt-1 text-xs text-slate-400">{productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana desativado na fase teste/16 avos. Vendas entram somente a partir das oitavas."}</p>
+            <p className="mt-1 text-xs text-slate-400">{productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana temporariamente desativado. Ative a rodada oficial para lançar vendas."}</p>
           </div>
           {!productFocusEnabled && (
             <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
@@ -2763,7 +2892,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-left">
               <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                <tr><th className="px-6 py-3">Colaborador</th><th className="px-4 py-3">Cargo original</th><th className="px-4 py-3">Perfil no piloto</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Status</th><th className="px-6 py-3 text-right">Ações</th></tr>
+                <tr><th className="px-6 py-3">Colaborador</th><th className="px-4 py-3">Cargo original</th><th className="px-4 py-3">Perfil na campanha</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Status</th><th className="px-6 py-3 text-right">Ações</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {visibleUsers.map(user => (
@@ -2810,7 +2939,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       )}
       {module === "dashboard" && <div className="grid gap-6 xl:grid-cols-[1.25fr_.75fr]">
 	        <section className="soft-card rounded-2xl p-5 sm:p-6">
-	          <div className="flex items-center justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">{productFocusEnabled ? "Desempenho por loja" : "Fase teste"}</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Acompanhamento das lojas</h3></div><span className="text-xs font-bold text-slate-400">Atualização automática</span></div>
+	          <div className="flex items-center justify-between"><div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">{productFocusEnabled ? "Desempenho por loja" : "Fase final"}</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Acompanhamento das lojas</h3></div><span className="text-xs font-bold text-slate-400">Atualização automática</span></div>
 	          <div className="mt-6 grid gap-3 md:grid-cols-2">
 	            {storeSummaries.map((summary, index) => {
                 const maxPoints = Math.max(1, ...storeSummaries.map(item => item.points));
