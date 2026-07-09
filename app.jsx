@@ -135,14 +135,16 @@ const normalizeCustomUser = user => {
   };
 };
 
-const mergeUsers = (baseUsers, customUsers = []) => {
+const mergeUsers = (baseUsers, customUsers = [], deletedUsers = []) => {
+  const deletedCpfs = new Set((Array.isArray(deletedUsers) ? deletedUsers : []).map(onlyDigits));
   const byCpf = {};
   baseUsers.forEach(user => {
-    byCpf[onlyDigits(user.cpf)] = user;
+    const cpf = onlyDigits(user.cpf);
+    if (!deletedCpfs.has(cpf)) byCpf[cpf] = user;
   });
   customUsers.map(normalizeCustomUser).forEach(user => {
     const cpf = onlyDigits(user.cpf);
-    if (cpf.length === 11) byCpf[cpf] = user;
+    if (cpf.length === 11 && !deletedCpfs.has(cpf)) byCpf[cpf] = user;
   });
   return Object.values(byCpf);
 };
@@ -476,6 +478,7 @@ const defaultAppSettings = {
   matchResults: defaultMatchResults,
   productCatalog: focusProducts,
   productAssignments: initialProductAssignments,
+  deletedUsers: [],
 };
 
 const getEntryDate = entry => new Date(entry.submitted_at || entry.submittedAt || entry.readAt || entry.createdAt || entry.created_at || 0);
@@ -1962,13 +1965,37 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       created,
     ];
     const ok = await onSaveSetting("customUsers", nextCustomUsers);
+    if (ok) {
+      const deletedUsers = Array.isArray(settings.deletedUsers) ? settings.deletedUsers : [];
+      const nextDeletedUsers = deletedUsers.filter(cpf => onlyDigits(cpf) !== onlyDigits(created.cpf));
+      if (nextDeletedUsers.length !== deletedUsers.length) await onSaveSetting("deletedUsers", nextDeletedUsers);
+    }
     if (!ok) {
       setToast("Não foi possível salvar o colaborador no banco.");
       return;
     }
-    setUsers(mergeUsers(registeredUsers, nextCustomUsers));
+    setUsers(mergeUsers(registeredUsers, nextCustomUsers, (settings.deletedUsers || []).filter(cpf => onlyDigits(cpf) !== onlyDigits(created.cpf))));
     cancelUserForm();
     setToast(editingCpf ? `${created.name} atualizado com sucesso.` : `${created.name} cadastrado. Senha inicial: CPF.`);
+  };
+
+  const deleteUser = async targetUser => {
+    const cpf = onlyDigits(targetUser.cpf);
+    if (cpf === onlyDigits(adminUser?.cpf)) {
+      setToast("Você não pode excluir o próprio usuário logado.");
+      return;
+    }
+    if (!window.confirm(`Excluir ${targetUser.name} da campanha? Ele deixará de acessar a plataforma e sairá dos rankings.`)) return;
+    const nextCustomUsers = (Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== cpf);
+    const nextDeletedUsers = Array.from(new Set([...(Array.isArray(settings.deletedUsers) ? settings.deletedUsers : []).map(onlyDigits), cpf])).filter(item => item.length === 11);
+    const customOk = await onSaveSetting("customUsers", nextCustomUsers);
+    const deletedOk = await onSaveSetting("deletedUsers", nextDeletedUsers);
+    if (!customOk || !deletedOk) {
+      setToast("Não foi possível excluir o colaborador no servidor.");
+      return;
+    }
+    setUsers(mergeUsers(registeredUsers, nextCustomUsers, nextDeletedUsers));
+    setToast(`${targetUser.name} foi removido da campanha.`);
   };
 
   const resetUserPassword = async (targetUser) => {
@@ -2907,6 +2934,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                         {user.profile !== "Administrador" && <button onClick={() => onAccessAs(user)} className="rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950">Acessar como</button>}
                         <button onClick={() => resetUserPassword(user)} className="rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700">Resetar senha</button>
                         <button onClick={() => startEditUser(user)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button>
+                        <button onClick={() => deleteUser(user)} className="rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red">Excluir</button>
                       </div>
                     </td>
                   </tr>
@@ -3096,7 +3124,8 @@ function App() {
 
   const activeRound = appSettings.round || defaultRoundConfig;
   const customUsers = Array.isArray(appSettings.customUsers) ? appSettings.customUsers : [];
-  const allRegisteredUsers = useMemo(() => mergeUsers(registeredUsers, customUsers), [appSettings.customUsers]);
+  const deletedUsers = Array.isArray(appSettings.deletedUsers) ? appSettings.deletedUsers : [];
+  const allRegisteredUsers = useMemo(() => mergeUsers(registeredUsers, customUsers, deletedUsers), [appSettings.customUsers, appSettings.deletedUsers]);
   const dynamicDemoUsers = useMemo(() => buildDemoUsers(allRegisteredUsers), [allRegisteredUsers]);
   const activeGames = getActiveGames(worldCupMatches, activeRound);
   const syncedMatchResults = getMatchResultsFromGames(activeGames);
