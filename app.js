@@ -3,6 +3,25 @@ const {
   useMemo,
   useState
 } = React;
+if (typeof Object.fromEntries !== "function") {
+  Object.fromEntries = entries => {
+    const result = {};
+    entries.forEach(([key, value]) => {
+      result[key] = value;
+    });
+    return result;
+  };
+}
+const scrollToTopSafely = () => {
+  try {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  } catch (error) {
+    window.scrollTo(0, 0);
+  }
+};
 const Icon = ({
   name,
   size = 20,
@@ -4636,10 +4655,7 @@ function App() {
     const timer = setTimeout(() => setToast(""), 3200);
     return () => clearTimeout(timer);
   }, [toast]);
-  useEffect(() => window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  }), [page]);
+  useEffect(() => scrollToTopSafely(), [page]);
   const loadPredictions = async () => {
     try {
       const response = await fetch("/api/predictions", {

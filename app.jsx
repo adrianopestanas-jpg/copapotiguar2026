@@ -1,5 +1,23 @@
 const { useEffect, useMemo, useState } = React;
 
+if (typeof Object.fromEntries !== "function") {
+  Object.fromEntries = entries => {
+    const result = {};
+    entries.forEach(([key, value]) => {
+      result[key] = value;
+    });
+    return result;
+  };
+}
+
+const scrollToTopSafely = () => {
+  try {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (error) {
+    window.scrollTo(0, 0);
+  }
+};
+
 const Icon = ({ name, size = 20, className = "" }) => {
   const paths = {
     home: <><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V20h14v-9.5M9 20v-6h6v6"/></>,
@@ -3043,7 +3061,7 @@ function App() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  useEffect(() => window.scrollTo({ top: 0, behavior: "smooth" }), [page]);
+  useEffect(() => scrollToTopSafely(), [page]);
 
   const loadPredictions = async () => {
     try {
