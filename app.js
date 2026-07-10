@@ -1303,7 +1303,7 @@ function MobileNav({
   if (user.accessRole === "admin") return null;
   const items = [["home", "Início", "home"], ["ball", "Palpites", "guesses"], ["ranking", "Ranking", "ranking"], ["store", "Loja", "store"]];
   return /*#__PURE__*/React.createElement("nav", {
-    className: "fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-black/5 bg-white/95 px-2 py-2 shadow-2xl shadow-potiguar-950/20 backdrop-blur lg:hidden"
+    className: "mobile-bottom-nav fixed inset-x-3 z-40 flex items-center justify-around rounded-2xl border border-black/5 bg-white/95 px-2 py-2 shadow-2xl shadow-potiguar-950/20 backdrop-blur lg:hidden"
   }, items.map(([icon, label, value]) => /*#__PURE__*/React.createElement("button", {
     key: value,
     onClick: () => setPage(value),
@@ -2247,7 +2247,7 @@ function Guesses({
       className: "text-center text-sm text-potiguar-950 sm:text-base"
     }, game.away))));
   })), /*#__PURE__*/React.createElement("div", {
-    className: "sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5"
+    className: "rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:sticky lg:bottom-5"
   }, /*#__PURE__*/React.createElement("button", {
     disabled: !complete || saved,
     onClick: async () => {

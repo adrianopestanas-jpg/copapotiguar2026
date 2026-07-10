@@ -966,7 +966,7 @@ function MobileNav({ page, setPage, user }) {
     ["store", "Loja", "store"],
   ];
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-black/5 bg-white/95 px-2 py-2 shadow-2xl shadow-potiguar-950/20 backdrop-blur lg:hidden">
+    <nav className="mobile-bottom-nav fixed inset-x-3 z-40 flex items-center justify-around rounded-2xl border border-black/5 bg-white/95 px-2 py-2 shadow-2xl shadow-potiguar-950/20 backdrop-blur lg:hidden">
       {items.map(([icon, label, value]) => (
         <button key={value} onClick={() => setPage(value)} className={`nav-item ${page === value ? "active text-potiguar-900" : "text-slate-400"} flex min-w-[66px] flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-extrabold`}>
           <Icon name={icon} size={20} />
@@ -1662,7 +1662,7 @@ function Guesses({ acknowledged, setPage, setToast, user, settings, activeGames,
           );
         })}
       </div>
-      <div className="sticky bottom-24 z-10 rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:bottom-5">
+      <div className="rounded-2xl border border-potiguar-900/10 bg-white/95 p-3 shadow-2xl backdrop-blur lg:sticky lg:bottom-5">
         <button disabled={!complete || saved} onClick={async () => {
           const ok = await onSavePrediction(user, scores, openGames);
           if (ok) {
