@@ -123,6 +123,38 @@ const makeInitials = name => String(name ?? "")
   .map(part => part[0]?.toUpperCase())
   .join("");
 
+const dateInputKey = value => {
+  if (!value) return "";
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getParticipationState = (user, now = new Date()) => {
+  const status = user.status || "Ativo";
+  if (user.profile === "Administrador") return { active: true, label: "Ativo", reason: "" };
+  const today = dateInputKey(now);
+  const vacationStart = dateInputKey(user.vacationStart);
+  const vacationEnd = dateInputKey(user.vacationEnd);
+  const hasVacationPeriod = Boolean(vacationStart || vacationEnd);
+  const inVacationPeriod = hasVacationPeriod &&
+    (!vacationStart || today >= vacationStart) &&
+    (!vacationEnd || today <= vacationEnd);
+  if (status === "Inativo") return { active: false, label: "Inativo", reason: "Usuário inativo na campanha." };
+  if (status === "Afastado") return { active: false, label: "Afastado", reason: "Usuário afastado temporariamente." };
+  if (inVacationPeriod || (status === "Férias" && !hasVacationPeriod)) {
+    return { active: false, label: "Férias", reason: vacationEnd ? `Acesso pausado durante férias até ${vacationEnd.split("-").reverse().join("/")}.` : "Acesso pausado durante férias." };
+  }
+  if (status === "Férias" && hasVacationPeriod) return { active: true, label: "Férias programadas", reason: vacationStart ? `Férias programadas a partir de ${vacationStart.split("-").reverse().join("/")}.` : "Férias programadas." };
+  return { active: true, label: "Ativo", reason: "" };
+};
+
+const isUserEligibleForCampaign = user => getParticipationState(user).active;
+
 const participantRows = (typeof window !== "undefined" && window.COPA_PARTICIPANTS) || [];
 
 const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
@@ -136,6 +168,9 @@ const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
       profile,
       store: normalizeStore(store),
       status: "Ativo",
+      vacationStart: "",
+      vacationEnd: "",
+      absenceNote: "",
     };
   };
 
@@ -150,6 +185,9 @@ const normalizeCustomUser = user => {
     profile,
     store: normalizeStore(user.store),
     status: user.status || "Ativo",
+    vacationStart: user.vacationStart || "",
+    vacationEnd: user.vacationEnd || "",
+    absenceNote: user.absenceNote || "",
   };
 };
 
@@ -177,6 +215,11 @@ const buildDemoUsers = users => users.reduce((acc, participant) => {
     accessRole: participant.profile === "Administrador" ? "admin" : participant.profile === "Liderança" ? "leadership" : "seller",
     store: participant.store,
     cpf: participant.cpf,
+    status: participant.status || "Ativo",
+    participationState: getParticipationState(participant),
+    vacationStart: participant.vacationStart || "",
+    vacationEnd: participant.vacationEnd || "",
+    absenceNote: participant.absenceNote || "",
     points: 0,
     position: null,
     initials: makeInitials(participant.name),
@@ -569,7 +612,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
   const productFocusEnabled = isProductFocusEnabled(settings);
-  const participants = users.filter(user => user.profile !== "Administrador");
+  const participants = users.filter(user => user.profile !== "Administrador" && isUserEligibleForCampaign(user));
   const rows = participants.map(user => ({
     name: user.name,
     cpf: onlyDigits(user.cpf),
@@ -757,7 +800,7 @@ const getStoreSummaries = (rankingRows, predictionEntries = [], readEntries = []
   .sort((a, b) => b.points - a.points || b.predictionCount - a.predictionCount || a.store.localeCompare(b.store));
 
 const getPredictionEngagement = (users = [], predictionEntries = []) => {
-  const eligibleUsers = users.filter(user => user.profile !== "Administrador" && fixedStores.includes(user.store));
+  const eligibleUsers = users.filter(user => user.profile !== "Administrador" && fixedStores.includes(user.store) && isUserEligibleForCampaign(user));
   const predictionMap = predictionEntries.reduce((acc, entry) => {
     const cpf = onlyDigits(entry.cpf);
     if (!cpf) return acc;
@@ -1753,7 +1796,58 @@ function RankingPage({ user, pilotRanking }) {
   );
 }
 
-function StorePage({ user, pilotRanking, totalSold, settings }) {
+function StoreAbsenceSummary({ user, users = [] }) {
+  const storePeople = users.filter(person => person.store === user.store && person.profile !== "Administrador");
+  const activePeople = storePeople.filter(isUserEligibleForCampaign);
+  const pausedPeople = storePeople.filter(person => !isUserEligibleForCampaign(person));
+  const scheduledVacations = storePeople.filter(person => {
+    const participation = getParticipationState(person);
+    return participation.active && participation.label === "Férias programadas";
+  });
+  if (!pausedPeople.length && !scheduledVacations.length) return null;
+  return (
+    <section className="soft-card rounded-2xl p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Base de aderência</p>
+          <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Equipe ativa considerada</h3>
+          <p className="mt-1 text-xs text-slate-400">{activePeople.length} ativo(s) entram na aderência • {pausedPeople.length} fora temporariamente</p>
+        </div>
+        <Icon name="users" className="text-potiguar-700" />
+      </div>
+      {pausedPeople.length > 0 && (
+        <div className="mt-5 space-y-2">
+          <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600">Fora da rodada agora</p>
+          {pausedPeople.map(person => {
+            const participation = getParticipationState(person);
+            return (
+              <div key={person.cpf} className="flex items-center justify-between gap-3 rounded-xl bg-amber-50 p-3">
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p>
+                  <p className="truncate text-[10px] text-amber-700">{participation.label}{person.absenceNote ? ` • ${person.absenceNote}` : ""}</p>
+                </div>
+                <span className="shrink-0 rounded-lg bg-white px-2 py-1 text-[9px] font-extrabold text-amber-700">não conta</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {scheduledVacations.length > 0 && (
+        <div className="mt-5 space-y-2">
+          <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-slate-400">Férias programadas</p>
+          {scheduledVacations.map(person => (
+            <div key={person.cpf} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
+              <p className="truncate text-xs font-extrabold text-potiguar-950">{person.name}</p>
+              <span className="shrink-0 text-[10px] font-bold text-slate-400">{person.vacationStart ? person.vacationStart.split("-").reverse().join("/") : "—"} até {person.vacationEnd ? person.vacationEnd.split("-").reverse().join("/") : "—"}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function StorePage({ user, pilotRanking, totalSold, settings, users = [] }) {
   const productFocusEnabled = isProductFocusEnabled(settings);
   const storeFocus = getStoreFocus(user.store, settings);
   const storeUnit = storeFocus.product.unit || "unidades";
@@ -1779,6 +1873,7 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
           <StatCard icon="ranking" label="Pontos da loja" value={localPoints} detail={`${localHits} acerto(s) em palpites`} accent="white" />
         </div>
       )}
+      {user.accessRole === "leadership" && <StoreAbsenceSummary user={user} users={users} />}
       <section className="soft-card rounded-2xl p-5 sm:p-6">
         <div className="flex items-center justify-between">
           <div><p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Nosso time</p><h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Ranking {user.store}</h3></div>
@@ -1836,6 +1931,7 @@ function StorePage({ user, pilotRanking, totalSold, settings }) {
         </section>
 
         <div className="space-y-6">
+          {user.accessRole === "leadership" && <StoreAbsenceSummary user={user} users={users} />}
           <section className="soft-card rounded-2xl p-5 sm:p-6">
             <div className="flex items-center gap-4">
               <div className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-100 text-3xl">🏆</div>
@@ -1865,7 +1961,8 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   const [storeFilter, setStoreFilter] = useState("Todas");
   const [users, setUsers] = useState(allUsers);
   const [showUserForm, setShowUserForm] = useState(false);
-  const [newUser, setNewUser] = useState({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
+  const emptyUserForm = { name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE, status: "Ativo", vacationStart: "", vacationEnd: "", absenceNote: "" };
+  const [newUser, setNewUser] = useState(emptyUserForm);
   const [editingCpf, setEditingCpf] = useState("");
   const [assignments, setAssignments] = useState(getProductAssignments(settings));
   const [productCatalog, setProductCatalog] = useState(getProductCatalog(settings));
@@ -1916,7 +2013,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     const matchesStore = storeFilter === "Todas" || user.store === storeFilter;
     return matchesSearch && matchesStore;
   });
-  const sellersForSale = users.filter(user => user.profile === "Vendedor" && user.store === newSale.store);
+  const sellersForSale = users.filter(user => user.profile === "Vendedor" && user.store === newSale.store && isUserEligibleForCampaign(user));
   const productsForSale = assignments.filter(item => item.store === newSale.store);
   const salesRanking = Object.values(salesEntries.reduce((acc, entry) => {
     if (!acc[entry.seller]) acc[entry.seller] = { name: entry.seller, store: entry.store, quantity: 0 };
@@ -1951,6 +2048,10 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       job: user.profile === "Administrador" ? "Administrador" : user.profile === "Liderança" ? "Líder de loja" : "Vendedor",
       profile: user.profile,
       store: user.store,
+      status: user.status || "Ativo",
+      vacationStart: user.vacationStart || "",
+      vacationEnd: user.vacationEnd || "",
+      absenceNote: user.absenceNote || "",
     });
     setShowUserForm(true);
     setModule("users");
@@ -1959,7 +2060,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   const cancelUserForm = () => {
     setShowUserForm(false);
     setEditingCpf("");
-    setNewUser({ name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE });
+    setNewUser(emptyUserForm);
   };
 
   const createUser = async event => {
@@ -1977,7 +2078,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       setToast("Já existe outro colaborador cadastrado com este CPF.");
       return;
     }
-    const created = normalizeCustomUser({ ...newUser, email: "", status: "Ativo" });
+    const created = normalizeCustomUser({ ...newUser, email: "" });
     const nextCustomUsers = [
       ...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== (editingCpf || onlyDigits(created.cpf))),
       created,
@@ -2923,7 +3024,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
             </div>
           </div>
           {showUserForm && (
-            <form onSubmit={createUser} className="grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-5">
+            <form onSubmit={createUser} className="grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-6">
               <div className="sm:col-span-2 xl:col-span-5">
                 <p className="text-xs font-extrabold uppercase tracking-[.15em] text-potiguar-700">{editingCpf ? "Editando colaborador" : "Novo colaborador"}</p>
               </div>
@@ -2931,6 +3032,10 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">CPF</span><input aria-label="CPF do novo colaborador" inputMode="numeric" value={newUser.cpf} onChange={e => setNewUser({...newUser,cpf:formatCpf(e.target.value)})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Cargo</span><select aria-label="Cargo do novo colaborador" value={newUser.job} onChange={e => {const job=e.target.value; setNewUser({...newUser,job,profile:job==="Administrador"?"Administrador":job==="Líder de loja"?"Liderança":"Vendedor",store:job==="Administrador"?"Rede Potiguar":newUser.store});}} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option>Vendedor</option><option>Líder de loja</option><option>Administrador</option></select></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Loja</span><select aria-label="Loja do novo colaborador" value={newUser.store} onChange={e => setNewUser({...newUser,store:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs">{[...fixedStores, "Rede Potiguar"].map(store=><option key={store}>{store}</option>)}</select></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status</span><select aria-label="Status de participação" value={newUser.status} onChange={e => setNewUser({...newUser,status:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option>Ativo</option><option>Férias</option><option>Afastado</option><option>Inativo</option></select></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Início férias</span><input aria-label="Início das férias" type="date" value={newUser.vacationStart || ""} onChange={e => setNewUser({...newUser,vacationStart:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Fim férias</span><input aria-label="Fim das férias" type="date" value={newUser.vacationEnd || ""} onChange={e => setNewUser({...newUser,vacationEnd:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
+              <label className="sm:col-span-2 xl:col-span-3"><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Observação</span><input aria-label="Observação de ausência" value={newUser.absenceNote || ""} onChange={e => setNewUser({...newUser,absenceNote:e.target.value})} placeholder="Ex.: férias coletivas, licença, retorno previsto..." className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
               <div className="flex items-end gap-2"><button type="button" onClick={cancelUserForm} className="rounded-xl px-4 py-3 text-xs font-bold text-slate-400">Cancelar</button><button type="submit" className="flex-1 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white">{editingCpf ? "Salvar" : "Cadastrar"}</button></div>
             </form>
           )}
@@ -2940,13 +3045,15 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                 <tr><th className="px-6 py-3">Colaborador</th><th className="px-4 py-3">Cargo original</th><th className="px-4 py-3">Perfil na campanha</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Status</th><th className="px-6 py-3 text-right">Ações</th></tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {visibleUsers.map(user => (
+                {visibleUsers.map(user => {
+                  const participation = getParticipationState(user);
+                  return (
                   <tr key={user.cpf} className="hover:bg-potiguar-lime/5">
                     <td className="px-6 py-4"><div className="flex items-center gap-3"><Avatar initials={user.name.split(" ").map(x => x[0]).slice(0,2).join("")} photoUrl={profilePhotos[onlyDigits(user.cpf)]}/><div><p className="text-xs font-extrabold text-potiguar-950">{user.name}</p><p className="mt-0.5 text-[10px] font-semibold text-slate-400">CPF {user.cpf}</p></div></div></td>
                     <td className="px-4 py-4 text-xs font-semibold text-slate-500">{user.job}</td>
                     <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{user.profile}</span></td>
                     <td className="px-4 py-4 text-xs font-bold text-potiguar-800">{user.store}</td>
-                    <td className="px-4 py-4"><span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>{user.status}</span></td>
+                    <td className="px-4 py-4"><span className={`inline-flex items-center gap-1.5 text-[10px] font-bold ${participation.active ? "text-emerald-600" : "text-amber-600"}`}><span className={`h-1.5 w-1.5 rounded-full ${participation.active ? "bg-emerald-500" : "bg-amber-500"}`}></span>{participation.label}</span>{(user.vacationStart || user.vacationEnd) && <p className="mt-1 text-[9px] text-slate-400">{user.vacationStart ? user.vacationStart.split("-").reverse().join("/") : "—"} até {user.vacationEnd ? user.vacationEnd.split("-").reverse().join("/") : "—"}</p>}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         {user.profile !== "Administrador" && <button onClick={() => onAccessAs(user)} className="rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950">Acessar como</button>}
@@ -2956,7 +3063,8 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
             {visibleUsers.length === 0 && <div className="p-10 text-center text-sm font-semibold text-slate-400">Nenhum usuário encontrado.</div>}
@@ -3313,6 +3421,10 @@ function App() {
   };
 
   const login = async (nextUser, password) => {
+    const participation = nextUser.participationState || getParticipationState(nextUser);
+    if (nextUser.accessRole !== "admin" && !participation.active) {
+      return { ok: false, error: participation.reason || "Seu acesso está pausado temporariamente." };
+    }
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -3422,7 +3534,7 @@ function App() {
           {activePage === "home" && <Home acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} pilotRanking={pilotRanking} totalSold={effectiveUserStoreSold} profilePhotos={profilePhotos} settings={appSettings} activeGames={activeGames} onAcknowledge={saveAnnouncementRead} onSaveProfilePhoto={saveProfilePhoto} />}
           {activePage === "guesses" && <Guesses acknowledged={announcementAcknowledged} setPage={setPage} setToast={setToast} user={effectiveUser} settings={appSettings} activeGames={activeGames} onSavePrediction={savePrediction} />}
           {activePage === "ranking" && <RankingPage user={effectiveUser} pilotRanking={pilotRanking} />}
-          {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={effectiveUserStoreSold} settings={appSettings} />}
+          {activePage === "store" && <StorePage user={effectiveUser} pilotRanking={pilotRanking} totalSold={effectiveUserStoreSold} settings={appSettings} users={allRegisteredUsers} />}
           {activePage === "admin" && <AdminPage adminUser={effectiveUser} users={allRegisteredUsers} customUsers={customUsers} setToast={setToast} predictionEntries={activePredictionEntries} readEntries={activeReadEntries} salesEntries={activeSalesEntries} setSalesEntries={setSalesEntries} pilotRanking={pilotRanking} totalSold={totalSold} profilePhotos={profilePhotos} settings={scoringSettings} activeGames={activeGames} worldCupMatches={worldCupMatches} onSaveSetting={saveSetting} onRefreshData={refreshData} onAccessAs={accessAsUser} />}
         </main>
       </div>

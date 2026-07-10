@@ -182,6 +182,57 @@ const resolveJob = (job, explicitProfile) => {
   return /(GERENTE|SUBGERENTE)/.test(textKey(job)) ? "Líder de loja" : "Vendedor";
 };
 const makeInitials = name => String(name ?? "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]?.toUpperCase()).join("");
+const dateInputKey = value => {
+  if (!value) return "";
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+const getParticipationState = (user, now = new Date()) => {
+  const status = user.status || "Ativo";
+  if (user.profile === "Administrador") return {
+    active: true,
+    label: "Ativo",
+    reason: ""
+  };
+  const today = dateInputKey(now);
+  const vacationStart = dateInputKey(user.vacationStart);
+  const vacationEnd = dateInputKey(user.vacationEnd);
+  const hasVacationPeriod = Boolean(vacationStart || vacationEnd);
+  const inVacationPeriod = hasVacationPeriod && (!vacationStart || today >= vacationStart) && (!vacationEnd || today <= vacationEnd);
+  if (status === "Inativo") return {
+    active: false,
+    label: "Inativo",
+    reason: "Usuário inativo na campanha."
+  };
+  if (status === "Afastado") return {
+    active: false,
+    label: "Afastado",
+    reason: "Usuário afastado temporariamente."
+  };
+  if (inVacationPeriod || status === "Férias" && !hasVacationPeriod) {
+    return {
+      active: false,
+      label: "Férias",
+      reason: vacationEnd ? `Acesso pausado durante férias até ${vacationEnd.split("-").reverse().join("/")}.` : "Acesso pausado durante férias."
+    };
+  }
+  if (status === "Férias" && hasVacationPeriod) return {
+    active: true,
+    label: "Férias programadas",
+    reason: vacationStart ? `Férias programadas a partir de ${vacationStart.split("-").reverse().join("/")}.` : "Férias programadas."
+  };
+  return {
+    active: true,
+    label: "Ativo",
+    reason: ""
+  };
+};
+const isUserEligibleForCampaign = user => getParticipationState(user).active;
 const participantRows = typeof window !== "undefined" && window.COPA_PARTICIPANTS || [];
 const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
   const profile = resolveProfile(job, explicitProfile);
@@ -193,7 +244,10 @@ const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
     originalJob: toTitleCase(job),
     profile,
     store: normalizeStore(store),
-    status: "Ativo"
+    status: "Ativo",
+    vacationStart: "",
+    vacationEnd: "",
+    absenceNote: ""
   };
 };
 const normalizeCustomUser = user => {
@@ -206,7 +260,10 @@ const normalizeCustomUser = user => {
     originalJob: user.originalJob || user.job || resolveJob(user.job, profile),
     profile,
     store: normalizeStore(user.store),
-    status: user.status || "Ativo"
+    status: user.status || "Ativo",
+    vacationStart: user.vacationStart || "",
+    vacationEnd: user.vacationEnd || "",
+    absenceNote: user.absenceNote || ""
   };
 };
 const mergeUsers = (baseUsers, customUsers = [], deletedUsers = []) => {
@@ -232,6 +289,11 @@ const buildDemoUsers = users => users.reduce((acc, participant) => {
     accessRole: participant.profile === "Administrador" ? "admin" : participant.profile === "Liderança" ? "leadership" : "seller",
     store: participant.store,
     cpf: participant.cpf,
+    status: participant.status || "Ativo",
+    participationState: getParticipationState(participant),
+    vacationStart: participant.vacationStart || "",
+    vacationEnd: participant.vacationEnd || "",
+    absenceNote: participant.absenceNote || "",
     points: 0,
     position: null,
     initials: makeInitials(participant.name)
@@ -860,7 +922,7 @@ const buildPilotRanking = (users, predictionEntries, salesEntries, readEntries, 
   const activeRound = settings.round || defaultRoundConfig;
   const activeMatchResults = settings.matchResults || defaultMatchResults;
   const productFocusEnabled = isProductFocusEnabled(settings);
-  const participants = users.filter(user => user.profile !== "Administrador");
+  const participants = users.filter(user => user.profile !== "Administrador" && isUserEligibleForCampaign(user));
   const rows = participants.map(user => ({
     name: user.name,
     cpf: onlyDigits(user.cpf),
@@ -1027,7 +1089,7 @@ const getStoreSummaries = (rankingRows, predictionEntries = [], readEntries = []
   };
 }).sort((a, b) => b.points - a.points || b.predictionCount - a.predictionCount || a.store.localeCompare(b.store));
 const getPredictionEngagement = (users = [], predictionEntries = []) => {
-  const eligibleUsers = users.filter(user => user.profile !== "Administrador" && fixedStores.includes(user.store));
+  const eligibleUsers = users.filter(user => user.profile !== "Administrador" && fixedStores.includes(user.store) && isUserEligibleForCampaign(user));
   const predictionMap = predictionEntries.reduce((acc, entry) => {
     const cpf = onlyDigits(entry.cpf);
     if (!cpf) return acc;
@@ -2359,11 +2421,68 @@ function RankingPage({
     }, "PONTOS")));
   }))));
 }
+function StoreAbsenceSummary({
+  user,
+  users = []
+}) {
+  const storePeople = users.filter(person => person.store === user.store && person.profile !== "Administrador");
+  const activePeople = storePeople.filter(isUserEligibleForCampaign);
+  const pausedPeople = storePeople.filter(person => !isUserEligibleForCampaign(person));
+  const scheduledVacations = storePeople.filter(person => {
+    const participation = getParticipationState(person);
+    return participation.active && participation.label === "Férias programadas";
+  });
+  if (!pausedPeople.length && !scheduledVacations.length) return null;
+  return /*#__PURE__*/React.createElement("section", {
+    className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex items-start justify-between gap-3"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
+  }, "Base de aderência"), /*#__PURE__*/React.createElement("h3", {
+    className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
+  }, "Equipe ativa considerada"), /*#__PURE__*/React.createElement("p", {
+    className: "mt-1 text-xs text-slate-400"
+  }, activePeople.length, " ativo(s) entram na aderência • ", pausedPeople.length, " fora temporariamente")), /*#__PURE__*/React.createElement(Icon, {
+    name: "users",
+    className: "text-potiguar-700"
+  })), pausedPeople.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 space-y-2"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-amber-600"
+  }, "Fora da rodada agora"), pausedPeople.map(person => {
+    const participation = getParticipationState(person);
+    return /*#__PURE__*/React.createElement("div", {
+      key: person.cpf,
+      className: "flex items-center justify-between gap-3 rounded-xl bg-amber-50 p-3"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "min-w-0"
+    }, /*#__PURE__*/React.createElement("p", {
+      className: "truncate text-xs font-extrabold text-potiguar-950"
+    }, person.name), /*#__PURE__*/React.createElement("p", {
+      className: "truncate text-[10px] text-amber-700"
+    }, participation.label, person.absenceNote ? ` • ${person.absenceNote}` : "")), /*#__PURE__*/React.createElement("span", {
+      className: "shrink-0 rounded-lg bg-white px-2 py-1 text-[9px] font-extrabold text-amber-700"
+    }, "não conta"));
+  })), scheduledVacations.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "mt-5 space-y-2"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-slate-400"
+  }, "Férias programadas"), scheduledVacations.map(person => /*#__PURE__*/React.createElement("div", {
+    key: person.cpf,
+    className: "flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "truncate text-xs font-extrabold text-potiguar-950"
+  }, person.name), /*#__PURE__*/React.createElement("span", {
+    className: "shrink-0 text-[10px] font-bold text-slate-400"
+  }, person.vacationStart ? person.vacationStart.split("-").reverse().join("/") : "—", " até ", person.vacationEnd ? person.vacationEnd.split("-").reverse().join("/") : "—")))));
+}
 function StorePage({
   user,
   pilotRanking,
   totalSold,
-  settings
+  settings,
+  users = []
 }) {
   const productFocusEnabled = isProductFocusEnabled(settings);
   const storeFocus = getStoreFocus(user.store, settings);
@@ -2417,7 +2536,10 @@ function StorePage({
     value: localPoints,
     detail: `${localHits} acerto(s) em palpites`,
     accent: "white"
-  })), /*#__PURE__*/React.createElement("section", {
+  })), user.accessRole === "leadership" && /*#__PURE__*/React.createElement(StoreAbsenceSummary, {
+    user: user,
+    users: users
+  }), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center justify-between"
@@ -2514,7 +2636,10 @@ function StorePage({
     className: "font-display text-lg text-potiguar-900"
   }, p.points))))), /*#__PURE__*/React.createElement("div", {
     className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("section", {
+  }, user.accessRole === "leadership" && /*#__PURE__*/React.createElement(StoreAbsenceSummary, {
+    user: user,
+    users: users
+  }), /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center gap-4"
@@ -2578,13 +2703,18 @@ function AdminPage({
   const [storeFilter, setStoreFilter] = useState("Todas");
   const [users, setUsers] = useState(allUsers);
   const [showUserForm, setShowUserForm] = useState(false);
-  const [newUser, setNewUser] = useState({
+  const emptyUserForm = {
     name: "",
     cpf: "",
     job: "Vendedor",
     profile: "Vendedor",
-    store: PILOT_STORE
-  });
+    store: PILOT_STORE,
+    status: "Ativo",
+    vacationStart: "",
+    vacationEnd: "",
+    absenceNote: ""
+  };
+  const [newUser, setNewUser] = useState(emptyUserForm);
   const [editingCpf, setEditingCpf] = useState("");
   const [assignments, setAssignments] = useState(getProductAssignments(settings));
   const [productCatalog, setProductCatalog] = useState(getProductCatalog(settings));
@@ -2644,7 +2774,7 @@ function AdminPage({
     const matchesStore = storeFilter === "Todas" || user.store === storeFilter;
     return matchesSearch && matchesStore;
   });
-  const sellersForSale = users.filter(user => user.profile === "Vendedor" && user.store === newSale.store);
+  const sellersForSale = users.filter(user => user.profile === "Vendedor" && user.store === newSale.store && isUserEligibleForCampaign(user));
   const productsForSale = assignments.filter(item => item.store === newSale.store);
   const salesRanking = Object.values(salesEntries.reduce((acc, entry) => {
     if (!acc[entry.seller]) acc[entry.seller] = {
@@ -2677,7 +2807,11 @@ function AdminPage({
       cpf: user.cpf,
       job: user.profile === "Administrador" ? "Administrador" : user.profile === "Liderança" ? "Líder de loja" : "Vendedor",
       profile: user.profile,
-      store: user.store
+      store: user.store,
+      status: user.status || "Ativo",
+      vacationStart: user.vacationStart || "",
+      vacationEnd: user.vacationEnd || "",
+      absenceNote: user.absenceNote || ""
     });
     setShowUserForm(true);
     setModule("users");
@@ -2685,13 +2819,7 @@ function AdminPage({
   const cancelUserForm = () => {
     setShowUserForm(false);
     setEditingCpf("");
-    setNewUser({
-      name: "",
-      cpf: "",
-      job: "Vendedor",
-      profile: "Vendedor",
-      store: PILOT_STORE
-    });
+    setNewUser(emptyUserForm);
   };
   const createUser = async event => {
     event.preventDefault();
@@ -2710,8 +2838,7 @@ function AdminPage({
     }
     const created = normalizeCustomUser({
       ...newUser,
-      email: "",
-      status: "Ativo"
+      email: ""
     });
     const nextCustomUsers = [...(Array.isArray(customUsers) ? customUsers : []).filter(user => onlyDigits(user.cpf) !== (editingCpf || onlyDigits(created.cpf))), created];
     const ok = await onSaveSetting("customUsers", nextCustomUsers);
@@ -4371,7 +4498,7 @@ function AdminPage({
     size: 15
   }), " Novo usuário")))), showUserForm && /*#__PURE__*/React.createElement("form", {
     onSubmit: createUser,
-    className: "grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-5"
+    className: "grid gap-4 border-b border-slate-100 bg-potiguar-lime/5 p-5 sm:grid-cols-2 sm:p-6 xl:grid-cols-6"
   }, /*#__PURE__*/React.createElement("div", {
     className: "sm:col-span-2 xl:col-span-5"
   }, /*#__PURE__*/React.createElement("p", {
@@ -4424,7 +4551,52 @@ function AdminPage({
     className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
   }, [...fixedStores, "Rede Potiguar"].map(store => /*#__PURE__*/React.createElement("option", {
     key: store
-  }, store)))), /*#__PURE__*/React.createElement("div", {
+  }, store)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Status"), /*#__PURE__*/React.createElement("select", {
+    "aria-label": "Status de participação",
+    value: newUser.status,
+    onChange: e => setNewUser({
+      ...newUser,
+      status: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
+  }, /*#__PURE__*/React.createElement("option", null, "Ativo"), /*#__PURE__*/React.createElement("option", null, "Férias"), /*#__PURE__*/React.createElement("option", null, "Afastado"), /*#__PURE__*/React.createElement("option", null, "Inativo"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Início férias"), /*#__PURE__*/React.createElement("input", {
+    "aria-label": "Início das férias",
+    type: "date",
+    value: newUser.vacationStart || "",
+    onChange: e => setNewUser({
+      ...newUser,
+      vacationStart: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Fim férias"), /*#__PURE__*/React.createElement("input", {
+    "aria-label": "Fim das férias",
+    type: "date",
+    value: newUser.vacationEnd || "",
+    onChange: e => setNewUser({
+      ...newUser,
+      vacationEnd: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("label", {
+    className: "sm:col-span-2 xl:col-span-3"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Observação"), /*#__PURE__*/React.createElement("input", {
+    "aria-label": "Observação de ausência",
+    value: newUser.absenceNote || "",
+    onChange: e => setNewUser({
+      ...newUser,
+      absenceNote: e.target.value
+    }),
+    placeholder: "Ex.: férias coletivas, licença, retorno previsto...",
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"
+  })), /*#__PURE__*/React.createElement("div", {
     className: "flex items-end gap-2"
   }, /*#__PURE__*/React.createElement("button", {
     type: "button",
@@ -4453,51 +4625,56 @@ function AdminPage({
     className: "px-6 py-3 text-right"
   }, "Ações"))), /*#__PURE__*/React.createElement("tbody", {
     className: "divide-y divide-slate-100"
-  }, visibleUsers.map(user => /*#__PURE__*/React.createElement("tr", {
-    key: user.cpf,
-    className: "hover:bg-potiguar-lime/5"
-  }, /*#__PURE__*/React.createElement("td", {
-    className: "px-6 py-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement(Avatar, {
-    initials: user.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
-    photoUrl: profilePhotos[onlyDigits(user.cpf)]
-  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    className: "text-xs font-extrabold text-potiguar-950"
-  }, user.name), /*#__PURE__*/React.createElement("p", {
-    className: "mt-0.5 text-[10px] font-semibold text-slate-400"
-  }, "CPF ", user.cpf)))), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4 text-xs font-semibold text-slate-500"
-  }, user.job), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`
-  }, user.profile)), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4 text-xs font-bold text-potiguar-800"
-  }, user.store), /*#__PURE__*/React.createElement("td", {
-    className: "px-4 py-4"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "h-1.5 w-1.5 rounded-full bg-emerald-500"
-  }), user.status)), /*#__PURE__*/React.createElement("td", {
-    className: "px-6 py-4 text-right"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex justify-end gap-2"
-  }, user.profile !== "Administrador" && /*#__PURE__*/React.createElement("button", {
-    onClick: () => onAccessAs(user),
-    className: "rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950"
-  }, "Acessar como"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => resetUserPassword(user),
-    className: "rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700"
-  }, "Resetar senha"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => startEditUser(user),
-    className: "rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500"
-  }, "Editar"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => deleteUser(user),
-    className: "rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red"
-  }, "Excluir"))))))), visibleUsers.length === 0 && /*#__PURE__*/React.createElement("div", {
+  }, visibleUsers.map(user => {
+    const participation = getParticipationState(user);
+    return /*#__PURE__*/React.createElement("tr", {
+      key: user.cpf,
+      className: "hover:bg-potiguar-lime/5"
+    }, /*#__PURE__*/React.createElement("td", {
+      className: "px-6 py-4"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex items-center gap-3"
+    }, /*#__PURE__*/React.createElement(Avatar, {
+      initials: user.name.split(" ").map(x => x[0]).slice(0, 2).join(""),
+      photoUrl: profilePhotos[onlyDigits(user.cpf)]
+    }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+      className: "text-xs font-extrabold text-potiguar-950"
+    }, user.name), /*#__PURE__*/React.createElement("p", {
+      className: "mt-0.5 text-[10px] font-semibold text-slate-400"
+    }, "CPF ", user.cpf)))), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4 text-xs font-semibold text-slate-500"
+    }, user.job), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`
+    }, user.profile)), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4 text-xs font-bold text-potiguar-800"
+    }, user.store), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-4"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `inline-flex items-center gap-1.5 text-[10px] font-bold ${participation.active ? "text-emerald-600" : "text-amber-600"}`
+    }, /*#__PURE__*/React.createElement("span", {
+      className: `h-1.5 w-1.5 rounded-full ${participation.active ? "bg-emerald-500" : "bg-amber-500"}`
+    }), participation.label), (user.vacationStart || user.vacationEnd) && /*#__PURE__*/React.createElement("p", {
+      className: "mt-1 text-[9px] text-slate-400"
+    }, user.vacationStart ? user.vacationStart.split("-").reverse().join("/") : "—", " até ", user.vacationEnd ? user.vacationEnd.split("-").reverse().join("/") : "—")), /*#__PURE__*/React.createElement("td", {
+      className: "px-6 py-4 text-right"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "flex justify-end gap-2"
+    }, user.profile !== "Administrador" && /*#__PURE__*/React.createElement("button", {
+      onClick: () => onAccessAs(user),
+      className: "rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950"
+    }, "Acessar como"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => resetUserPassword(user),
+      className: "rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700"
+    }, "Resetar senha"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => startEditUser(user),
+      className: "rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500"
+    }, "Editar"), /*#__PURE__*/React.createElement("button", {
+      onClick: () => deleteUser(user),
+      className: "rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red"
+    }, "Excluir"))));
+  }))), visibleUsers.length === 0 && /*#__PURE__*/React.createElement("div", {
     className: "p-10 text-center text-sm font-semibold text-slate-400"
   }, "Nenhum usuário encontrado."))), formModule && /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
@@ -4924,6 +5101,13 @@ function App() {
     setAcknowledgedAccessKey("");
   };
   const login = async (nextUser, password) => {
+    const participation = nextUser.participationState || getParticipationState(nextUser);
+    if (nextUser.accessRole !== "admin" && !participation.active) {
+      return {
+        ok: false,
+        error: participation.reason || "Seu acesso está pausado temporariamente."
+      };
+    }
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
@@ -5101,7 +5285,8 @@ function App() {
     user: effectiveUser,
     pilotRanking: pilotRanking,
     totalSold: effectiveUserStoreSold,
-    settings: appSettings
+    settings: appSettings,
+    users: allRegisteredUsers
   }), activePage === "admin" && /*#__PURE__*/React.createElement(AdminPage, {
     adminUser: effectiveUser,
     users: allRegisteredUsers,
