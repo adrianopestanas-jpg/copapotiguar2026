@@ -3099,6 +3099,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
               <tbody className="divide-y divide-slate-100">
                 {visibleUsers.map(user => {
                   const participation = getParticipationState(user);
+                  const canAccessAsTarget = isMasterAdmin && onlyDigits(user.cpf) !== onlyDigits(adminUser?.cpf) && (user.profile !== "Administrador" || ["marketing", "rh"].includes(getAdminRole(user)));
                   return (
                   <tr key={user.cpf} className="hover:bg-potiguar-lime/5">
                     <td className="px-6 py-4"><div className="flex items-center gap-3"><Avatar initials={user.name.split(" ").map(x => x[0]).slice(0,2).join("")} photoUrl={profilePhotos[onlyDigits(user.cpf)]}/><div><p className="text-xs font-extrabold text-potiguar-950">{user.name}</p><p className="mt-0.5 text-[10px] font-semibold text-slate-400">CPF {user.cpf}</p></div></div></td>
@@ -3108,7 +3109,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                     <td className="px-4 py-4"><span className={`inline-flex items-center gap-1.5 text-[10px] font-bold ${participation.active ? "text-emerald-600" : "text-amber-600"}`}><span className={`h-1.5 w-1.5 rounded-full ${participation.active ? "bg-emerald-500" : "bg-amber-500"}`}></span>{participation.label}</span>{(user.vacationStart || user.vacationEnd) && <p className="mt-1 text-[9px] text-slate-400">{user.vacationStart ? user.vacationStart.split("-").reverse().join("/") : "—"} até {user.vacationEnd ? user.vacationEnd.split("-").reverse().join("/") : "—"}</p>}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        {isMasterAdmin && user.profile !== "Administrador" && <button onClick={() => onAccessAs(user)} className="rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950">Acessar como</button>}
+                        {canAccessAsTarget && <button onClick={() => onAccessAs(user)} className="rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950">Acessar como</button>}
                         <button onClick={() => resetUserPassword(user)} className="rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700">Resetar senha</button>
                         <button onClick={() => startEditUser(user)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button>
                         {isMasterAdmin && <button onClick={() => deleteUser(user)} className="rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red">Excluir</button>}
@@ -3523,16 +3524,17 @@ function App() {
 
   const accessAsUser = (targetUser) => {
     const target = dynamicDemoUsers[onlyDigits(targetUser.cpf)];
+    const loggedAdminRole = getAdminRole(loggedUser);
     if (!target) {
       setToast("Usuário não encontrado para simulação.");
       return;
     }
-    if (target.accessRole === "admin") {
-      setToast("Acesso como administrador não precisa de simulação.");
+    if (target.accessRole === "admin" && (loggedAdminRole !== "master" || !["marketing", "rh"].includes(getAdminRole(target)))) {
+      setToast("Admin Master só pode simular perfis administrativos de Marketing ou RH.");
       return;
     }
     setImpersonatedCpf(onlyDigits(target.cpf));
-    setPage("home");
+    setPage(target.accessRole === "admin" ? "admin" : "home");
     setAcknowledgedRoundId("");
     setAcknowledgedAccessKey("");
     setToast(`Visualizando como ${target.name}.`);

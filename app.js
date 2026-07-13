@@ -4699,6 +4699,7 @@ function AdminPage({
     className: "divide-y divide-slate-100"
   }, visibleUsers.map(user => {
     const participation = getParticipationState(user);
+    const canAccessAsTarget = isMasterAdmin && onlyDigits(user.cpf) !== onlyDigits(adminUser?.cpf) && (user.profile !== "Administrador" || ["marketing", "rh"].includes(getAdminRole(user)));
     return /*#__PURE__*/React.createElement("tr", {
       key: user.cpf,
       className: "hover:bg-potiguar-lime/5"
@@ -4733,7 +4734,7 @@ function AdminPage({
       className: "px-6 py-4 text-right"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex justify-end gap-2"
-    }, isMasterAdmin && user.profile !== "Administrador" && /*#__PURE__*/React.createElement("button", {
+    }, canAccessAsTarget && /*#__PURE__*/React.createElement("button", {
       onClick: () => onAccessAs(user),
       className: "rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950"
     }, "Acessar como"), /*#__PURE__*/React.createElement("button", {
@@ -5253,16 +5254,17 @@ function App() {
   };
   const accessAsUser = targetUser => {
     const target = dynamicDemoUsers[onlyDigits(targetUser.cpf)];
+    const loggedAdminRole = getAdminRole(loggedUser);
     if (!target) {
       setToast("Usuário não encontrado para simulação.");
       return;
     }
-    if (target.accessRole === "admin") {
-      setToast("Acesso como administrador não precisa de simulação.");
+    if (target.accessRole === "admin" && (loggedAdminRole !== "master" || !["marketing", "rh"].includes(getAdminRole(target)))) {
+      setToast("Admin Master só pode simular perfis administrativos de Marketing ou RH.");
       return;
     }
     setImpersonatedCpf(onlyDigits(target.cpf));
-    setPage("home");
+    setPage(target.accessRole === "admin" ? "admin" : "home");
     setAcknowledgedRoundId("");
     setAcknowledgedAccessKey("");
     setToast(`Visualizando como ${target.name}.`);
