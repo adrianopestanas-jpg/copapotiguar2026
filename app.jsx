@@ -155,9 +155,33 @@ const getParticipationState = (user, now = new Date()) => {
 
 const isUserEligibleForCampaign = user => getParticipationState(user).active;
 
+const ADMIN_ROLE_LABELS = {
+  master: "Admin Master",
+  marketing: "Marketing",
+  rh: "RH",
+};
+
+const getAdminRole = user => {
+  if (!user || (user.profile !== "Administrador" && user.accessRole !== "admin")) return "";
+  const cpf = onlyDigits(user.cpf);
+  if (["03823375300", "02771693305"].includes(cpf)) return "master";
+  if (cpf === "60933552335") return "marketing";
+  if (cpf === "83845488387") return "rh";
+  return user.adminRole || "master";
+};
+
+const ADMIN_MODULES = {
+  master: ["dashboard", "engagement", "announcements", "products", "goals", "predictions", "sales", "users", "awards", "rankings", "rounds"],
+  marketing: ["dashboard", "engagement", "products", "goals", "sales", "awards", "rankings"],
+  rh: ["dashboard", "engagement", "announcements", "users", "rankings"],
+};
+
+const canAdminAccessModule = (adminUser, module) => (ADMIN_MODULES[getAdminRole(adminUser)] || ADMIN_MODULES.master).includes(module);
+const protectedAdminCpfs = new Set(["03823375300", "02771693305", "60933552335", "83845488387"]);
+
 const participantRows = (typeof window !== "undefined" && window.COPA_PARTICIPANTS) || [];
 
-const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
+const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile, adminRole]) => {
     const profile = resolveProfile(job, explicitProfile);
     return {
       name: toTitleCase(name),
@@ -171,6 +195,7 @@ const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
       vacationStart: "",
       vacationEnd: "",
       absenceNote: "",
+      adminRole: profile === "Administrador" ? (adminRole || getAdminRole({ cpf, profile: "Administrador" })) : "",
     };
   };
 
@@ -188,6 +213,7 @@ const normalizeCustomUser = user => {
     vacationStart: user.vacationStart || "",
     vacationEnd: user.vacationEnd || "",
     absenceNote: user.absenceNote || "",
+    adminRole: profile === "Administrador" ? (user.adminRole || getAdminRole({ cpf: user.cpf, profile: "Administrador" })) : "",
   };
 };
 
@@ -202,6 +228,10 @@ const mergeUsers = (baseUsers, customUsers = [], deletedUsers = []) => {
     const cpf = onlyDigits(user.cpf);
     if (cpf.length === 11 && !deletedCpfs.has(cpf)) byCpf[cpf] = user;
   });
+  baseUsers.forEach(user => {
+    const cpf = onlyDigits(user.cpf);
+    if (protectedAdminCpfs.has(cpf)) byCpf[cpf] = user;
+  });
   return Object.values(byCpf);
 };
 
@@ -215,6 +245,7 @@ const buildDemoUsers = users => users.reduce((acc, participant) => {
     accessRole: participant.profile === "Administrador" ? "admin" : participant.profile === "Liderança" ? "leadership" : "seller",
     store: participant.store,
     cpf: participant.cpf,
+    adminRole: participant.adminRole || getAdminRole(participant),
     status: participant.status || "Ativo",
     participationState: getParticipationState(participant),
     vacationStart: participant.vacationStart || "",
@@ -1961,7 +1992,10 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   const [storeFilter, setStoreFilter] = useState("Todas");
   const [users, setUsers] = useState(allUsers);
   const [showUserForm, setShowUserForm] = useState(false);
-  const emptyUserForm = { name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE, status: "Ativo", vacationStart: "", vacationEnd: "", absenceNote: "" };
+  const adminRole = getAdminRole(adminUser);
+  const isMasterAdmin = adminRole === "master";
+  const canManageUsers = canAdminAccessModule(adminUser, "users");
+  const emptyUserForm = { name: "", cpf: "", job: "Vendedor", profile: "Vendedor", store: PILOT_STORE, status: "Ativo", vacationStart: "", vacationEnd: "", absenceNote: "", adminRole: "master" };
   const [newUser, setNewUser] = useState(emptyUserForm);
   const [editingCpf, setEditingCpf] = useState("");
   const [assignments, setAssignments] = useState(getProductAssignments(settings));
@@ -2004,7 +2038,11 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     ["ranking", "Rankings", "Acompanhar classificação", "rankings"],
     ["chart", "Dashboards", "Visualizar indicadores", "dashboard"],
     ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"],
-  ];
+  ].filter(([, , , value]) => canAdminAccessModule(adminUser, value));
+
+  useEffect(() => {
+    if (!canAdminAccessModule(adminUser, module)) setModule(actions[0]?.[3] || "dashboard");
+  }, [adminRole, module]);
 
   const formModule = null;
   const visibleUsers = users.filter(user => {
@@ -2040,6 +2078,10 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     .replace(/\.(\d{3})(\d)/, ".$1-$2");
 
   const startEditUser = user => {
+    if (user.profile === "Administrador" && !isMasterAdmin) {
+      setToast("Somente Admin Master pode editar administradores.");
+      return;
+    }
     const cpf = onlyDigits(user.cpf);
     setEditingCpf(cpf);
     setNewUser({
@@ -2052,6 +2094,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       vacationStart: user.vacationStart || "",
       vacationEnd: user.vacationEnd || "",
       absenceNote: user.absenceNote || "",
+      adminRole: user.adminRole || getAdminRole(user) || "master",
     });
     setShowUserForm(true);
     setModule("users");
@@ -2076,6 +2119,10 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     }
     if (editingCpf && cpfDigits !== editingCpf && users.some(user => onlyDigits(user.cpf) === cpfDigits)) {
       setToast("Já existe outro colaborador cadastrado com este CPF.");
+      return;
+    }
+    if (!isMasterAdmin && newUser.profile === "Administrador") {
+      setToast("Somente Admin Master pode cadastrar ou editar administradores.");
       return;
     }
     const created = normalizeCustomUser({ ...newUser, email: "" });
@@ -2118,6 +2165,10 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   };
 
   const resetUserPassword = async (targetUser) => {
+    if (targetUser.profile === "Administrador" && !isMasterAdmin) {
+      setToast("Somente Admin Master pode resetar senha de administradores.");
+      return;
+    }
     if (!window.confirm(`Redefinir a senha de ${targetUser.name} para o CPF do usuário?`)) return;
     try {
       const response = await fetch("/api/admin/reset-password", {
@@ -2368,7 +2419,7 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <div><p className="text-sm font-semibold text-slate-400">Copa Potiguar • acesso administrativo</p><h2 className="font-display text-3xl font-extrabold text-potiguar-950">Central de administração</h2></div>
+        <div><p className="text-sm font-semibold text-slate-400">Copa Potiguar • acesso administrativo</p><h2 className="font-display text-3xl font-extrabold text-potiguar-950">Central de administração</h2><span className="mt-2 inline-flex rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-900">Perfil: {ADMIN_ROLE_LABELS[adminRole] || "Admin"}</span></div>
         <div className="flex gap-2">
           <button onClick={() => { onRefreshData(); setToast("Dados atualizados."); }} className="flex items-center justify-center gap-2 rounded-xl border border-potiguar-900/10 bg-white px-4 py-3 text-xs font-extrabold text-potiguar-900"><Icon name="clock" size={17}/> Atualizar</button>
           <button onClick={exportReport} className="flex items-center justify-center gap-2 rounded-xl bg-potiguar-900 px-4 py-3 text-xs font-extrabold text-white"><Icon name="chart" size={17}/> Exportar relatório</button>
@@ -3030,8 +3081,9 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
               </div>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Nome completo</span><input aria-label="Nome do novo colaborador" value={newUser.name} onChange={e => setNewUser({...newUser,name:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">CPF</span><input aria-label="CPF do novo colaborador" inputMode="numeric" value={newUser.cpf} onChange={e => setNewUser({...newUser,cpf:formatCpf(e.target.value)})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
-              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Cargo</span><select aria-label="Cargo do novo colaborador" value={newUser.job} onChange={e => {const job=e.target.value; setNewUser({...newUser,job,profile:job==="Administrador"?"Administrador":job==="Líder de loja"?"Liderança":"Vendedor",store:job==="Administrador"?"Rede Potiguar":newUser.store});}} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option>Vendedor</option><option>Líder de loja</option><option>Administrador</option></select></label>
+              <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Cargo</span><select aria-label="Cargo do novo colaborador" value={newUser.job} onChange={e => {const job=e.target.value; setNewUser({...newUser,job,profile:job==="Administrador"?"Administrador":job==="Líder de loja"?"Liderança":"Vendedor",store:job==="Administrador"?"Rede Potiguar":newUser.store,adminRole:job==="Administrador"?(newUser.adminRole || "master"):""});}} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option>Vendedor</option><option>Líder de loja</option>{isMasterAdmin && <option>Administrador</option>}</select></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Loja</span><select aria-label="Loja do novo colaborador" value={newUser.store} onChange={e => setNewUser({...newUser,store:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs">{[...fixedStores, "Rede Potiguar"].map(store=><option key={store}>{store}</option>)}</select></label>
+              {newUser.profile === "Administrador" && <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Perfil administrativo</span><select aria-label="Perfil administrativo" value={newUser.adminRole || "master"} onChange={e => setNewUser({...newUser,adminRole:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option value="master">Admin Master</option><option value="marketing">Marketing</option><option value="rh">RH</option></select></label>}
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Status</span><select aria-label="Status de participação" value={newUser.status} onChange={e => setNewUser({...newUser,status:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"><option>Ativo</option><option>Férias</option><option>Afastado</option><option>Inativo</option></select></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Início férias</span><input aria-label="Início das férias" type="date" value={newUser.vacationStart || ""} onChange={e => setNewUser({...newUser,vacationStart:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
               <label><span className="mb-2 block text-xs font-extrabold text-potiguar-950">Fim férias</span><input aria-label="Fim das férias" type="date" value={newUser.vacationEnd || ""} onChange={e => setNewUser({...newUser,vacationEnd:e.target.value})} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs outline-none focus:border-potiguar-500"/></label>
@@ -3051,15 +3103,15 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
                   <tr key={user.cpf} className="hover:bg-potiguar-lime/5">
                     <td className="px-6 py-4"><div className="flex items-center gap-3"><Avatar initials={user.name.split(" ").map(x => x[0]).slice(0,2).join("")} photoUrl={profilePhotos[onlyDigits(user.cpf)]}/><div><p className="text-xs font-extrabold text-potiguar-950">{user.name}</p><p className="mt-0.5 text-[10px] font-semibold text-slate-400">CPF {user.cpf}</p></div></div></td>
                     <td className="px-4 py-4 text-xs font-semibold text-slate-500">{user.job}</td>
-                    <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{user.profile}</span></td>
+                    <td className="px-4 py-4"><span className={`rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`}>{user.profile === "Administrador" ? ADMIN_ROLE_LABELS[getAdminRole(user)] || "Admin" : user.profile}</span></td>
                     <td className="px-4 py-4 text-xs font-bold text-potiguar-800">{user.store}</td>
                     <td className="px-4 py-4"><span className={`inline-flex items-center gap-1.5 text-[10px] font-bold ${participation.active ? "text-emerald-600" : "text-amber-600"}`}><span className={`h-1.5 w-1.5 rounded-full ${participation.active ? "bg-emerald-500" : "bg-amber-500"}`}></span>{participation.label}</span>{(user.vacationStart || user.vacationEnd) && <p className="mt-1 text-[9px] text-slate-400">{user.vacationStart ? user.vacationStart.split("-").reverse().join("/") : "—"} até {user.vacationEnd ? user.vacationEnd.split("-").reverse().join("/") : "—"}</p>}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        {user.profile !== "Administrador" && <button onClick={() => onAccessAs(user)} className="rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950">Acessar como</button>}
+                        {isMasterAdmin && user.profile !== "Administrador" && <button onClick={() => onAccessAs(user)} className="rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950">Acessar como</button>}
                         <button onClick={() => resetUserPassword(user)} className="rounded-lg bg-amber-50 px-3 py-2 text-[10px] font-extrabold text-amber-700">Resetar senha</button>
                         <button onClick={() => startEditUser(user)} className="rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500">Editar</button>
-                        <button onClick={() => deleteUser(user)} className="rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red">Excluir</button>
+                        {isMasterAdmin && <button onClick={() => deleteUser(user)} className="rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red">Excluir</button>}
                       </div>
                     </td>
                   </tr>

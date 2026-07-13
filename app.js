@@ -233,8 +233,28 @@ const getParticipationState = (user, now = new Date()) => {
   };
 };
 const isUserEligibleForCampaign = user => getParticipationState(user).active;
+const ADMIN_ROLE_LABELS = {
+  master: "Admin Master",
+  marketing: "Marketing",
+  rh: "RH"
+};
+const getAdminRole = user => {
+  if (!user || user.profile !== "Administrador" && user.accessRole !== "admin") return "";
+  const cpf = onlyDigits(user.cpf);
+  if (["03823375300", "02771693305"].includes(cpf)) return "master";
+  if (cpf === "60933552335") return "marketing";
+  if (cpf === "83845488387") return "rh";
+  return user.adminRole || "master";
+};
+const ADMIN_MODULES = {
+  master: ["dashboard", "engagement", "announcements", "products", "goals", "predictions", "sales", "users", "awards", "rankings", "rounds"],
+  marketing: ["dashboard", "engagement", "products", "goals", "sales", "awards", "rankings"],
+  rh: ["dashboard", "engagement", "announcements", "users", "rankings"]
+};
+const canAdminAccessModule = (adminUser, module) => (ADMIN_MODULES[getAdminRole(adminUser)] || ADMIN_MODULES.master).includes(module);
+const protectedAdminCpfs = new Set(["03823375300", "02771693305", "60933552335", "83845488387"]);
 const participantRows = typeof window !== "undefined" && window.COPA_PARTICIPANTS || [];
-const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
+const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile, adminRole]) => {
   const profile = resolveProfile(job, explicitProfile);
   return {
     name: toTitleCase(name),
@@ -247,7 +267,11 @@ const normalizeParticipantUser = ([name, cpf, job, store, explicitProfile]) => {
     status: "Ativo",
     vacationStart: "",
     vacationEnd: "",
-    absenceNote: ""
+    absenceNote: "",
+    adminRole: profile === "Administrador" ? adminRole || getAdminRole({
+      cpf,
+      profile: "Administrador"
+    }) : ""
   };
 };
 const normalizeCustomUser = user => {
@@ -263,7 +287,11 @@ const normalizeCustomUser = user => {
     status: user.status || "Ativo",
     vacationStart: user.vacationStart || "",
     vacationEnd: user.vacationEnd || "",
-    absenceNote: user.absenceNote || ""
+    absenceNote: user.absenceNote || "",
+    adminRole: profile === "Administrador" ? user.adminRole || getAdminRole({
+      cpf: user.cpf,
+      profile: "Administrador"
+    }) : ""
   };
 };
 const mergeUsers = (baseUsers, customUsers = [], deletedUsers = []) => {
@@ -277,6 +305,10 @@ const mergeUsers = (baseUsers, customUsers = [], deletedUsers = []) => {
     const cpf = onlyDigits(user.cpf);
     if (cpf.length === 11 && !deletedCpfs.has(cpf)) byCpf[cpf] = user;
   });
+  baseUsers.forEach(user => {
+    const cpf = onlyDigits(user.cpf);
+    if (protectedAdminCpfs.has(cpf)) byCpf[cpf] = user;
+  });
   return Object.values(byCpf);
 };
 const buildDemoUsers = users => users.reduce((acc, participant) => {
@@ -289,6 +321,7 @@ const buildDemoUsers = users => users.reduce((acc, participant) => {
     accessRole: participant.profile === "Administrador" ? "admin" : participant.profile === "Liderança" ? "leadership" : "seller",
     store: participant.store,
     cpf: participant.cpf,
+    adminRole: participant.adminRole || getAdminRole(participant),
     status: participant.status || "Ativo",
     participationState: getParticipationState(participant),
     vacationStart: participant.vacationStart || "",
@@ -2703,6 +2736,9 @@ function AdminPage({
   const [storeFilter, setStoreFilter] = useState("Todas");
   const [users, setUsers] = useState(allUsers);
   const [showUserForm, setShowUserForm] = useState(false);
+  const adminRole = getAdminRole(adminUser);
+  const isMasterAdmin = adminRole === "master";
+  const canManageUsers = canAdminAccessModule(adminUser, "users");
   const emptyUserForm = {
     name: "",
     cpf: "",
@@ -2712,7 +2748,8 @@ function AdminPage({
     status: "Ativo",
     vacationStart: "",
     vacationEnd: "",
-    absenceNote: ""
+    absenceNote: "",
+    adminRole: "master"
   };
   const [newUser, setNewUser] = useState(emptyUserForm);
   const [editingCpf, setEditingCpf] = useState("");
@@ -2766,7 +2803,10 @@ function AdminPage({
       awayScore: String(result.awayScore)
     });
   }, [allUsers, settings, currentAdminGame.id]);
-  const actions = [["bolt", "Aderência", "Quem participou e quem falta", "engagement"], ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Desafios", "Cadastrar desafio da semana", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["chart", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]];
+  const actions = [["bolt", "Aderência", "Quem participou e quem falta", "engagement"], ["megaphone", "Comunicados", "Criar textos e inserir vídeos", "announcements"], ["fire", "Desafios", "Cadastrar desafio da semana", "products"], ["target", "Metas", "Definir objetivos por loja", "goals"], ["ball", "Palpites", "Visualizar palpites enviados", "predictions"], ["chart", "Vendas", "Lançar quantidade por vendedor", "sales"], ["users", "Colaboradores", "Cadastrar acessos elegíveis", "users"], ["trophy", "Premiações", "Administrar reconhecimentos", "awards"], ["ranking", "Rankings", "Acompanhar classificação", "rankings"], ["chart", "Dashboards", "Visualizar indicadores", "dashboard"], ["shield", "Rodadas", "Controlar e encerrar rodadas", "rounds"]].filter(([,,, value]) => canAdminAccessModule(adminUser, value));
+  useEffect(() => {
+    if (!canAdminAccessModule(adminUser, module)) setModule(actions[0]?.[3] || "dashboard");
+  }, [adminRole, module]);
   const formModule = null;
   const visibleUsers = users.filter(user => {
     const search = userSearch.trim().toLowerCase();
@@ -2800,6 +2840,10 @@ function AdminPage({
   const predictionEngagement = getPredictionEngagement(users, predictionEntries);
   const formatCpf = value => value.replace(/\D/g, "").slice(0, 11).replace(/^(\d{3})(\d)/, "$1.$2").replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3").replace(/\.(\d{3})(\d)/, ".$1-$2");
   const startEditUser = user => {
+    if (user.profile === "Administrador" && !isMasterAdmin) {
+      setToast("Somente Admin Master pode editar administradores.");
+      return;
+    }
     const cpf = onlyDigits(user.cpf);
     setEditingCpf(cpf);
     setNewUser({
@@ -2811,7 +2855,8 @@ function AdminPage({
       status: user.status || "Ativo",
       vacationStart: user.vacationStart || "",
       vacationEnd: user.vacationEnd || "",
-      absenceNote: user.absenceNote || ""
+      absenceNote: user.absenceNote || "",
+      adminRole: user.adminRole || getAdminRole(user) || "master"
     });
     setShowUserForm(true);
     setModule("users");
@@ -2834,6 +2879,10 @@ function AdminPage({
     }
     if (editingCpf && cpfDigits !== editingCpf && users.some(user => onlyDigits(user.cpf) === cpfDigits)) {
       setToast("Já existe outro colaborador cadastrado com este CPF.");
+      return;
+    }
+    if (!isMasterAdmin && newUser.profile === "Administrador") {
+      setToast("Somente Admin Master pode cadastrar ou editar administradores.");
       return;
     }
     const created = normalizeCustomUser({
@@ -2874,6 +2923,10 @@ function AdminPage({
     setToast(`${targetUser.name} foi removido da campanha.`);
   };
   const resetUserPassword = async targetUser => {
+    if (targetUser.profile === "Administrador" && !isMasterAdmin) {
+      setToast("Somente Admin Master pode resetar senha de administradores.");
+      return;
+    }
     if (!window.confirm(`Redefinir a senha de ${targetUser.name} para o CPF do usuário?`)) return;
     try {
       const response = await fetch("/api/admin/reset-password", {
@@ -3125,7 +3178,9 @@ function AdminPage({
     className: "text-sm font-semibold text-slate-400"
   }, "Copa Potiguar • acesso administrativo"), /*#__PURE__*/React.createElement("h2", {
     className: "font-display text-3xl font-extrabold text-potiguar-950"
-  }, "Central de administração")), /*#__PURE__*/React.createElement("div", {
+  }, "Central de administração"), /*#__PURE__*/React.createElement("span", {
+    className: "mt-2 inline-flex rounded-full bg-potiguar-lime/25 px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider text-potiguar-900"
+  }, "Perfil: ", ADMIN_ROLE_LABELS[adminRole] || "Admin")), /*#__PURE__*/React.createElement("div", {
     className: "flex gap-2"
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => {
@@ -4535,11 +4590,12 @@ function AdminPage({
         ...newUser,
         job,
         profile: job === "Administrador" ? "Administrador" : job === "Líder de loja" ? "Liderança" : "Vendedor",
-        store: job === "Administrador" ? "Rede Potiguar" : newUser.store
+        store: job === "Administrador" ? "Rede Potiguar" : newUser.store,
+        adminRole: job === "Administrador" ? newUser.adminRole || "master" : ""
       });
     },
     className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
-  }, /*#__PURE__*/React.createElement("option", null, "Vendedor"), /*#__PURE__*/React.createElement("option", null, "Líder de loja"), /*#__PURE__*/React.createElement("option", null, "Administrador"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("option", null, "Vendedor"), /*#__PURE__*/React.createElement("option", null, "Líder de loja"), isMasterAdmin && /*#__PURE__*/React.createElement("option", null, "Administrador"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Loja"), /*#__PURE__*/React.createElement("select", {
     "aria-label": "Loja do novo colaborador",
@@ -4551,7 +4607,23 @@ function AdminPage({
     className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
   }, [...fixedStores, "Rede Potiguar"].map(store => /*#__PURE__*/React.createElement("option", {
     key: store
-  }, store)))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+  }, store)))), newUser.profile === "Administrador" && /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
+    className: "mb-2 block text-xs font-extrabold text-potiguar-950"
+  }, "Perfil administrativo"), /*#__PURE__*/React.createElement("select", {
+    "aria-label": "Perfil administrativo",
+    value: newUser.adminRole || "master",
+    onChange: e => setNewUser({
+      ...newUser,
+      adminRole: e.target.value
+    }),
+    className: "w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-xs"
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "master"
+  }, "Admin Master"), /*#__PURE__*/React.createElement("option", {
+    value: "marketing"
+  }, "Marketing"), /*#__PURE__*/React.createElement("option", {
+    value: "rh"
+  }, "RH"))), /*#__PURE__*/React.createElement("label", null, /*#__PURE__*/React.createElement("span", {
     className: "mb-2 block text-xs font-extrabold text-potiguar-950"
   }, "Status"), /*#__PURE__*/React.createElement("select", {
     "aria-label": "Status de participação",
@@ -4647,7 +4719,7 @@ function AdminPage({
       className: "px-4 py-4"
     }, /*#__PURE__*/React.createElement("span", {
       className: `rounded-full px-2.5 py-1 text-[9px] font-extrabold ${user.profile === "Administrador" ? "bg-purple-50 text-purple-700" : user.profile === "Liderança" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"}`
-    }, user.profile)), /*#__PURE__*/React.createElement("td", {
+    }, user.profile === "Administrador" ? ADMIN_ROLE_LABELS[getAdminRole(user)] || "Admin" : user.profile)), /*#__PURE__*/React.createElement("td", {
       className: "px-4 py-4 text-xs font-bold text-potiguar-800"
     }, user.store), /*#__PURE__*/React.createElement("td", {
       className: "px-4 py-4"
@@ -4661,7 +4733,7 @@ function AdminPage({
       className: "px-6 py-4 text-right"
     }, /*#__PURE__*/React.createElement("div", {
       className: "flex justify-end gap-2"
-    }, user.profile !== "Administrador" && /*#__PURE__*/React.createElement("button", {
+    }, isMasterAdmin && user.profile !== "Administrador" && /*#__PURE__*/React.createElement("button", {
       onClick: () => onAccessAs(user),
       className: "rounded-lg bg-potiguar-lime px-3 py-2 text-[10px] font-extrabold text-potiguar-950"
     }, "Acessar como"), /*#__PURE__*/React.createElement("button", {
@@ -4670,7 +4742,7 @@ function AdminPage({
     }, "Resetar senha"), /*#__PURE__*/React.createElement("button", {
       onClick: () => startEditUser(user),
       className: "rounded-lg bg-slate-100 px-3 py-2 text-[10px] font-extrabold text-slate-500"
-    }, "Editar"), /*#__PURE__*/React.createElement("button", {
+    }, "Editar"), isMasterAdmin && /*#__PURE__*/React.createElement("button", {
       onClick: () => deleteUser(user),
       className: "rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red"
     }, "Excluir"))));

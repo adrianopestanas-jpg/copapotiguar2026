@@ -215,7 +215,8 @@ window.COPA_PARTICIPANTS = [
   ["DIELIO EVERTON BARROS", "065.061.643-01", "Subgerente de loja", "OLHO D'ÁGUA"],
   ["VANUCIA VIANA DO LAGO", "038.884.093-57", "Subgerente de loja", "SANTA INES"],
   ["FERNANDO AMARAL TAVARES", "601.869.693-25", "Subgerente de loja", "MAIOBAO"],
-  ["Jessica", "609.335.523-35", "Gerente de Marketing", "IMPERATRIZ", "Liderança"],
-  ["Adriano Pestana", "038.233.753-00", "Diretor Comercial", "REDE POTIGUAR", "Administrador"],
-  ["Marcos Fernando", "027.716.933-05", "Gerente de TI", "REDE POTIGUAR", "Administrador"],
+  ["Jessica", "609.335.523-35", "Gerente de Marketing", "REDE POTIGUAR", "Administrador", "marketing"],
+  ["Conceição de Maria Guimarães Fortaleza", "838.454.883-87", "RH", "REDE POTIGUAR", "Administrador", "rh"],
+  ["Adriano Pestana", "038.233.753-00", "Diretor Comercial", "REDE POTIGUAR", "Administrador", "master"],
+  ["Marcos Fernando", "027.716.933-05", "Gerente de TI", "REDE POTIGUAR", "Administrador", "master"],
 ];
