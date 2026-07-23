@@ -547,6 +547,41 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (request.method === "DELETE" && url.pathname.startsWith("/api/sales/")) {
+      const id = Number(url.pathname.split("/").pop());
+      if (!Number.isInteger(id) || id <= 0) {
+        sendJson(response, 400, { error: "Venda inválida." });
+        return;
+      }
+      await pool.query(`delete from sales_entries where id = $1`, [id]);
+      const salesResult = await pool.query(`
+        select id, seller_cpf, seller_name, store, product_id, product_sku, product_name, quantity, created_at
+          from sales_entries
+         order by created_at desc, id desc
+      `);
+      sendJson(response, 200, {
+        ok: true,
+        sales: salesResult.rows.map(row => ({
+          id: row.id,
+          sellerCpf: row.seller_cpf,
+          seller: row.seller_name,
+          store: row.store,
+          productId: row.product_id,
+          productSku: row.product_sku,
+          productName: row.product_name,
+          quantity: Number(row.quantity),
+          createdAt: row.created_at,
+        })),
+      });
+      return;
+    }
+
+    if (request.method === "DELETE" && url.pathname === "/api/sales") {
+      await pool.query(`delete from sales_entries`);
+      sendJson(response, 200, { ok: true, sales: [] });
+      return;
+    }
+
     if (request.method === "GET" && url.pathname === "/api/announcement-reads") {
       const result = await pool.query(`
         select id, cpf, full_name, access_role, store, round_id, round_name, announcement_id, announcement_title, watched_seconds, read_at

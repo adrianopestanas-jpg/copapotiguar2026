@@ -3036,6 +3036,44 @@ function AdminPage({
       setToast("Não foi possível registrar a venda no servidor.");
     }
   };
+  const deleteSale = async entry => {
+    if (!window.confirm(`Excluir venda de ${entry.seller} (${entry.quantity})?`)) return;
+    try {
+      const response = await fetch(`/api/sales/${entry.id}`, {
+        method: "DELETE"
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Falha ao excluir venda.");
+      setSalesEntries(data.sales || []);
+      setToast("Venda excluída e ranking recalculado.");
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível excluir a venda.");
+    }
+  };
+  const clearSales = async () => {
+    if (!salesEntries.length) {
+      setToast("Não há vendas para zerar.");
+      return;
+    }
+    const confirmation = window.prompt(`Esta ação vai zerar ${salesEntries.length} lançamento(s) de venda e recalcular o ranking. Digite ZERAR para confirmar.`);
+    if (confirmation !== "ZERAR") {
+      setToast("Zeragem cancelada.");
+      return;
+    }
+    try {
+      const response = await fetch("/api/sales", {
+        method: "DELETE"
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Falha ao zerar vendas.");
+      setSalesEntries(data.sales || []);
+      setToast("Todas as vendas foram zeradas. Palpites e leituras foram mantidos.");
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível zerar as vendas.");
+    }
+  };
   const saveAnnouncement = async event => {
     event.preventDefault();
     const next = {
@@ -4405,13 +4443,20 @@ function AdminPage({
     }, "META ", item.goal)));
   }))), module === "sales" && /*#__PURE__*/React.createElement("section", {
     className: "soft-card rounded-2xl p-5 sm:p-6"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
     className: "text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700"
   }, "Apuração do desafio da semana"), /*#__PURE__*/React.createElement("h3", {
     className: "mt-1 font-display text-xl font-extrabold text-potiguar-950"
   }, "Vendas do desafio por vendedor"), /*#__PURE__*/React.createElement("p", {
     className: "mt-1 text-xs text-slate-400"
-  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana temporariamente desativado. Ative a rodada oficial para lançar vendas.")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
+  }, productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana temporariamente desativado. Ative a rodada oficial para lançar vendas.")), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    onClick: clearSales,
+    disabled: !salesEntries.length,
+    className: `rounded-xl px-4 py-3 text-xs font-extrabold ${salesEntries.length ? "bg-red-50 text-potiguar-red hover:bg-red-100" : "cursor-not-allowed bg-slate-50 text-slate-300"}`
+  }, "Zerar vendas")), !productFocusEnabled && /*#__PURE__*/React.createElement("div", {
     className: "mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800"
   }, "Nesta fase vamos medir apenas palpites e endomarketing. Não lance vendas de desafio da semana agora."), productFocusEnabled && /*#__PURE__*/React.createElement("form", {
     onSubmit: addSale,
@@ -4486,7 +4531,7 @@ function AdminPage({
   }, "Registrar venda")), /*#__PURE__*/React.createElement("div", {
     className: "mt-5 overflow-x-auto"
   }, /*#__PURE__*/React.createElement("table", {
-    className: "w-full min-w-[650px] text-left"
+    className: "w-full min-w-[760px] text-left"
   }, /*#__PURE__*/React.createElement("thead", {
     className: "bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"
   }, /*#__PURE__*/React.createElement("tr", null, /*#__PURE__*/React.createElement("th", {
@@ -4497,7 +4542,9 @@ function AdminPage({
     className: "px-4 py-3"
   }, "Produto"), /*#__PURE__*/React.createElement("th", {
     className: "px-4 py-3 text-right"
-  }, "Quantidade"))), /*#__PURE__*/React.createElement("tbody", {
+  }, "Quantidade"), /*#__PURE__*/React.createElement("th", {
+    className: "px-4 py-3 text-right"
+  }, "Ações"))), /*#__PURE__*/React.createElement("tbody", {
     className: "divide-y divide-slate-100"
   }, salesEntries.map(entry => {
     const product = productCatalog.find(product => product.id === entry.productId);
@@ -4511,8 +4558,16 @@ function AdminPage({
       className: "px-4 py-3 text-xs text-slate-500"
     }, entry.productSku || product?.sku, " • ", entry.productName || product?.name), /*#__PURE__*/React.createElement("td", {
       className: "px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800"
-    }, entry.quantity));
-  }))))), module === "users" && /*#__PURE__*/React.createElement("section", {
+    }, entry.quantity), /*#__PURE__*/React.createElement("td", {
+      className: "px-4 py-3 text-right"
+    }, /*#__PURE__*/React.createElement("button", {
+      type: "button",
+      onClick: () => deleteSale(entry),
+      className: "rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red"
+    }, "Excluir")));
+  }))), salesEntries.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "p-6 text-center text-sm font-semibold text-slate-400"
+  }, "Nenhuma venda lançada."))), module === "users" && /*#__PURE__*/React.createElement("section", {
     className: "soft-card overflow-hidden rounded-2xl"
   }, /*#__PURE__*/React.createElement("div", {
     className: "border-b border-slate-100 p-5 sm:p-6"

@@ -2265,6 +2265,42 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
     }
   };
 
+  const deleteSale = async entry => {
+    if (!window.confirm(`Excluir venda de ${entry.seller} (${entry.quantity})?`)) return;
+    try {
+      const response = await fetch(`/api/sales/${entry.id}`, { method: "DELETE" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Falha ao excluir venda.");
+      setSalesEntries(data.sales || []);
+      setToast("Venda excluída e ranking recalculado.");
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível excluir a venda.");
+    }
+  };
+
+  const clearSales = async () => {
+    if (!salesEntries.length) {
+      setToast("Não há vendas para zerar.");
+      return;
+    }
+    const confirmation = window.prompt(`Esta ação vai zerar ${salesEntries.length} lançamento(s) de venda e recalcular o ranking. Digite ZERAR para confirmar.`);
+    if (confirmation !== "ZERAR") {
+      setToast("Zeragem cancelada.");
+      return;
+    }
+    try {
+      const response = await fetch("/api/sales", { method: "DELETE" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Falha ao zerar vendas.");
+      setSalesEntries(data.sales || []);
+      setToast("Todas as vendas foram zeradas. Palpites e leituras foram mantidos.");
+    } catch (error) {
+      console.error(error);
+      setToast("Não foi possível zerar as vendas.");
+    }
+  };
+
   const saveAnnouncement = async event => {
     event.preventDefault();
     const next = {
@@ -3023,10 +3059,13 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
       )}
       {module === "sales" && (
         <section className="soft-card rounded-2xl p-5 sm:p-6">
-          <div>
-            <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Apuração do desafio da semana</p>
-            <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Vendas do desafio por vendedor</h3>
-            <p className="mt-1 text-xs text-slate-400">{productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana temporariamente desativado. Ative a rodada oficial para lançar vendas."}</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.15em] text-potiguar-700">Apuração do desafio da semana</p>
+              <h3 className="mt-1 font-display text-xl font-extrabold text-potiguar-950">Vendas do desafio por vendedor</h3>
+              <p className="mt-1 text-xs text-slate-400">{productFocusEnabled ? "O lançamento identifica loja, vendedor, desafio da semana e quantidade." : "Desafio da semana temporariamente desativado. Ative a rodada oficial para lançar vendas."}</p>
+            </div>
+            <button type="button" onClick={clearSales} disabled={!salesEntries.length} className={`rounded-xl px-4 py-3 text-xs font-extrabold ${salesEntries.length ? "bg-red-50 text-potiguar-red hover:bg-red-100" : "cursor-not-allowed bg-slate-50 text-slate-300"}`}>Zerar vendas</button>
           </div>
           {!productFocusEnabled && (
             <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
@@ -3041,10 +3080,11 @@ function AdminPage({ adminUser, users: allUsers, customUsers, setToast, predicti
             <button type="submit" className="rounded-xl bg-potiguar-900 px-5 py-3 text-xs font-extrabold text-white">Registrar venda</button>
           </form>}
           <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-[650px] text-left">
-              <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"><tr><th className="px-4 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Produto</th><th className="px-4 py-3 text-right">Quantidade</th></tr></thead>
-              <tbody className="divide-y divide-slate-100">{salesEntries.map(entry=>{const product=productCatalog.find(product=>product.id===entry.productId);return <tr key={entry.id}><td className="px-4 py-3 text-xs font-extrabold text-potiguar-950">{entry.seller}</td><td className="px-4 py-3 text-xs text-slate-500">{entry.store}</td><td className="px-4 py-3 text-xs text-slate-500">{entry.productSku || product?.sku} • {entry.productName || product?.name}</td><td className="px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800">{entry.quantity}</td></tr>;})}</tbody>
+            <table className="w-full min-w-[760px] text-left">
+              <thead className="bg-slate-50 text-[10px] font-extrabold uppercase tracking-wider text-slate-400"><tr><th className="px-4 py-3">Vendedor</th><th className="px-4 py-3">Loja</th><th className="px-4 py-3">Produto</th><th className="px-4 py-3 text-right">Quantidade</th><th className="px-4 py-3 text-right">Ações</th></tr></thead>
+              <tbody className="divide-y divide-slate-100">{salesEntries.map(entry=>{const product=productCatalog.find(product=>product.id===entry.productId);return <tr key={entry.id}><td className="px-4 py-3 text-xs font-extrabold text-potiguar-950">{entry.seller}</td><td className="px-4 py-3 text-xs text-slate-500">{entry.store}</td><td className="px-4 py-3 text-xs text-slate-500">{entry.productSku || product?.sku} • {entry.productName || product?.name}</td><td className="px-4 py-3 text-right font-display text-lg font-extrabold text-potiguar-800">{entry.quantity}</td><td className="px-4 py-3 text-right"><button type="button" onClick={() => deleteSale(entry)} className="rounded-lg bg-red-50 px-3 py-2 text-[10px] font-extrabold text-potiguar-red">Excluir</button></td></tr>;})}</tbody>
             </table>
+            {salesEntries.length === 0 && <div className="p-6 text-center text-sm font-semibold text-slate-400">Nenhuma venda lançada.</div>}
           </div>
         </section>
       )}
